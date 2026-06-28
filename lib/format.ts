@@ -50,6 +50,16 @@ export function clockShort(iso: string): string {
   return p.minute === 0 ? `${h12} ${ampm}` : `${h12}:${pad2(p.minute)} ${ampm}`;
 }
 
+/** An ultra-compact hour for tight multi-day cards, e.g. "6a" / "12p". Minutes are
+ *  assumed zero (these stamps sit on hourly boundaries). */
+export function clockCompact(iso: string): string {
+  const p = parseNaive(iso);
+  if (!p) return "—";
+  const ampm = p.hour < 12 ? "a" : "p";
+  const h12 = p.hour % 12 === 0 ? 12 : p.hour % 12;
+  return `${h12}${ampm}`;
+}
+
 /** Zeller-free weekday from Y-M-D (uses UTC Date math on the naive date only). */
 export function weekdayIndex(year: number, month: number, day: number): number {
   return new Date(Date.UTC(year, month - 1, day)).getUTCDay();

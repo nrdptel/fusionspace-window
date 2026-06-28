@@ -331,6 +331,20 @@ click away, not in your face. The eighteen entries are now grouped into eight co
 the default page is clean, and a curious flyer opens only the section they care about. The
 restraint the family is known for, applied to its own documentation.
 
+### Fixture fidelity — feet, not metres (post-v1)
+
+Validating the parsers against a real Open-Meteo response (Black Rock Desert, a high desert
+field very unlike the synthetic fixture) turned up a quiet test-fidelity gap: when the request
+asks for imperial wind/temperature — which the app does — Open-Meteo returns the *length*
+variables (geopotential height, visibility, freezing level) in **feet**, not the SI metres. The
+parsers were already correct (they read each variable's reported unit rather than assume one),
+so production was fine; but the fixture had been written in metres, so the whole suite only ever
+exercised the metres path while production ran the feet path. A regression in the feet handling
+would have shipped green. The fixture now mirrors real behaviour (feet), the derived
+miles/AGL values are identical, and `visibilityToMiles`/`heightToFeet` are unit-tested both ways
+so neither path can rot. The lesson the family already lives by — read the unit, never assume —
+now has the test coverage to match.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

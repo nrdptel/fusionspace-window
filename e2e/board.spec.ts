@@ -101,9 +101,10 @@ test("the outlook shows sunrise and sunset", async ({ page }) => {
 test("the outlook sets the week against the seasonal normal", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
-  // Archive fixture normal ~12 mph; the windy forecast peaks at 22 → windier than usual.
+  // Archive normal ~12 mph; the forecast week averages ~19 (peak 22) → windier than usual.
   const outlook = page.locator("#outlook");
   await expect(outlook.getByText(/Typical max wind for this week here/)).toBeVisible();
+  await expect(outlook.getByText(/The next 7 days average .* \(peak/)).toBeVisible();
   await expect(outlook.getByText("windier than usual")).toBeVisible();
 });
 

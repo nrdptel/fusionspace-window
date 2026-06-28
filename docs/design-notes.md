@@ -324,8 +324,9 @@ honest discontinuity the source labels make legible. It rides into the field bri
 The forecast says what's coming; it never says whether what's coming is *normal*. That's the
 question a flyer weighs days out — wait for a better window, or accept that this is about as
 good as the season gets here. So the outlook now sets the week against the field's own history:
-a typical max wind for this week of the year, with the upcoming peak called windier, about
-typical, or calmer than that. It's the first feature to reach past the single forecast request,
+a typical max wind for this week of the year, with the week ahead compared like with like — its
+average daily-max against that normal, not a 7-day peak against an average (which would always
+read windy) — and called windier, about typical, or calmer, with the peak shown for context. It's the first feature to reach past the single forecast request,
 and it does so the family's way — as a **best-effort source, exactly like NWS**: a parallel call
 to Open-Meteo's free historical archive (about five years of daily max wind/gust), summarised by
 a pure, tested helper (`lib/weather/climatology.ts`) that averages the days within a week of the

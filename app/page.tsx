@@ -78,8 +78,9 @@ export default function Page() {
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Sky &amp; ceiling</strong>{" "}
-              is the observed ceiling from the nearest reporting station where there is one,
-              labelled <em>observed</em>, with a modelled multi-day cloud picture beside it.
+              is the observed ceiling and <strong>visibility</strong> from the nearest reporting
+              station where there is one, labelled <em>observed</em> (modelled where there
+              isn&apos;t), with a modelled multi-day cloud picture beside it.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Units &amp; sharing</strong>{" "}
@@ -171,7 +172,7 @@ export default function Page() {
             whole column. It assumes nothing about your rocket or descent rate — it leans the
             drift, it doesn&apos;t predict the landing.
           </Method>
-          <Method title="Cloud ceiling & sky">
+          <Method title="Cloud ceiling, visibility & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS
             reporting station&apos;s latest observation (a METAR), converted to feet; the nearest
             automated stations that report no cloud layers are skipped. It&apos;s labelled
@@ -179,6 +180,15 @@ export default function Page() {
             multi-day sky picture and the fallback when no station is reachable are Open-Meteo&apos;s
             modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling in feet (TAF) is
             planned for a later version — its source has no browser access today.
+          </Method>
+          <Method title="Visibility">
+            Horizontal visibility in statute miles — it matters for keeping a high flight in
+            sight and for the cloud-and-visibility rules many waivers carry. Like the ceiling,
+            it prefers the nearest station&apos;s observed value (the METAR visibility, in
+            metres, converted to miles) and is labelled <em>observed</em>; when no station is
+            reachable it falls back to Open-Meteo&apos;s modelled visibility for the current hour,
+            labelled <em>modelled</em>. Observed values top out around the METAR&apos;s 10-mile
+            reporting ceiling; the model can read higher in genuinely clear air.
           </Method>
           <Method title="Storm potential (CAPE)">
             Convective available potential energy from Open-Meteo — the standard measure of how

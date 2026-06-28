@@ -46,6 +46,13 @@ describe("parseForecast", () => {
     expect(fc.aloftHourly[0].time).toBe(fc.hourly[0].time);
   });
 
+  it("converts hourly visibility from metres to statute miles", () => {
+    // Fixture: overnight haze ~10 mi (16093 m), clear ~50 mi (80467 m) by day.
+    expect(fc.hourly[0].visibilityMi).toBeCloseTo(10, 2);
+    expect(fc.hourly[12].visibilityMi).toBeCloseTo(50, 2);
+    expect(fc.hourly[12].visibilityMi).toBeGreaterThan(fc.hourly[0].visibilityMi);
+  });
+
   it("derives true AGL as geopotential height minus field elevation", () => {
     const levels = fc.aloftHourly[0].levels;
     const l500 = levels.find((l) => l.pressureHpa === 500)!;

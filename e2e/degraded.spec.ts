@@ -11,6 +11,8 @@ test("NWS down: the board still renders, sky falls back to modeled, no alerts", 
 
   // The sky panel is the modeled fallback, not an observed ceiling, and there's no alert.
   await expect(page.locator("#sky").getByText("Modeled").first()).toBeVisible();
+  // Visibility still appears, filled in from the model rather than a station observation.
+  await expect(page.locator("#sky").getByText("Visibility", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Wind Advisory" })).toHaveCount(0);
 });
 

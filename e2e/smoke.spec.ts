@@ -15,8 +15,8 @@ test("home loads cleanly and renders the board on stubbed data", async ({ page }
 
   // Current conditions render from the fixture (21 mph surface wind).
   await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
-  await expect(page.getByText("Surface wind").first()).toBeVisible();
-  await expect(page.getByText("21").first()).toBeVisible();
+  await expect(page.locator("#now").getByText("Surface wind", { exact: true })).toBeVisible();
+  await expect(page.locator("#now")).toContainText("21");
 
   // The 20 mph reference line is stated as a reference, not a verdict.
   await expect(page.getByText(/20 mph/).first()).toBeVisible();

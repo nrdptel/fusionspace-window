@@ -81,6 +81,11 @@ export default function Page() {
               personal wind line stay in this browser.
             </li>
             <li>
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">Take it to the field</strong>{" "}
+              — &ldquo;Copy briefing&rdquo; puts a plain-text summary of the conditions on your
+              clipboard for the club chat; &ldquo;Copy link&rdquo; shares the exact view.
+            </li>
+            <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Offline</strong> —
               if a fetch fails or you lose signal, Window shows the last data it loaded for that
               field with an &ldquo;as of&rdquo; flag, never a stale reading dressed as fresh.
@@ -167,6 +172,15 @@ export default function Page() {
             cloud cover, and sunrise/sunset (field-local — for planning setup and leaving daylight
             for recovery). A day whose max wind crosses 20 mph is marked — again as a reference,
             not a verdict.
+          </Method>
+          <Method title="The field briefing">
+            &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface
+            wind against the limit, sky and ceiling, density altitude, a few winds-aloft levels,
+            any alerts, the next calm window, and a short outlook — to paste into a club chat.
+            It&apos;s exactly the figures shown on the page, with the share link and the
+            not-authoritative disclaimer baked in, so a briefing carries the same honesty as the
+            board. Nothing is sent anywhere; the text is built in your browser and copied to your
+            clipboard.
           </Method>
           <Method title="Freshness, caching & offline">
             A field is fetched once and cached in your browser for about ten minutes, so a reload

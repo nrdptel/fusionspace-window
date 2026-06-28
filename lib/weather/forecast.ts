@@ -77,6 +77,7 @@ function buildCurrent(raw: RawForecast): CurrentConditions {
     isDay: num(c.is_day) !== 0,
     pressureMslHpa: num(c.pressure_msl) ?? NaN,
     surfacePressureHpa: num(c.surface_pressure) ?? NaN,
+    capeJkg: num(c.cape) ?? NaN,
   };
 }
 
@@ -96,6 +97,7 @@ function buildHourly(raw: RawForecast): HourPoint[] {
     // `is_day` is absent on some models; default to daytime so a calm window is
     // never wrongly hidden as "after dark".
     isDay: num(h.is_day?.[i]) !== 0,
+    capeJkg: num(h.cape?.[i]) ?? NaN,
   }));
 }
 

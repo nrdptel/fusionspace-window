@@ -32,6 +32,7 @@ const CURRENT_VARS = [
   "cloud_cover",
   "pressure_msl",
   "surface_pressure",
+  "cape",
   "wind_speed_10m",
   "wind_direction_10m",
   "wind_gusts_10m",
@@ -47,6 +48,7 @@ const HOURLY_SURFACE = [
   "wind_direction_10m",
   "wind_gusts_10m",
   "is_day",
+  "cape",
 ];
 
 const DAILY_VARS = [

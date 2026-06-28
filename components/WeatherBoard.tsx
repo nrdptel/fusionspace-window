@@ -23,6 +23,7 @@ import UnitsControl from "./UnitsControl";
 import Alerts from "./Alerts";
 import Now from "./Now";
 import DensityAltitude from "./DensityAltitude";
+import StormPotential from "./StormPotential";
 import CalmWindows from "./CalmWindows";
 import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
@@ -276,6 +277,16 @@ export default function WeatherBoard() {
           <Panel id="now" title="Right now">
             <Now current={data.forecast.current} field={f} units={units} windLine={windLine} model={data.forecast.model} />
             <DensityAltitude current={data.forecast.current} field={f} units={units} model={data.forecast.model} />
+          </Panel>
+
+          <Panel id="storms" title="Storm potential">
+            <StormPotential
+              current={data.forecast.current}
+              hourly={data.forecast.hourly}
+              fromIndex={currentHourIndex(data)}
+              todayIso={todayIso}
+              model={data.forecast.model}
+            />
           </Panel>
 
           <Panel id="hourly" title="Today & tomorrow">

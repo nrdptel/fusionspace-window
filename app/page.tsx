@@ -70,6 +70,11 @@ export default function Page() {
               its real height AGL.
             </li>
             <li>
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">Storm potential</strong>{" "}
+              reads convective instability (CAPE) and the day&apos;s peak, so a calm morning that
+              towers up by mid-afternoon doesn&apos;t catch you out — a heads-up, never a verdict.
+            </li>
+            <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Sky &amp; ceiling</strong>{" "}
               is the observed ceiling from the nearest reporting station where there is one,
               labelled <em>observed</em>, with a modelled multi-day cloud picture beside it.
@@ -159,6 +164,15 @@ export default function Page() {
             multi-day sky picture and the fallback when no station is reachable are Open-Meteo&apos;s
             modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling in feet (TAF) is
             planned for a later version — its source has no browser access today.
+          </Method>
+          <Method title="Storm potential (CAPE)">
+            Convective available potential energy from Open-Meteo — the standard measure of how
+            primed the atmosphere is to build thunderstorms, in joules per kilogram. Window shows
+            the current value and the day&apos;s peak, sorted into the bands meteorologists use
+            (roughly: under 300 stable, 300–1000 marginal, 1000–2500 moderate, above 2500
+            strong). Afternoon convection cancels more summer launches than wind does, and a calm
+            morning can tower up by mid-afternoon — so it&apos;s a heads-up to watch the sky, not
+            a verdict. It pairs with the NWS alerts, which carry any actual watch or warning.
           </Method>
           <Method title="Active alerts">
             NWS active watches, warnings, and advisories for the field

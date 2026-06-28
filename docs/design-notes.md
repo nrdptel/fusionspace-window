@@ -218,6 +218,21 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Storm potential / CAPE (post-v1)
+
+The board covered wind, sky, ceiling, alerts, and density altitude, but said nothing about
+*convective instability* — and afternoon thunderstorms cancel more summer launches than wind
+does. A clear morning can tower up into a Red Flag by 3 PM, so a flyer planning the drive
+wants to know whether the air is primed to blow up. Open-Meteo exposes **CAPE** (convective
+available potential energy, J/kg), the standard measure, so Window surfaces it: a pure, tested
+classifier (`lib/weather/instability.ts`) sorts the current value and the day's peak into the
+usual SPC-style bands (under 300 stable, to 1000 marginal, to 2500 moderate, above strong),
+and the panel headlines the worse of now and the afternoon peak with a plain-language note.
+It's its own glanceable panel between "Right now" and the hourly timeline, and it pairs with
+the NWS alerts (which carry any actual watch or warning). Same posture: a real meteorological
+figure, surfaced with context, never a go/no-go. One more field on the existing request
+(`cape`), no new dependency.
+
 ### Wind shear (post-v1)
 
 The signature panel is winds aloft, and the thing a flyer reads a sounding *for* is shear — a

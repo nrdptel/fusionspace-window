@@ -25,6 +25,11 @@ test("home loads cleanly and renders the board on stubbed data", async ({ page }
   await expect(page.locator("#now").getByText("Density altitude")).toBeVisible();
   await expect(page.locator("#now").getByText(/5,0\d{2}/).first()).toBeVisible();
 
+  // Storm potential (CAPE) is surfaced as its own panel.
+  await expect(page.getByRole("heading", { name: "Storm potential", exact: true })).toBeVisible();
+  await expect(page.locator("#storms").getByText(/CAPE now 900 J\/kg/)).toBeVisible();
+  await expect(page.locator("#storms").getByText(/Moderately unstable/)).toBeVisible();
+
   // The signature panels are present, including the wind-shear callout.
   await expect(page.getByRole("heading", { name: "Winds aloft", exact: true })).toBeVisible();
   await expect(page.locator("#aloft").getByText(/Strongest layer/)).toBeVisible();

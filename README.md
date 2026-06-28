@@ -2,8 +2,8 @@
 
 Launch weather for high-power and model rocketry. You give it a launch field; it shows the
 weather a flyer needs to decide whether to fly — surface wind against the safety limit, winds
-aloft up to waiver altitude, cloud ceiling, precip, and a multi-day outlook — in one
-glanceable, honest view.
+aloft up to waiver altitude, density altitude, storm potential, cloud ceiling and visibility,
+and a multi-day outlook — in one glanceable, honest view.
 
 It is **purely informational.** It takes no rocket parameters and produces no go/no-go
 verdict. It surfaces the data and the relevant reference lines — the 20 mph NFPA/NAR/Tripoli
@@ -15,17 +15,29 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 
 ## What it shows
 
-- **Right now** — surface wind, gust, and direction against the 20 mph launch limit, plus
-  temperature, sky, and precip. Winds are named for the direction they blow *from*.
-- **Today & tomorrow** — an hourly wind timeline, so you can find the calm window. The slider
-  picks the hour shown in the profile below.
+- **Right now** — surface wind, gust, and direction against the 20 mph launch limit, with the
+  model figure cross-checked against the nearest station's *observed* wind; plus temperature,
+  sky, **density altitude** (how thin the air is, which sets thrust and descent), and a
+  **pressure tendency** so you can see the barometer rising or falling. Winds are named for the
+  direction they blow *from*.
+- **Storm potential** — convective instability (CAPE), now and the day's peak, sorted into the
+  bands meteorologists use — so a calm morning that towers up by mid-afternoon doesn't catch
+  you out.
+- **Today & tomorrow** — an hourly wind timeline with the upcoming **calm windows** surfaced
+  above it. Drag the **fly-time** slider (or tap a window) to any hour and a snapshot shows that
+  hour's wind, density altitude, and storm potential — and the winds-aloft profile follows it.
 - **Winds aloft** — the signature panel: wind speed and direction by true height above the
-  field, surface up to waiver altitudes, mapped from pressure-level geopotential heights. The
-  thing general weather apps bury or cap low.
-- **Sky & ceiling** — the observed ceiling from the nearest reporting station where there is
-  one (labelled *observed*), with a modelled multi-day cloud picture beside it.
+  field, surface up to waiver altitudes, mapped from pressure-level geopotential heights. It
+  flags the strongest **shear** layer, the column's **mean wind** (which way recovery drifts),
+  and the **0°C** level. The thing general weather apps bury or cap low.
+- **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
+  where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
+  multi-day cloud picture beside it.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.
-- **The next several days** — a ~7-day outlook: the "is the drive worth it" view.
+- **The next several days** — a ~7-day outlook with sunrise/sunset: the "is the drive worth it"
+  view.
+- **Field briefing** — "Copy briefing" assembles a plain-text summary of the conditions for the
+  club chat; "Copy link" shares the exact view.
 - **How this is derived** — source, model, valid time, and limits for every figure.
 
 US-first, imperial defaults (mph, ft, °F) with a units toggle (metric, and knots for wind).
@@ -42,8 +54,10 @@ there is no backend.
   aloft profile, in a single request using a US-optimised GFS/HRRR blend (`gfs_seamless`). Its
   Geocoding API powers place search. (CC BY 4.0.)
 - **[NOAA / National Weather Service](https://www.weather.gov)** — active alerts and the
-  nearest station's observed ceiling. A graceful-degradation enhancement, not a dependency: if
-  it can't be reached, alerts are absent and the sky falls back to modelled cloud cover.
+  nearest station's latest observation (a METAR): the observed ceiling, visibility, and surface
+  wind, plus the raw report. A graceful-degradation enhancement, not a dependency: if it can't be
+  reached, alerts are absent, the observed cross-checks drop out, and the sky falls back to
+  modelled cloud cover and visibility.
 
 Winds aloft is Open-Meteo only — NOAA retired the public RAP/rucsoundings upper-air feed for
 the continental US, so there is no better free source.
@@ -60,10 +74,12 @@ Node 20 — the same stack as the rest of Fusion Space. It builds to plain stati
 `out/` with no server runtime, and deploys to Cloudflare Pages via Wrangler in GitHub Actions.
 
 The data layer is split the family's way: a thin, impure network layer (`lib/weather/net.ts`)
-and pure, tested parsing/deriving (Open-Meteo → view model, pressure levels → AGL profile,
-METAR cloud layers → ceiling, alerts, unit conversions) in `lib/`, with tests and fixtures
-alongside. The unit tests and the Playwright e2e (which stubs the APIs by route interception)
-never touch the live providers, so CI is deterministic.
+and pure, tested deriving in `lib/` — Open-Meteo → view model, pressure levels → AGL profile,
+METAR → ceiling/visibility/observed wind, plus density altitude, CAPE bands, wind shear, the
+column mean wind, calm windows, pressure tendency, the freezing level, the text briefing, and
+the unit conversions — each with tests and fixtures alongside. The unit tests and the Playwright
+e2e (which stubs the APIs by route interception) never touch the live providers, so CI is
+deterministic.
 
 ## Develop
 

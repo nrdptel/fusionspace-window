@@ -33,6 +33,8 @@ export interface CurrentConditions {
   pressureMslHpa: number;
   /** Actual pressure at the field (station pressure), hPa — the input for density altitude. */
   surfacePressureHpa: number;
+  /** Convective available potential energy, J/kg — convective (thunderstorm) instability. */
+  capeJkg: number;
 }
 
 export interface HourPoint {
@@ -47,6 +49,8 @@ export interface HourPoint {
   weatherCode: number;
   /** Daylight at this hour (Open-Meteo `is_day`). */
   isDay: boolean;
+  /** Convective available potential energy, J/kg. */
+  capeJkg: number;
 }
 
 export interface AloftLevel {

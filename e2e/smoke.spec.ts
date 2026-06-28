@@ -25,8 +25,9 @@ test("home loads cleanly and renders the board on stubbed data", async ({ page }
   await expect(page.locator("#now").getByText("Density altitude")).toBeVisible();
   await expect(page.locator("#now").getByText(/5,0\d{2}/).first()).toBeVisible();
 
-  // The signature panels are present.
+  // The signature panels are present, including the wind-shear callout.
   await expect(page.getByRole("heading", { name: "Winds aloft", exact: true })).toBeVisible();
+  await expect(page.locator("#aloft").getByText(/Strongest layer/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "The next several days" })).toBeVisible();
 
   expect(errors).toEqual([]);

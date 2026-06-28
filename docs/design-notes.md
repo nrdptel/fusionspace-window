@@ -218,6 +218,20 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Wind shear (post-v1)
+
+The signature panel is winds aloft, and the thing a flyer reads a sounding *for* is shear — a
+sharp change in wind between two layers, which tips a rocket off its heading off the rail and
+walks the recovery downrange. So the profile now flags its strongest shear layer. A pure,
+tested helper (`lib/weather/shear.ts`) takes the plotted levels (surface included), encodes
+each as a velocity vector in the meteorological FROM convention, and reports the adjacent
+pair with the greatest vector difference — a single number that captures speed change, a
+directional veer, or both. It renders as a small amber-tagged callout under the profile
+("Strongest layer 6,900 → 10,800 ft — +9 mph and veers 18°"), with a one-line, factual note
+about why it matters. Same posture: it points the layer out, it doesn't decide. It
+strengthens exactly the panel that makes Window worth opening, at no new dependency or
+request.
+
 ### Field briefing (post-v1)
 
 The family ships text/share exports everywhere — Charge's copy-as-text card, Debrief's

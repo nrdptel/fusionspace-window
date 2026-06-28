@@ -55,8 +55,9 @@ export default function Page() {
               limit — a reference line, never a go/no-go — plus temperature, sky, and{" "}
               <strong>density altitude</strong> (how thin the air is, which sets thrust and
               descent). The model wind is cross-checked against the nearest station&apos;s{" "}
-              <strong>observed</strong> reading. Winds are named for the direction they blow{" "}
-              <em>from</em>.
+              <strong>observed</strong> reading, and a <strong>pressure tendency</strong> shows
+              whether the barometer is rising or falling. Winds are named for the direction they
+              blow <em>from</em>.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
@@ -146,6 +147,16 @@ export default function Page() {
             thinner air means a motor makes less thrust, descent under chute runs a little
             faster, and the rocket climbs higher out of sight for tracking; hot, high, humid
             days push it well above the ground. A figure, with its formula — not a verdict.
+          </Method>
+          <Method title="Pressure tendency">
+            &ldquo;Right now&rdquo; also shows which way the barometer is moving — the change in
+            the field&apos;s station pressure over the last few hours, from the hourly series, with
+            a small dead-band so ordinary daily wobble reads as steady. A falling barometer is the
+            oldest honest warning that weather is on the way in (an approaching low or front
+            bringing wind up and ceiling down); a rising one usually means high pressure building
+            and conditions settling. It pairs with storm potential — the air destabilising while
+            the pressure drops is a sharper heads-up than either alone. The rate is shown, not a
+            verdict.
           </Method>
           <Method title="The 20 mph line">
             NFPA 1127 and the NAR/Tripoli safety codes set 20 mph as the surface-wind ceiling

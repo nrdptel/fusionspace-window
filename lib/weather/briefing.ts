@@ -8,6 +8,7 @@
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
 import { meanWindAloft } from "./drift";
+import { pressureTendency } from "./pressure";
 import { findCalmWindows } from "./windows";
 import {
   degToCompass,
@@ -113,6 +114,14 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   if (visMi != null && Number.isFinite(visMi)) {
     lines.push(
       `Visibility: ${fmtVisibility(visMi, u.length)} ${VIS_LABEL[u.length]} (${obsVis != null ? "observed" : "modeled"})`,
+    );
+  }
+
+  // Pressure tendency — called out only when it's actually moving.
+  const tend = pressureTendency(forecast.hourly, hourIndex);
+  if (tend && tend.trend !== "steady") {
+    lines.push(
+      `Pressure: ${tend.trend} ${Math.abs(tend.changeHpa).toFixed(1)} hPa over ${tend.spanHours}h`,
     );
   }
 

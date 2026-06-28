@@ -115,6 +115,22 @@ test("the outlook degrades cleanly when the archive is unreachable", async ({ pa
   await expect(page.locator("#outlook").getByText(/Typical max wind/)).toHaveCount(0);
 });
 
+test("saved fields show a current-wind glance", async ({ page }) => {
+  await installStubs(page);
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "window.savedFields",
+      JSON.stringify([{ lat: 40.78, lon: -119.21, label: "Black Rock, NV" }]),
+    );
+  });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  // The saved chip carries the field's current wind (from the stub: 21 mph WSW).
+  const chip = page.locator("#location span", { hasText: "Black Rock, NV" }).first();
+  await expect(chip).toBeVisible();
+  await expect(chip).toContainText(/\d+ [NSEW]/);
+});
+
 test("the field rides in the URL and survives a reload", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

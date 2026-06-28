@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildArchiveUrl, buildForecastUrl, buildGeocodeUrl, MODEL } from "./net";
+import { buildArchiveUrl, buildForecastUrl, buildGeocodeUrl, buildWindPeekUrl, MODEL } from "./net";
 
 // Only the pure URL builders are tested — the fetchers are deliberately untested so CI
 // never touches the live providers.
@@ -39,6 +39,18 @@ describe("buildGeocodeUrl", () => {
     expect(url.startsWith("https://geocoding-api.open-meteo.com/v1/search?")).toBe(true);
     expect(params.get("name")).toBe("Lucerne Valley");
     expect(params.get("count")).toBe("6");
+  });
+});
+
+describe("buildWindPeekUrl", () => {
+  it("requests only the current wind, in mph, from the same model", () => {
+    const url = buildWindPeekUrl(34.45, -116.95);
+    const params = new URL(url).searchParams;
+    expect(url.startsWith("https://api.open-meteo.com/v1/forecast?")).toBe(true);
+    expect(params.get("current")).toBe("wind_speed_10m,wind_direction_10m,wind_gusts_10m");
+    expect(params.get("wind_speed_unit")).toBe("mph");
+    expect(params.get("models")).toBe(MODEL);
+    expect(params.has("hourly")).toBe(false);
   });
 });
 

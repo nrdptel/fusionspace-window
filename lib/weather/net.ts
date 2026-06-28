@@ -8,6 +8,7 @@
 import type { BoardData, Sky } from "./model";
 import { parseForecast, PRESSURE_LEVELS, type RawForecast } from "./forecast";
 import { summarizeClimatology, type RawArchive } from "./climatology";
+import { parseWindPeek, type WindPeek } from "./peek";
 import { parseAlerts } from "./alerts";
 import { parseGeocode, type Place } from "./geocode";
 import {
@@ -121,6 +122,28 @@ export function buildArchiveUrl(lat: number, lon: number, startDate: string, end
     timezone: "auto",
   });
   return `${ARCHIVE}?${p.toString()}`;
+}
+
+/** A minimal current-wind request for the saved-fields glance. */
+export function buildWindPeekUrl(lat: number, lon: number): string {
+  const p = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    current: "wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+    wind_speed_unit: "mph",
+    models: MODEL,
+    forecast_days: "1",
+  });
+  return `${OPEN_METEO}?${p.toString()}`;
+}
+
+/** Current surface wind for one field, best-effort — null on any failure. */
+export async function fetchWindPeek(lat: number, lon: number): Promise<WindPeek | null> {
+  try {
+    return parseWindPeek(await fetchJson(buildWindPeekUrl(lat, lon), 8_000));
+  } catch {
+    return null;
+  }
 }
 
 /** A ~`years`-long archive window ending a week back (the archive lags real-time). */

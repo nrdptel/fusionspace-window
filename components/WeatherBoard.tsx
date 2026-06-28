@@ -195,7 +195,7 @@ export default function WeatherBoard() {
 
   return (
     <div id="location" className="scroll-mt-4">
-      <LocationBar onPick={pick} saved={saved} onRemoveSaved={removeSavedField} />
+      <LocationBar onPick={pick} saved={saved} onRemoveSaved={removeSavedField} units={units} />
 
       {!field?.lat && (
         <div className="mt-8 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/30">

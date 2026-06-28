@@ -28,6 +28,9 @@ import { clock, clockShort, dayLabel } from "../format";
 const SURFACE_LIMIT_MPH = 20;
 // Representative AGL heights to sample the winds-aloft profile for the briefing.
 const ALOFT_TARGETS_FT = [3000, 6000, 12000, 20000];
+// Cap the mean-wind column at the board's default winds-aloft view, so the briefing's drift
+// matches what a reader sees on screen rather than averaging up to the stratosphere.
+const MEAN_WIND_TOP_FT = 20000;
 
 export interface BriefingOptions {
   units: UnitPrefs;
@@ -143,7 +146,7 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     );
     lines.push(`Winds aloft (AGL ${LENGTH_LABEL[u.length]}/${WIND_LABEL[u.wind]}): ${parts.join(" · ")}`);
 
-    const mean = meanWindAloft(profile.levels);
+    const mean = meanWindAloft(profile.levels, MEAN_WIND_TOP_FT);
     if (mean) {
       lines.push(
         `Mean wind to ${fmtLength(mean.topFt, u.length)} ${LENGTH_LABEL[u.length]}: ` +
@@ -165,7 +168,12 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   });
   if (windows.length > 0) {
     const w = windows[0];
-    const range = `${dayLabel(w.startTime, c.time)} ${clockShort(w.startTime)}–${clockShort(w.endTime)}`;
+    // Name the end day too when the window runs past midnight, so "2 PM–10 AM" can't read
+    // as ending the same afternoon.
+    const sameDay = w.startTime.slice(0, 10) === w.endTime.slice(0, 10);
+    const range = sameDay
+      ? `${dayLabel(w.startTime, c.time)} ${clockShort(w.startTime)}–${clockShort(w.endTime)}`
+      : `${dayLabel(w.startTime, c.time)} ${clockShort(w.startTime)} – ${dayLabel(w.endTime, c.time)} ${clockShort(w.endTime)}`;
     lines.push(
       `Next calm window (≤${windLine ?? SURFACE_LIMIT_MPH} mph): ${range}${w.daylight ? ", daylight" : ", after dark"}`,
     );

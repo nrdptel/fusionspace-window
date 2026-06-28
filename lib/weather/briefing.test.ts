@@ -55,7 +55,8 @@ describe("buildBriefing", () => {
 
   it("includes alerts, a calm window, and the short outlook", () => {
     expect(text).toContain("Alerts: Wind Advisory (Moderate)");
-    expect(text).toMatch(/Next calm window \(≤20 mph\):/);
+    // The window runs overnight, so the end day is named — not a bare "2 PM–10 AM".
+    expect(text).toMatch(/Next calm window \(≤20 mph\): Today 2 PM – Tomorrow 10 AM/);
     expect(text).toMatch(/Outlook \(°F\): Today \d+\/\d+/);
   });
 

@@ -43,6 +43,10 @@ describe("relativeAge & isStale", () => {
     expect(relativeAge(t0, t0 + 2 * 3_600_000)).toBe("2 h ago");
     expect(relativeAge(t0, t0 + 2 * 86_400_000)).toBe("2 d ago");
   });
+  it("returns a dash for an unparseable timestamp instead of NaN", () => {
+    expect(relativeAge(Date.parse("not-a-date"), t0)).toBe("—");
+    expect(relativeAge(t0, NaN)).toBe("—");
+  });
   it("flags data past the freshness window", () => {
     expect(isStale(t0, t0 + 60_000)).toBe(false);
     expect(isStale(t0, t0 + 20 * 60_000)).toBe(true);

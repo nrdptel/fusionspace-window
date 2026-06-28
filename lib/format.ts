@@ -77,6 +77,9 @@ export function shortDate(dateIso: string): string {
 
 /** A coarse human age for a fetch epoch, e.g. "just now", "5 min ago", "2 h ago". */
 export function relativeAge(fetchedAt: number, now: number): string {
+  // Guard a missing/unparseable timestamp (e.g. Date.parse of a malformed string) so it
+  // never renders as "NaN d ago".
+  if (!Number.isFinite(fetchedAt) || !Number.isFinite(now)) return "—";
   const ms = Math.max(0, now - fetchedAt);
   const min = Math.floor(ms / 60_000);
   if (min < 1) return "just now";

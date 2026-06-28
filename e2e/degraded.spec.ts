@@ -16,6 +16,18 @@ test("NWS down: the board still renders, sky falls back to modeled, no alerts", 
   await expect(page.getByRole("heading", { name: "Wind Advisory" })).toHaveCount(0);
 });
 
+test("NWS up but only RAWS stations nearby: the sky still falls back to modeled", async ({ page }) => {
+  await installStubs(page, { observations: "allRaws" });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  // The real case at a remote desert field (Black Rock): NWS is reachable — the alert still
+  // shows — but every nearby station is a no-sky RAWS, so the sky panel uses the modeled
+  // fallback rather than an observed ceiling.
+  await expect(page.getByRole("heading", { name: "Wind Advisory" })).toBeVisible();
+  await expect(page.locator("#sky").getByText("Modeled").first()).toBeVisible();
+  await expect(page.locator("#sky").getByText("Observed", { exact: true })).toHaveCount(0);
+});
+
 test("Open-Meteo down with no cache: a clear, non-error message — not a blank board", async ({ page }) => {
   await installStubs(page, { forecast: "down" });
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

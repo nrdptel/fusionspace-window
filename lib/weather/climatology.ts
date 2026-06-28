@@ -99,12 +99,14 @@ export function summarizeClimatology(
   };
 }
 
-/** Describe how an upcoming peak wind sits against the seasonal normal. The band is
- *  proportional with a small floor, so a few mph over a calm normal doesn't over-read. */
-export function compareToNormal(upcomingMaxMph: number, normal: ClimatologyNormal): NormalComparison {
+/** Describe how the week ahead sits against the seasonal normal. Compare like with like —
+ *  the forecast's *average* daily-max against the climatological *average* daily-max, not a
+ *  7-day peak against an average (which would always skew windy). The band is proportional
+ *  with a small floor, so a few mph over a calm normal doesn't over-read. */
+export function compareToNormal(upcomingMeanMaxMph: number, normal: ClimatologyNormal): NormalComparison {
   const typical = normal.typicalWindMaxMph;
   const margin = Math.max(3, typical * 0.2);
-  if (upcomingMaxMph >= typical + margin) return "windier";
-  if (upcomingMaxMph <= typical - margin) return "calmer";
+  if (upcomingMeanMaxMph >= typical + margin) return "windier";
+  if (upcomingMeanMaxMph <= typical - margin) return "calmer";
   return "typical";
 }

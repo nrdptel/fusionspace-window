@@ -33,8 +33,10 @@ function SeasonalContext({
   const u = resolveUnits(units);
   const upcoming = daily.slice(0, 7).map((d) => d.windMaxMph).filter((w) => Number.isFinite(w));
   if (upcoming.length === 0) return null;
+  const mean = upcoming.reduce((a, b) => a + b, 0) / upcoming.length;
   const peak = Math.max(...upcoming);
-  const cmp = compareToNormal(peak, climatology);
+  // Compare like with like: the week's average daily-max against the normal's average.
+  const cmp = compareToNormal(mean, climatology);
   const phrase = cmp === "windier" ? "windier than usual" : cmp === "calmer" ? "calmer than usual" : "about typical";
   const tone =
     cmp === "windier"
@@ -48,11 +50,11 @@ function SeasonalContext({
       <span className="font-mono tabular-nums text-zinc-800 dark:text-zinc-200">
         {fmtWind(climatology.typicalWindMaxMph, u.wind)} {WIND_LABEL[u.wind]}
       </span>{" "}
-      ({climatology.years}-yr normal). The next 7 days peak at{" "}
+      ({climatology.years}-yr normal). The next 7 days average{" "}
       <span className="font-mono tabular-nums text-zinc-800 dark:text-zinc-200">
-        {fmtWind(peak, u.wind)} {WIND_LABEL[u.wind]}
+        {fmtWind(mean, u.wind)} {WIND_LABEL[u.wind]}
       </span>{" "}
-      — <span className={"font-medium " + tone}>{phrase}</span>.
+      (peak {fmtWind(peak, u.wind)}) — <span className={"font-medium " + tone}>{phrase}</span>.
     </div>
   );
 }

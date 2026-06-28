@@ -325,7 +325,14 @@ export default function WeatherBoard() {
           </Panel>
 
           <Panel id="sky" title="Sky & ceiling">
-            <SkyPanel sky={data.sky} daily={data.forecast.daily} units={units} todayIso={todayIso} now={now || data.fetchedAt} />
+            <SkyPanel
+              sky={data.sky}
+              daily={data.forecast.daily}
+              units={units}
+              todayIso={todayIso}
+              now={now || data.fetchedAt}
+              modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
+            />
           </Panel>
 
           <Panel id="outlook" title="The next several days">

@@ -290,6 +290,22 @@ descent rate — it leans the drift, it doesn't predict a landing — keeping Wi
 informational, no-verdict posture. No new dependency or request; it's geometry over levels the
 board already plots.
 
+### Visibility (post-v1)
+
+The Sky panel showed the ceiling but not visibility, which is the other half of a flyer's
+sky read: you have to keep a high flight in sight to track and recover it, and many waivers
+carry explicit cloud-and-visibility minimums. So visibility now sits beside the ceiling, on
+the same observed/modelled footing. The METAR already fetched for the ceiling also carries
+visibility (in metres), so the observed value is free — parsed to statute miles in
+`metar.ts` and tagged *observed*. When no station is reachable it falls back to Open-Meteo's
+modelled visibility for the current hour (one more hourly variable on the existing request,
+converted from metres via the reported unit in `forecast.ts`), tagged *modelled* — the same
+graceful-degradation pattern as the cloud picture. It's stored canonically in statute miles
+and shows miles imperial, kilometres metric (a third length idiom alongside altitude-feet and
+the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values top out near
+the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
+honest discontinuity the source labels make legible. It rides into the field briefing too.
+
 ### Field briefing (post-v1)
 
 The family ships text/share exports everywhere — Charge's copy-as-text card, Debrief's

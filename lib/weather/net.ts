@@ -51,6 +51,7 @@ const HOURLY_SURFACE = [
   "wind_gusts_10m",
   "is_day",
   "cape",
+  "visibility",
 ];
 
 const DAILY_VARS = [

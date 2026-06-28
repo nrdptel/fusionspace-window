@@ -1,7 +1,14 @@
 "use client";
 
 import type { DayOutlook, Sky } from "@/lib/weather/model";
-import { fmtLength, LENGTH_LABEL, resolveUnits, type UnitPrefs } from "@/lib/units";
+import {
+  fmtLength,
+  fmtVisibility,
+  LENGTH_LABEL,
+  resolveUnits,
+  VIS_LABEL,
+  type UnitPrefs,
+} from "@/lib/units";
 import { dayLabel, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine } from "./ui";
 
@@ -11,14 +18,22 @@ export default function SkyPanel({
   units,
   todayIso,
   now,
+  modeledVisibilityMi,
 }: {
   sky: Sky;
   daily: DayOutlook[];
   units: UnitPrefs;
   todayIso: string;
   now: number;
+  /** Current-hour modeled visibility (statute miles), the fallback when no station reports it. */
+  modeledVisibilityMi: number;
 }) {
   const u = resolveUnits(units);
+
+  // Visibility prefers the station observation; otherwise the model fills in.
+  const observedVisMi = sky.source === "station" ? sky.visibilityMi : null;
+  const visMi = observedVisMi != null ? observedVisMi : modeledVisibilityMi;
+  const visObserved = observedVisMi != null;
   return (
     <Card>
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
@@ -72,6 +87,19 @@ export default function SkyPanel({
               </p>
             </>
           )}
+
+          {Number.isFinite(visMi) && (
+            <div className="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Visibility</span>
+                <Pill tone={visObserved ? "sky" : "amber"}>{visObserved ? "Observed" : "Modeled"}</Pill>
+              </div>
+              <div className="mt-1 font-mono text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                {fmtVisibility(visMi, u.length)}
+                <span className="ml-1 text-sm font-normal text-zinc-500 dark:text-zinc-400">{VIS_LABEL[u.length]}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Multi-day sky picture — always modeled cloud cover. */}
@@ -108,10 +136,11 @@ export default function SkyPanel({
             Observed at {sky.station.name} ({sky.station.id})
             {sky.station.distanceMi != null && ` · ${Math.round(sky.station.distanceMi)} mi away`}
             {sky.station.time && ` · ${relativeAge(Date.parse(sky.station.time), now)}`} · NWS
-            METAR. Daily cloud cover is modeled (Open-Meteo).
+            METAR. Visibility {visObserved ? "is the station's observed value" : "is modeled (Open-Meteo); the station reported none"}.
+            Daily cloud cover is modeled (Open-Meteo).
           </>
         ) : (
-          <>Cloud cover modeled by Open-Meteo. A forecast ceiling in feet (TAF) is planned for a later version.</>
+          <>Cloud cover and visibility modeled by Open-Meteo. A forecast ceiling in feet (TAF) is planned for a later version.</>
         )}
       </SourceLine>
     </Card>

@@ -26,6 +26,8 @@ export const KMH_PER_MPH = 1.609344;
 export const KN_PER_MPH = 0.868976242;
 export const MS_PER_MPH = 0.44704;
 export const MM_PER_IN = 25.4;
+export const M_PER_MILE = 1609.344;
+export const KM_PER_MILE = 1.609344;
 
 /** Resolve the active wind/temperature/length/precip units from the saved prefs. */
 export function resolveUnits(p: UnitPrefs): {
@@ -76,6 +78,12 @@ export function precipFromIn(inches: number, unit: PrecipUnit): number {
   return unit === "mm" ? inches * MM_PER_IN : inches;
 }
 
+// --- visibility (canonical statute miles; metric shows km) ------------------------
+export const VIS_LABEL: Record<LengthUnit, string> = { ft: "mi", m: "km" };
+export function visFromMiles(mi: number, unit: LengthUnit): number {
+  return unit === "m" ? mi * KM_PER_MILE : mi;
+}
+
 // --- direction --------------------------------------------------------------------
 const COMPASS_16 = [
   "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -101,6 +109,9 @@ export function fmtLength(ft: number, unit: LengthUnit, decimals = 0): string {
 }
 export function fmtPrecip(inches: number, unit: PrecipUnit, decimals = 2): string {
   return trim(precipFromIn(inches, unit), decimals);
+}
+export function fmtVisibility(mi: number, unit: LengthUnit, decimals = 0): string {
+  return trim(visFromMiles(mi, unit), decimals);
 }
 
 function trim(n: number, decimals: number): string {

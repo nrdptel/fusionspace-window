@@ -5,7 +5,7 @@
  *  layers. All pure; the actual multi-station fetch lives in net.ts. NWS reports SI, so
  *  cloud-layer bases (metres) are converted to feet. */
 
-import { FT_PER_M } from "../units";
+import { FT_PER_M, M_PER_MILE } from "../units";
 import type { CloudLayer, Sky } from "./model";
 
 export interface RawStation {
@@ -23,7 +23,13 @@ interface NwsValue {
 interface RawObservation {
   timestamp?: string;
   textDescription?: string;
+  visibility?: NwsValue;
   cloudLayers?: { base?: NwsValue; amount?: string }[];
+}
+
+/** NWS reports visibility in metres; convert to statute miles, or null when absent. */
+function visibilityMiles(v: NwsValue | undefined): number | null {
+  return typeof v?.value === "number" && Number.isFinite(v.value) ? v.value / M_PER_MILE : null;
 }
 
 /** Stations from a `/gridpoints/.../stations` feature collection, in NWS's order
@@ -71,6 +77,8 @@ export interface ParsedObservation {
   time: string;
   layers: CloudLayer[];
   ceilingFt: number | null;
+  /** Observed horizontal visibility, statute miles — null when absent. */
+  visibilityMi: number | null;
   description: string;
   /** True when the observation actually carries sky data we can show. */
   usable: boolean;
@@ -95,7 +103,14 @@ export function parseObservation(raw: unknown): ParsedObservation {
   }
   const description = (p.textDescription ?? "").trim() || summarizeLayers(layers);
   const usable = layers.length > 0 || Boolean((p.textDescription ?? "").trim());
-  return { time: p.timestamp ?? "", layers, ceilingFt, description, usable };
+  return {
+    time: p.timestamp ?? "",
+    layers,
+    ceilingFt,
+    visibilityMi: visibilityMiles(p.visibility),
+    description,
+    usable,
+  };
 }
 
 /** A plain-words sky summary from cloud layers when the station gives no text. */
@@ -142,6 +157,7 @@ export function stationSky(
     source: "station",
     station: { id: station.id, name: station.name, distanceMi, time: obs.time },
     ceilingFt: obs.ceilingFt,
+    visibilityMi: obs.visibilityMi,
     layers: obs.layers,
     description: obs.description,
   };

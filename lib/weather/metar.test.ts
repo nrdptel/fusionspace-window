@@ -23,6 +23,17 @@ describe("parseObservation", () => {
     expect(p.usable).toBe(true);
   });
 
+  it("converts observed visibility from metres to statute miles", () => {
+    const p = parseObservation(obs);
+    // 16093.44 m is exactly 10 statute miles.
+    expect(p.visibilityMi).toBeCloseTo(10, 3);
+  });
+
+  it("reports null visibility when the station omits it", () => {
+    const p = parseObservation(obsClear);
+    expect(p.visibilityMi).toBeNull();
+  });
+
   it("reports no ceiling for a clear sky but is still usable", () => {
     const p = parseObservation(obsClear);
     expect(p.ceilingFt).toBeNull();
@@ -73,6 +84,7 @@ describe("sky builders", () => {
     expect(s.source).toBe("station");
     expect(s.station?.id).toBe("KDAG");
     expect(s.station?.distanceMi).toBe(28);
+    expect(s.visibilityMi).toBeCloseTo(10, 3);
 
     const m = modelSky(42);
     expect(m.source).toBe("model");

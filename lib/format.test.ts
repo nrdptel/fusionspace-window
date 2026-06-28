@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   clock,
+  clockCompact,
   clockShort,
   dayLabel,
   isStale,
@@ -23,6 +24,12 @@ describe("clock", () => {
     expect(clock("2026-06-27T00:00")).toBe("12:00 AM");
     expect(clockShort("2026-06-27T13:00")).toBe("1 PM");
     expect(clockShort("2026-06-27T00:00")).toBe("12 AM");
+  });
+  it("formats an ultra-compact hour", () => {
+    expect(clockCompact("2026-06-27T06:00")).toBe("6a");
+    expect(clockCompact("2026-06-27T12:00")).toBe("12p");
+    expect(clockCompact("2026-06-27T00:00")).toBe("12a");
+    expect(clockCompact("2026-06-27T13:00")).toBe("1p");
   });
 });
 

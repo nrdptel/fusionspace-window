@@ -378,8 +378,11 @@ export default function WeatherBoard() {
           <Panel id="outlook" title="The next several days">
             <Outlook
               daily={data.forecast.daily}
+              hourly={data.forecast.hourly}
               units={units}
               todayIso={todayIso}
+              fromIndex={currentHourIndex(data)}
+              windLine={windLine}
               model={data.forecast.model}
               climatology={data.climatology}
             />

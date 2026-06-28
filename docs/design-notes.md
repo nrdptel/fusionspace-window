@@ -464,6 +464,26 @@ literal for the decision flyers actually make. Daylight comes from Open-Meteo's 
 mid-recovery is a real way to lose a rocket. Both are cheap reads on data already fetched,
 so they cost no new dependency and no extra request.
 
+### Per-day calm window in the outlook (post-v1)
+
+The calm-window chips only look two days out, but the forecast (and the outlook) run seven —
+so the outlook had an asymmetry: it showed each day's *maximum* wind but never said *when*
+within the day it was flyable. A club planning next weekend's launch could see a day was
+"windy" by its peak yet not learn it had a dead-calm morning. So each outlook card now carries
+its **calmest daylight window** — the longest daylight stretch (today onward) whose sustained
+wind stays at or under the active line, with a muted "no calm hour" when a day truly never drops
+below it. It reuses the calm-window machinery rather than inventing a parallel one: the
+run-finder was refactored to share a single `summarizeWindow` helper, and a new pure
+`bestDaylightWindow(hourly, date, limit, fromIndex)` (tested) picks the longest sub-limit
+daylight run on a given field-local date, breaking length ties toward the calmer peak and
+looking *forward* from the current hour so today's window never counts hours already gone. It's
+the same honest aggregation against a line you chose, extended from the 48-hour chips across the
+whole planning week — and it reads off the seven days of hourly data already fetched, so it costs
+no new dependency and no extra request. (While here: a long-standing JSX whitespace bug in the
+outlook source line — "20 mph**limit**" with the space swallowed after the interpolation — was
+fixed by moving the words into the interpolated string, and the new muted label was toned to the
+card's proven `zinc-500/400` so it clears the WCAG contrast audit.)
+
 ### Units
 
 Imperial by default: wind **mph**, altitude/height **ft**, temperature **°F**, precip

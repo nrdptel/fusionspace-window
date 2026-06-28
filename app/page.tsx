@@ -284,7 +284,11 @@ export default function Page() {
             sustained wind and gust, dominant wind direction, peak precipitation probability, mean
             cloud cover, and sunrise/sunset (field-local — for planning setup and leaving daylight
             for recovery). A day whose max wind crosses 20 mph is marked — again as a reference,
-            not a verdict.
+            not a verdict. Each day also surfaces its <em>calmest daylight window</em>: the longest
+            upcoming daylight stretch (today onward) whose sustained wind stays at or under your
+            line, read from the same hourly forecast as the calm windows above. It&apos;s how a day
+            flagged windy by its single peak can still show a flyable morning — the same plain
+            aggregation against a line you chose, extended across the planning week.
           </Method>
           <Method title="Seasonal normal (vs typical)">
             The outlook also sets the week against the field&apos;s own history: a

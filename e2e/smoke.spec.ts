@@ -61,6 +61,10 @@ test("shows the active NWS alert and the observed ceiling", async ({ page }) => 
   const nowPanel = page.locator("#now");
   await expect(nowPanel.getByText("Nearest station")).toBeVisible();
   await expect(nowPanel.getByText(/Observed at KDAG/)).toBeVisible();
+
+  // The barometer is falling in the fixture, surfaced as a pressure tendency.
+  await expect(nowPanel.getByText("Pressure", { exact: true })).toBeVisible();
+  await expect(nowPanel.getByText(/Falling .* hPa\/3h/)).toBeVisible();
 });
 
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {

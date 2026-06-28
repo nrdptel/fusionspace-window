@@ -319,6 +319,21 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Pressure tendency (post-v1)
+
+Storm potential says how primed the air is; the barometer says whether it's actually changing.
+A falling pressure is the oldest honest warning that weather is moving in — an approaching low
+or front bringing the wind up and the ceiling down — while a rising one usually means settling.
+The hourly station pressure was already on the wire (density altitude uses it), so a pure,
+tested helper (`lib/weather/pressure.ts`) takes the change over the last few hours at the
+current hour, with a 1 hPa dead-band so ordinary diurnal wobble reads as *steady*, and reports
+the trend with its signed rate. "Right now" shows it as a small glyph (an up/down triangle or a
+dash — no emoji) and the rate, with a falling barometer toned amber as the one direction worth a
+second look; it rides into the briefing only when it's actually moving. It pairs naturally with
+storm potential — destabilising air plus dropping pressure is a sharper heads-up than either
+alone — and, like everything here, it states the rate and leaves the call to you. No new request
+or dependency.
+
 ### Observed wind cross-check & raw METAR (post-v1)
 
 The surface wind on the board is a *model analysis*, not a measurement — the explainer always

@@ -21,9 +21,10 @@ const W = 580;
 const H = 380;
 const ML = 52;
 const MR = 96;
-const MT = 16;
+const MT = 28; // top margin leaves room for the axis title above the highest altitude tick
 const MB = 30;
 const SURFACE_AGL_FT = 33; // 10 m anemometer height
+const MIN_LABEL_GAP_PX = 11; // drop a barb's text label if it would land on the one below it
 
 type TopKey = "10000" | "20000" | "30000" | "all";
 const TOP_OPTIONS = [
@@ -99,6 +100,18 @@ export default function WindsAloft({
   const freezingAglFt = profile.freezingLevelAglFt;
   const showFreezing = Number.isFinite(freezingAglFt) && freezingAglFt > 0 && freezingAglFt <= topFt;
 
+  // Declutter the right-hand value labels: keep the surface (lowest) and skip any whose label
+  // would land on the one below it. The dot and barb still draw — only the text is dropped.
+  let lastLabelY = Infinity;
+  const labelFlags = shown.map((l) => {
+    const py = y(l.aglFt);
+    if (lastLabelY - py >= MIN_LABEL_GAP_PX) {
+      lastLabelY = py;
+      return true;
+    }
+    return false;
+  });
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -144,7 +157,8 @@ export default function WindsAloft({
             <text x={ML + innerW / 2} y={H - 3} textAnchor="middle" className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">
               wind speed ({WIND_LABEL[u.wind]})
             </text>
-            <text x={12} y={MT + 4} className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">altitude AGL ({LENGTH_LABEL[u.length]})</text>
+            {/* Axis title sits in the top margin, clear of the highest altitude tick. */}
+            <text x={12} y={11} className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">altitude AGL ({LENGTH_LABEL[u.length]})</text>
 
             {/* 0°C freezing level — where the air turns sub-freezing on the way up */}
             {showFreezing && (
@@ -176,9 +190,11 @@ export default function WindsAloft({
                       <path d="M0 -9 L-3 -4 L0 -5.5 L3 -4 Z" fill="currentColor" />
                     </g>
                   </g>
-                  <text x={bx + 12} y={py + 3} className="fill-zinc-600 dark:fill-zinc-300" fontSize="10">
-                    {fmtWind(l.windMph, u.wind)} {degToCompass(l.dirDeg)}
-                  </text>
+                  {labelFlags[i] && (
+                    <text x={bx + 12} y={py + 3} className="fill-zinc-600 dark:fill-zinc-300" fontSize="10">
+                      {fmtWind(l.windMph, u.wind)} {degToCompass(l.dirDeg)}
+                    </text>
+                  )}
                 </g>
               );
             })}

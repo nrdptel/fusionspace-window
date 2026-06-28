@@ -319,6 +319,21 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Seasonal normal — vs typical (post-v1)
+
+The forecast says what's coming; it never says whether what's coming is *normal*. That's the
+question a flyer weighs days out — wait for a better window, or accept that this is about as
+good as the season gets here. So the outlook now sets the week against the field's own history:
+a typical max wind for this week of the year, with the upcoming peak called windier, about
+typical, or calmer than that. It's the first feature to reach past the single forecast request,
+and it does so the family's way — as a **best-effort source, exactly like NWS**: a parallel call
+to Open-Meteo's free historical archive (about five years of daily max wind/gust), summarised by
+a pure, tested helper (`lib/weather/climatology.ts`) that averages the days within a week of the
+same date across those years, with day-of-year math done on the ISO strings so it stays pure. If
+the archive can't be reached the lookup just returns null and the board is unaffected — the
+forecast remains the only hard dependency, so the central architecture holds. It renders as one
+descriptive line in the outlook, never a verdict.
+
 ### Pressure tendency (post-v1)
 
 Storm potential says how primed the air is; the barometer says whether it's actually changing.

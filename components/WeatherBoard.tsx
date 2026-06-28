@@ -22,6 +22,7 @@ import LocationBar from "./LocationBar";
 import UnitsControl from "./UnitsControl";
 import Alerts from "./Alerts";
 import Now from "./Now";
+import CalmWindows from "./CalmWindows";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
@@ -273,6 +274,15 @@ export default function WeatherBoard() {
           </Panel>
 
           <Panel id="hourly" title="Today & tomorrow">
+            <CalmWindows
+              hourly={data.forecast.hourly}
+              fromIndex={currentHourIndex(data)}
+              selectedIndex={selectedHour}
+              onSelect={setSelectedHour}
+              units={units}
+              windLine={windLine}
+              todayIso={todayIso}
+            />
             <HourlyTimeline
               hourly={data.forecast.hourly}
               startIndex={currentHourIndex(data)}

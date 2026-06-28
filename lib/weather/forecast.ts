@@ -92,6 +92,9 @@ function buildHourly(raw: RawForecast): HourPoint[] {
     precipIn: num(h.precipitation?.[i]) ?? 0,
     cloudCoverPct: num(h.cloud_cover?.[i]) ?? NaN,
     weatherCode: num(h.weather_code?.[i]) ?? 0,
+    // `is_day` is absent on some models; default to daytime so a calm window is
+    // never wrongly hidden as "after dark".
+    isDay: num(h.is_day?.[i]) !== 0,
   }));
 }
 
@@ -133,6 +136,8 @@ function buildDaily(raw: RawForecast): DayOutlook[] {
     gustMaxMph: num(d.wind_gusts_10m_max?.[i]) ?? NaN,
     windDirDeg: num(d.wind_direction_10m_dominant?.[i]) ?? NaN,
     cloudCoverMeanPct: num(d.cloud_cover_mean?.[i]),
+    sunrise: typeof d.sunrise?.[i] === "string" ? (d.sunrise[i] as string) : null,
+    sunset: typeof d.sunset?.[i] === "string" ? (d.sunset[i] as string) : null,
   }));
 }
 

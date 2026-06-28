@@ -45,6 +45,7 @@ const HOURLY_SURFACE = [
   "wind_speed_10m",
   "wind_direction_10m",
   "wind_gusts_10m",
+  "is_day",
 ];
 
 const DAILY_VARS = [
@@ -57,6 +58,9 @@ const DAILY_VARS = [
   "wind_gusts_10m_max",
   "wind_direction_10m_dominant",
   "cloud_cover_mean",
+  "sunrise",
+  "sunset",
+  "daylight_duration",
 ];
 
 function aloftVars(): string[] {

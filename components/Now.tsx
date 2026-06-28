@@ -11,16 +11,35 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
-import { clock } from "@/lib/format";
+import { clock, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 
 const SURFACE_LIMIT_MPH = 20;
 
-function windTone(windMph: number, personalLine: number | null): "emerald" | "amber" | "red" {
+type Tone = "emerald" | "amber" | "red";
+
+function windTone(windMph: number, personalLine: number | null): Tone {
   if (windMph >= SURFACE_LIMIT_MPH) return "red";
   if (windMph >= (personalLine ?? 15)) return "amber";
   return "emerald";
+}
+
+function toneText(tone: Tone): string {
+  return tone === "red"
+    ? "text-red-700 dark:text-red-400"
+    : tone === "amber"
+      ? "text-amber-700 dark:text-amber-400"
+      : "text-emerald-700 dark:text-emerald-400";
+}
+
+export interface ObservedWind {
+  windMph: number;
+  gustMph: number | null;
+  dirDeg: number | null;
+  stationId: string;
+  distanceMi: number | null;
+  time: string;
 }
 
 /** A small arrow pointing the way the wind blows TOWARD (from-direction + 180°). */
@@ -41,12 +60,17 @@ export default function Now({
   units,
   windLine,
   model,
+  observed,
+  now,
 }: {
   current: CurrentConditions;
   field: Field;
   units: UnitPrefs;
   windLine: number | null;
   model: string;
+  /** Nearest-station observed wind, when an observation is available. */
+  observed?: ObservedWind | null;
+  now: number;
 }) {
   const u = resolveUnits(units);
   const sky = describeWeather(current.weatherCode, current.isDay);
@@ -96,6 +120,28 @@ export default function Now({
               </p>
             )}
           </div>
+
+          {/* Observed cross-check: the nearest real anemometer against the model figure. */}
+          {observed && (
+            <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+              <div className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Nearest station
+              </div>
+              <div className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
+                <span className={"font-mono font-semibold tabular-nums " + toneText(windTone(observed.windMph, windLine))}>
+                  {fmtWind(observed.windMph, u.wind)} {WIND_LABEL[u.wind]}
+                </span>
+                {observed.dirDeg != null && <> from {degToCompass(observed.dirDeg)}</>}
+                {observed.gustMph != null && <>, gust {fmtWind(observed.gustMph, u.wind)}</>}
+              </div>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                Observed at {observed.stationId}
+                {observed.distanceMi != null && `, ${Math.round(observed.distanceMi)} mi`}
+                {observed.time && `, ${relativeAge(Date.parse(observed.time), now)}`} — a real
+                reading to check the model against; it can differ with distance and terrain.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Temperature, sky, precip */}

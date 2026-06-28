@@ -77,9 +77,10 @@ test("the field briefing previews and copies", async ({ page }) => {
 
   // The preview shows the assembled, honest briefing text.
   await page.getByText("Preview the text briefing").click();
-  const preview = page.locator("pre");
+  const preview = page.locator("pre", { hasText: "Window —" });
   await expect(preview).toContainText("Window — Lucerne Valley, CA");
   await expect(preview).toContainText("Surface wind: 21 mph");
+  await expect(preview).toContainText("Nearest station (KDAG) observed 15 mph");
   await expect(preview).toContainText("lat=34.45"); // the shareable URL (host varies by env)
   await expect(preview).toContainText("Best-effort, not authoritative");
 

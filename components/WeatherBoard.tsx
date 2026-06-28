@@ -277,7 +277,26 @@ export default function WeatherBoard() {
           {data.alerts && data.alerts.length > 0 && <Alerts alerts={data.alerts} />}
 
           <Panel id="now" title="Right now">
-            <Now current={data.forecast.current} field={f} units={units} windLine={windLine} model={data.forecast.model} />
+            <Now
+              current={data.forecast.current}
+              field={f}
+              units={units}
+              windLine={windLine}
+              model={data.forecast.model}
+              now={now || data.fetchedAt}
+              observed={
+                data.sky.source === "station" && data.sky.observedWindMph != null && data.sky.station
+                  ? {
+                      windMph: data.sky.observedWindMph,
+                      gustMph: data.sky.observedGustMph ?? null,
+                      dirDeg: data.sky.observedWindDirDeg ?? null,
+                      stationId: data.sky.station.id,
+                      distanceMi: data.sky.station.distanceMi ?? null,
+                      time: data.sky.station.time,
+                    }
+                  : null
+              }
+            />
             <DensityAltitude current={data.forecast.current} field={f} units={units} model={data.forecast.model} />
           </Panel>
 

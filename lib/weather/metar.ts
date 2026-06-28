@@ -5,7 +5,7 @@
  *  layers. All pure; the actual multi-station fetch lives in net.ts. NWS reports SI, so
  *  cloud-layer bases (metres) are converted to feet. */
 
-import { FT_PER_M, M_PER_MILE } from "../units";
+import { FT_PER_M, KMH_PER_MPH, M_PER_MILE, MS_PER_MPH } from "../units";
 import type { CloudLayer, Sky } from "./model";
 
 export interface RawStation {
@@ -24,12 +24,29 @@ interface RawObservation {
   timestamp?: string;
   textDescription?: string;
   visibility?: NwsValue;
+  windSpeed?: NwsValue;
+  windDirection?: NwsValue;
+  windGust?: NwsValue;
+  rawMessage?: string;
   cloudLayers?: { base?: NwsValue; amount?: string }[];
 }
 
 /** NWS reports visibility in metres; convert to statute miles, or null when absent. */
 function visibilityMiles(v: NwsValue | undefined): number | null {
   return typeof v?.value === "number" && Number.isFinite(v.value) ? v.value / M_PER_MILE : null;
+}
+
+/** NWS reports wind in km/h (sometimes m/s); convert to mph, or null when absent. */
+function windToMph(v: NwsValue | undefined): number | null {
+  if (typeof v?.value !== "number" || !Number.isFinite(v.value)) return null;
+  const unit = (v.unitCode ?? "").toLowerCase();
+  if (unit.includes("m_s") || unit.includes("m/s")) return v.value / MS_PER_MPH;
+  // Default and explicit km/h.
+  return v.value / KMH_PER_MPH;
+}
+
+function dirDeg(v: NwsValue | undefined): number | null {
+  return typeof v?.value === "number" && Number.isFinite(v.value) ? v.value : null;
 }
 
 /** Stations from a `/gridpoints/.../stations` feature collection, in NWS's order
@@ -79,6 +96,12 @@ export interface ParsedObservation {
   ceilingFt: number | null;
   /** Observed horizontal visibility, statute miles — null when absent. */
   visibilityMi: number | null;
+  /** Observed surface wind (mph) / gust (mph) / direction (FROM, deg) — null when absent. */
+  windMph: number | null;
+  gustMph: number | null;
+  windDirDeg: number | null;
+  /** The raw METAR string, when the station reports one. */
+  raw: string | null;
   description: string;
   /** True when the observation actually carries sky data we can show. */
   usable: boolean;
@@ -103,11 +126,16 @@ export function parseObservation(raw: unknown): ParsedObservation {
   }
   const description = (p.textDescription ?? "").trim() || summarizeLayers(layers);
   const usable = layers.length > 0 || Boolean((p.textDescription ?? "").trim());
+  const rawMsg = typeof p.rawMessage === "string" && p.rawMessage.trim() ? p.rawMessage.trim() : null;
   return {
     time: p.timestamp ?? "",
     layers,
     ceilingFt,
     visibilityMi: visibilityMiles(p.visibility),
+    windMph: windToMph(p.windSpeed),
+    gustMph: windToMph(p.windGust),
+    windDirDeg: dirDeg(p.windDirection),
+    raw: rawMsg,
     description,
     usable,
   };
@@ -158,6 +186,10 @@ export function stationSky(
     station: { id: station.id, name: station.name, distanceMi, time: obs.time },
     ceilingFt: obs.ceilingFt,
     visibilityMi: obs.visibilityMi,
+    observedWindMph: obs.windMph,
+    observedGustMph: obs.gustMph,
+    observedWindDirDeg: obs.windDirDeg,
+    raw: obs.raw,
     layers: obs.layers,
     description: obs.description,
   };

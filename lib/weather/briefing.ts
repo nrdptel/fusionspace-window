@@ -17,11 +17,13 @@ import {
   fmtVisibility,
   fmtWind,
   LENGTH_LABEL,
+  limitLabel,
   resolveUnits,
   TEMP_LABEL,
   VIS_LABEL,
   WIND_LABEL,
   type UnitPrefs,
+  type WindUnit,
 } from "../units";
 import { clock, clockShort, dayLabel } from "../format";
 
@@ -42,10 +44,11 @@ export interface BriefingOptions {
   shareUrl: string;
 }
 
-function surfacePhrase(windMph: number, windLine: number | null): string {
-  if (windMph >= SURFACE_LIMIT_MPH) return "over the 20 mph limit";
-  if (windMph >= (windLine ?? 15)) return "near the 20 mph limit";
-  return "below the 20 mph limit";
+function surfacePhrase(windMph: number, windLine: number | null, windUnit: WindUnit): string {
+  const limit = `the ${limitLabel(windUnit)} limit`;
+  if (windMph >= SURFACE_LIMIT_MPH) return `over ${limit}`;
+  if (windMph >= (windLine ?? 15)) return `near ${limit}`;
+  return `below ${limit}`;
 }
 
 /** Pick the profile level nearest each target AGL height (deduped, in order). */
@@ -87,7 +90,7 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
 
   lines.push(
     `Surface wind: ${fmtWind(c.windMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(c.dirDeg)} (${Math.round(c.dirDeg)}°), ` +
-      `gusting ${fmtWind(c.gustMph, u.wind)} — ${surfacePhrase(c.windMph, windLine)}`,
+      `gusting ${fmtWind(c.gustMph, u.wind)} — ${surfacePhrase(c.windMph, windLine, u.wind)}`,
   );
 
   // Observed cross-check from the nearest station, where one reported wind.

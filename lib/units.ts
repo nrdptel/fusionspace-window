@@ -114,6 +114,14 @@ export function fmtVisibility(mi: number, unit: LengthUnit, decimals = 0): strin
   return trim(visFromMiles(mi, unit), decimals);
 }
 
+/** The launch wind limit, shown in the active wind unit. The published NFPA/NAR/Tripoli rule is
+ *  "20 mph", so in any other unit the canonical mph value is kept in parentheses — a metric or
+ *  knots user gets a number they can compare directly without losing what the rule actually is. */
+export function limitLabel(unit: WindUnit, mph = 20): string {
+  if (unit === "mph") return `${mph} mph`;
+  return `${fmtWind(mph, unit)} ${WIND_LABEL[unit]} (${mph} mph)`;
+}
+
 function trim(n: number, decimals: number): string {
   if (!Number.isFinite(n)) return "—";
   const f = 10 ** decimals;

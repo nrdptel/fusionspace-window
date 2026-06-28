@@ -5,6 +5,7 @@ import {
   degToCompass,
   fmtTemp,
   fmtWind,
+  limitLabel,
   resolveUnits,
   TEMP_LABEL,
   WIND_LABEL,
@@ -94,7 +95,7 @@ export default function Now({
 
   const statusText =
     tone === "red"
-      ? "Surface wind is over the 20 mph limit"
+      ? `Surface wind is over the ${limitLabel(u.wind)} limit`
       : tone === "amber"
         ? "Surface wind is near the limit"
         : "Surface wind is below the limit";
@@ -126,12 +127,12 @@ export default function Now({
           <div className="mt-3 space-y-1 text-xs text-zinc-500 dark:text-zinc-400">
             <p>
               <span className="inline-block h-2 w-4 rounded-sm bg-red-500/60 align-middle" aria-hidden />{" "}
-              20 mph — the NFPA/NAR/Tripoli surface-wind limit for launching (a reference, not a verdict).
+              {limitLabel(u.wind)} — the NFPA/NAR/Tripoli surface-wind limit for launching (a reference, not a verdict).
             </p>
             {windLine != null && (
               <p>
                 <span className="inline-block h-2 w-4 rounded-sm bg-amber-500/60 align-middle" aria-hidden />{" "}
-                {windLine} mph — your personal line.
+                {fmtWind(windLine, u.wind)} {WIND_LABEL[u.wind]} — your personal line.
               </p>
             )}
           </div>

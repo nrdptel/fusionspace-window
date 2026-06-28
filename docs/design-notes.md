@@ -331,6 +331,17 @@ click away, not in your face. The eighteen entries are now grouped into eight co
 the default page is clean, and a curious flyer opens only the section they care about. The
 restraint the family is known for, applied to its own documentation.
 
+### Remember the last field (post-v1)
+
+The field lives in the URL — great for sharing, but it meant a flyer who just typed
+`window.fusionspace.co` (or opened the bookmark without the query) landed on the empty prompt
+every time, even though most use the tool for one home field. So the last viewed field is now
+kept in `localStorage` (`window.lastField`), and a *bare* visit — no coordinates in the URL —
+restores it, rewriting the URL with `replaceState` so the view stays shareable and reload-proof
+and no stray history entry is added. A genuinely new user (nothing stored) still gets the empty
+onboarding prompt; the URL, when it has coordinates, still wins. It's the same local-prefs
+posture as units and saved fields: a convenience held in the browser, nothing sent anywhere.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

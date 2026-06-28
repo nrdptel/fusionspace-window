@@ -8,12 +8,20 @@ import { DEFAULT_UNITS, type UnitPrefs } from "./units";
 const UNITS_KEY = "window.units";
 const WINDLINE_KEY = "window.windline";
 const SAVED_KEY = "window.savedFields";
+const LAST_KEY = "window.lastField";
 const SAVED_LIMIT = 12;
 
 export interface SavedField {
   lat: number;
   lon: number;
   label: string;
+}
+
+/** The field a return visit lands on (label optional — a shared coords-only link has none). */
+export interface LastField {
+  lat: number;
+  lon: number;
+  label?: string;
 }
 
 // --- units ---
@@ -98,6 +106,39 @@ export function readSaved(): SavedField[] {
 export function writeSaved(list: SavedField[]): void {
   try {
     localStorage.setItem(SAVED_KEY, JSON.stringify(list.slice(0, SAVED_LIMIT)));
+  } catch {
+    /* no-op */
+  }
+}
+
+// --- last viewed field (so a bare visit lands on it, not the empty prompt) ---
+export function parseLastField(raw: string | null): LastField | null {
+  if (!raw) return null;
+  try {
+    const o = JSON.parse(raw) as Partial<LastField>;
+    if (
+      typeof o?.lat === "number" &&
+      typeof o?.lon === "number" &&
+      Number.isFinite(o.lat) &&
+      Number.isFinite(o.lon)
+    ) {
+      return { lat: o.lat, lon: o.lon, label: typeof o.label === "string" ? o.label : undefined };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+export function readLastField(): LastField | null {
+  try {
+    return parseLastField(localStorage.getItem(LAST_KEY));
+  } catch {
+    return null;
+  }
+}
+export function writeLastField(f: LastField): void {
+  try {
+    localStorage.setItem(LAST_KEY, JSON.stringify({ lat: f.lat, lon: f.lon, label: f.label }));
   } catch {
     /* no-op */
   }

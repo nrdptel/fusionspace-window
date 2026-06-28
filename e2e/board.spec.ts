@@ -98,6 +98,22 @@ test("the outlook shows sunrise and sunset", async ({ page }) => {
   await expect(page.locator("#outlook").getByText(/5:42 AM/)).toBeVisible();
 });
 
+test("the outlook sets the week against the seasonal normal", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  // Archive fixture normal ~12 mph; the windy forecast peaks at 22 → windier than usual.
+  const outlook = page.locator("#outlook");
+  await expect(outlook.getByText(/Typical max wind for this week here/)).toBeVisible();
+  await expect(outlook.getByText("windier than usual")).toBeVisible();
+});
+
+test("the outlook degrades cleanly when the archive is unreachable", async ({ page }) => {
+  await installStubs(page, { archive: "down" });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { name: "The next several days" })).toBeVisible();
+  await expect(page.locator("#outlook").getByText(/Typical max wind/)).toHaveCount(0);
+});
+
 test("the field rides in the URL and survives a reload", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

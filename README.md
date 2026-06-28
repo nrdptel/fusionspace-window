@@ -34,8 +34,9 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
   multi-day cloud picture beside it.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.
-- **The next several days** — a ~7-day outlook with sunrise/sunset: the "is the drive worth it"
-  view.
+- **The next several days** — a ~7-day outlook with sunrise/sunset, set against the field's
+  **seasonal normal** (is this week windier than typical, or about average?): the "is the drive
+  worth it" view.
 - **Field briefing** — "Copy briefing" assembles a plain-text summary of the conditions for the
   club chat; "Copy link" shares the exact view.
 - **How this is derived** — source, model, valid time, and limits for every figure.
@@ -58,6 +59,9 @@ there is no backend.
   wind, plus the raw report. A graceful-degradation enhancement, not a dependency: if it can't be
   reached, alerts are absent, the observed cross-checks drop out, and the sky falls back to
   modelled cloud cover and visibility.
+- **Open-Meteo Historical Archive** — about five years of the field's daily max wind for the
+  "vs typical" seasonal normal in the outlook. Best-effort in the same way: absent if the lookup
+  doesn't land, and the forecast stays the only hard dependency.
 
 Winds aloft is Open-Meteo only — NOAA retired the public RAP/rucsoundings upper-air feed for
 the continental US, so there is no better free source.

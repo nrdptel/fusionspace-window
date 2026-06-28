@@ -237,7 +237,8 @@ export default function Page() {
             (<code className="font-mono text-xs">/alerts/active</code>), most severe first.
             NWS is a best-effort enhancement: if it can&apos;t be reached, alerts and the observed
             ceiling are simply absent rather than shown as an error, and the sky falls back to the
-            modelled cloud cover.
+            modelled cloud cover. The seasonal normal (above) and the observed station readings are
+            best-effort in the same way — the forecast itself is the only hard dependency.
           </Method>
           <Method title="Calm windows">
             The hourly forecast already knows when the wind lays down, so Window surfaces the
@@ -253,6 +254,16 @@ export default function Page() {
             cloud cover, and sunrise/sunset (field-local — for planning setup and leaving daylight
             for recovery). A day whose max wind crosses 20 mph is marked — again as a reference,
             not a verdict.
+          </Method>
+          <Method title="Seasonal normal (vs typical)">
+            The outlook also sets the week against the field&apos;s own history: a
+            <em> typical</em> max wind for this week of the year, averaged from about five years of
+            Open-Meteo&apos;s daily archive over a window of dates around the same week, with the
+            upcoming peak called <em>windier</em>, <em>about typical</em>, or <em>calmer</em> than
+            that. It answers the planning question — wait for a better window, or accept that this
+            is about as good as the season gets here. Like NWS, it&apos;s a best-effort
+            enhancement: if the archive can&apos;t be reached it&apos;s simply absent, and the
+            board is unaffected. A descriptive comparison, not a verdict.
           </Method>
           <Method title="The field briefing">
             &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface

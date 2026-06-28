@@ -16,7 +16,7 @@ function board(): BoardData {
     28,
     parseObservation(obs),
   );
-  return { forecast, sky, alerts: parseAlerts(alertsFixture), fetchedAt: 0 };
+  return { forecast, sky, alerts: parseAlerts(alertsFixture), climatology: null, fetchedAt: 0 };
 }
 
 describe("buildBriefing", () => {

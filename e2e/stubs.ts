@@ -22,16 +22,24 @@ export interface StubOptions {
   forecast?: "ok" | "down";
   /** NWS availability (alerts + observed ceiling). */
   nws?: "ok" | "down";
+  /** Open-Meteo historical archive availability (the seasonal normal). */
+  archive?: "ok" | "down";
 }
 
 /** Install all provider stubs. Call BEFORE page.goto — the board fetches on mount. */
 export async function installStubs(page: Page, opts: StubOptions = {}): Promise<void> {
   const forecast = opts.forecast ?? "ok";
   const nws = opts.nws ?? "ok";
+  const archive = opts.archive ?? "ok";
 
   await page.route("https://api.open-meteo.com/v1/forecast**", (route) => {
     if (forecast === "down") return route.abort("failed");
     return json(route, "forecast.json");
+  });
+
+  await page.route("https://archive-api.open-meteo.com/**", (route) => {
+    if (archive === "down") return route.abort("failed");
+    return json(route, "archive.json");
   });
 
   await page.route("https://geocoding-api.open-meteo.com/**", (route) =>

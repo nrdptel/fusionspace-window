@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { HalfDiscIcon, MoonIcon, SunIcon } from "./icons";
 
 type Theme = "system" | "light" | "dark";
 
@@ -11,7 +12,11 @@ const LABEL: Record<Theme, string> = {
   light: "Light",
   dark: "Dark",
 };
-const ICON: Record<Theme, string> = { system: "◐", light: "☀", dark: "☾" };
+const ICON: Record<Theme, React.ComponentType<{ className?: string }>> = {
+  system: HalfDiscIcon,
+  light: SunIcon,
+  dark: MoonIcon,
+};
 
 /** Apply the persisted theme as a class on <html>: `dark`/`light` for an explicit
  * choice, or NEITHER for "system" (the prefers-color-scheme fallback in
@@ -63,6 +68,7 @@ export default function ThemeToggle() {
   // matches the server HTML (the actual theme is already on <html> via the
   // pre-paint script, independent of this button's label).
   const shown: Theme = mounted ? theme : "system";
+  const Icon = ICON[shown];
 
   return (
     <button
@@ -72,9 +78,7 @@ export default function ThemeToggle() {
       aria-label={`Color theme: ${LABEL[shown]}. Click to change.`}
       className="inline-flex items-center gap-1.5 rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
     >
-      <span aria-hidden="true" className="text-sm leading-none">
-        {ICON[shown]}
-      </span>
+      <Icon className="h-3.5 w-3.5" />
       {LABEL[shown]}
     </button>
   );

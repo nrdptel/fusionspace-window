@@ -218,6 +218,16 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Iconography — monochrome SVG, no emoji (post-v1)
+
+Every glyph on the board is a line-style, monochrome SVG that inherits `currentColor` — the
+weather icons (`components/WeatherIcon`, keyed off the WMO code in `lib/weather/wmo.ts`), the
+sun/moon used for daylight and the theme toggle, the warning triangle on the safety note and
+alerts, the save-field star, and the footer's observance lines (now text only). No emoji
+anywhere. Emoji render inconsistently across platforms and read as decoration, which is
+exactly what this family's restraint avoids; a coherent SVG set sits better in the quiet,
+precise look and themes cleanly in light and dark.
+
 ### Storm potential / CAPE (post-v1)
 
 The board covered wind, sky, ceiling, alerts, and density altitude, but said nothing about

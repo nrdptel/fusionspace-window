@@ -11,11 +11,15 @@ describe("describeWeather", () => {
     expect(describeWeather(95).precip).toBe(true);
   });
 
-  it("uses the day or night glyph for clear-ish codes", () => {
-    expect(describeWeather(0, true).glyph).not.toBe(describeWeather(0, false).glyph);
+  it("uses the day or night icon for clear-ish codes", () => {
+    expect(describeWeather(0, true).icon).toBe("sun");
+    expect(describeWeather(0, false).icon).toBe("moon");
+    expect(describeWeather(2, true).icon).toBe("partly-day");
+    expect(describeWeather(2, false).icon).toBe("partly-night");
   });
 
   it("falls back gracefully for an unknown code", () => {
     expect(describeWeather(1234).label).toBe("—");
+    expect(describeWeather(1234).icon).toBe("cloud");
   });
 });

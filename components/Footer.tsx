@@ -106,7 +106,7 @@ export default function Footer() {
         <div className="mt-5 space-y-1">
           {observances.map((o) => (
             <p key={o.id} className="text-zinc-500 dark:text-zinc-400">
-              <span aria-hidden="true">{o.emoji}</span> {o.message}
+              {o.message}
               {o.href && (
                 <>
                   {" "}

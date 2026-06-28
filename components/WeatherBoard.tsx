@@ -9,10 +9,12 @@ import { pressureTendency } from "@/lib/weather/pressure";
 import { isStale, relativeAge, clock } from "@/lib/format";
 import {
   addSaved,
+  readLastField,
   readSaved,
   readUnits,
   readWindLine,
   removeSaved,
+  writeLastField,
   writeSaved,
   writeUnits,
   writeWindLine,
@@ -81,7 +83,22 @@ export default function WeatherBoard() {
   // Read URL + prefs once on mount, and follow back/forward navigation.
   useEffect(() => {
     setMounted(true);
-    setField(decodeState(window.location.search));
+    const urlField = decodeState(window.location.search);
+    // A bare visit (no field in the URL) lands a returning flyer back on their last field,
+    // with the URL restored so it stays shareable and reload-proof. New users keep the empty
+    // prompt.
+    if (urlField.lat == null || urlField.lon == null) {
+      const last = readLastField();
+      if (last) {
+        const qs = encodeState(last);
+        window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+        setField(last);
+      } else {
+        setField(urlField);
+      }
+    } else {
+      setField(urlField);
+    }
     setUnits(readUnits());
     setWindLine(readWindLine());
     setSaved(readSaved());
@@ -135,6 +152,8 @@ export default function WeatherBoard() {
       setError(null);
       return;
     }
+    // Remember it so the next bare visit lands here.
+    writeLastField({ lat: field.lat, lon: field.lon, label: field.label });
     void load(field);
   }, [mounted, field, load]);
 

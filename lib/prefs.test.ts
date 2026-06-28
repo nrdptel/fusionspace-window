@@ -1,12 +1,35 @@
 import { describe, it, expect } from "vitest";
 import {
   addSaved,
+  parseLastField,
   parseSaved,
   parseUnits,
   parseWindLine,
   removeSaved,
   type SavedField,
 } from "./prefs";
+
+describe("parseLastField", () => {
+  it("reads a stored field, with or without a label", () => {
+    expect(parseLastField(JSON.stringify({ lat: 34.45, lon: -116.95, label: "Lucerne Valley" }))).toEqual({
+      lat: 34.45,
+      lon: -116.95,
+      label: "Lucerne Valley",
+    });
+    expect(parseLastField(JSON.stringify({ lat: 40.78, lon: -119.21 }))).toEqual({
+      lat: 40.78,
+      lon: -119.21,
+      label: undefined,
+    });
+  });
+
+  it("rejects junk and non-finite coordinates", () => {
+    expect(parseLastField(null)).toBeNull();
+    expect(parseLastField("not json")).toBeNull();
+    expect(parseLastField(JSON.stringify({ lat: "x", lon: 1 }))).toBeNull();
+    expect(parseLastField(JSON.stringify({ lon: -116.95 }))).toBeNull();
+  });
+});
 
 describe("parseUnits", () => {
   it("defaults to imperial and validates the saved value", () => {

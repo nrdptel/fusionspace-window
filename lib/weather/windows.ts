@@ -37,6 +37,26 @@ export interface CalmWindowOptions {
   minHours?: number;
 }
 
+/** Summarise a contiguous run of hours [i, jExclusive) into a CalmWindow. */
+function summarizeWindow(hourly: HourPoint[], i: number, jExclusive: number): CalmWindow {
+  const run = hourly.slice(i, jExclusive);
+  const winds = run.map((h) => h.windMph);
+  const gusts = run.map((h) => h.gustMph).filter((g) => Number.isFinite(g));
+  const daylightHours = run.filter((h) => h.isDay).length;
+  return {
+    startIndex: i,
+    endIndex: jExclusive - 1,
+    startTime: hourly[i].time,
+    endTime: hourly[jExclusive - 1].time,
+    hours: run.length,
+    maxWindMph: Math.max(...winds),
+    gustMaxMph: gusts.length ? Math.max(...gusts) : NaN,
+    meanWindMph: winds.reduce((a, b) => a + b, 0) / winds.length,
+    daylightHours,
+    daylight: daylightHours > 0,
+  };
+}
+
 /** Upcoming stretches where sustained wind stays at or below `limitMph`, in time order. */
 export function findCalmWindows(hourly: HourPoint[], opts: CalmWindowOptions): CalmWindow[] {
   const { limitMph, fromIndex } = opts;
@@ -56,25 +76,45 @@ export function findCalmWindows(hourly: HourPoint[], opts: CalmWindowOptions): C
     }
     let j = i;
     while (j < end && calm(hourly[j])) j++;
-    const run = hourly.slice(i, j);
-    if (run.length >= minHours) {
-      const winds = run.map((h) => h.windMph);
-      const gusts = run.map((h) => h.gustMph).filter((g) => Number.isFinite(g));
-      const daylightHours = run.filter((h) => h.isDay).length;
-      windows.push({
-        startIndex: i,
-        endIndex: j - 1,
-        startTime: hourly[i].time,
-        endTime: hourly[j - 1].time,
-        hours: run.length,
-        maxWindMph: Math.max(...winds),
-        gustMaxMph: gusts.length ? Math.max(...gusts) : NaN,
-        meanWindMph: winds.reduce((a, b) => a + b, 0) / winds.length,
-        daylightHours,
-        daylight: daylightHours > 0,
-      });
-    }
+    if (j - i >= minHours) windows.push(summarizeWindow(hourly, i, j));
     i = j;
   }
   return windows;
+}
+
+/** The single best flyable *daylight* window on a given field-local date, or null when no
+ *  daylight hour that day stays at or under `limitMph`. "Best" is the longest sub-limit
+ *  daylight run, breaking ties by the calmer peak — the honest "when, and for how long,
+ *  could I fly that day" glance the multi-day outlook needs, where the daily max wind alone
+ *  can't say a windy afternoon still had a calm morning. Pass `fromIndex` (the current hour)
+ *  so today's window looks forward rather than counting hours already gone. */
+export function bestDaylightWindow(
+  hourly: HourPoint[],
+  date: string,
+  limitMph: number,
+  fromIndex = 0,
+): CalmWindow | null {
+  const ok = (h: HourPoint, idx: number) =>
+    idx >= fromIndex &&
+    h.time.slice(0, 10) === date &&
+    h.isDay &&
+    Number.isFinite(h.windMph) &&
+    h.windMph <= limitMph;
+
+  let best: CalmWindow | null = null;
+  let i = 0;
+  while (i < hourly.length) {
+    if (!ok(hourly[i], i)) {
+      i++;
+      continue;
+    }
+    let j = i;
+    while (j < hourly.length && ok(hourly[j], j)) j++;
+    const w = summarizeWindow(hourly, i, j);
+    if (!best || w.hours > best.hours || (w.hours === best.hours && w.maxWindMph < best.maxWindMph)) {
+      best = w;
+    }
+    i = j;
+  }
+  return best;
 }

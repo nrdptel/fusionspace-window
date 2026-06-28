@@ -1,9 +1,10 @@
 "use client";
 
-import type { DayOutlook } from "@/lib/weather/model";
+import type { DayOutlook, HourPoint } from "@/lib/weather/model";
 import type { ClimatologyNormal } from "@/lib/weather/climatology";
 import { compareToNormal } from "@/lib/weather/climatology";
 import { SURFACE_LIMIT_MPH } from "@/lib/weather/limits";
+import { bestDaylightWindow } from "@/lib/weather/windows";
 import {
   degToCompass,
   fmtTemp,
@@ -15,7 +16,7 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
-import { clockShort, dayLabel, shortDate } from "@/lib/format";
+import { clockCompact, clockShort, dayLabel, shortDate } from "@/lib/format";
 import { SourceLine } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import { SunIcon } from "./icons";
@@ -59,21 +60,71 @@ function SeasonalContext({
   );
 }
 
+/** A compact "calmest flyable daylight stretch this day" line for a forecast card. Reuses
+ *  the calm-window finder, daylight-only and forward-looking, so the outlook answers *when*
+ *  a day is flyable — not just its single max-wind number. */
+function DayCalmWindow({
+  hourly,
+  date,
+  limitMph,
+  fromIndex,
+  unit,
+}: {
+  hourly: HourPoint[];
+  date: string;
+  limitMph: number;
+  fromIndex: number;
+  unit: ReturnType<typeof resolveUnits>["wind"];
+}) {
+  const w = bestDaylightWindow(hourly, date, limitMph, fromIndex);
+  if (!w) {
+    return (
+      <div
+        className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400"
+        title={`No daylight hour stays at or under ${fmtWind(limitMph, unit)} ${WIND_LABEL[unit]}`}
+      >
+        no calm hour
+      </div>
+    );
+  }
+  const range =
+    w.hours === 1 ? clockCompact(w.startTime) : `${clockCompact(w.startTime)}–${clockCompact(w.endTime)}`;
+  return (
+    <div
+      className="mt-1 flex items-center justify-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400"
+      title={`Calmest daylight stretch at or under ${fmtWind(limitMph, unit)} ${WIND_LABEL[unit]} — peak ${fmtWind(w.maxWindMph, unit)} ${WIND_LABEL[unit]}`}
+    >
+      <SunIcon className="h-3 w-3 text-amber-500" />
+      <span className="font-mono tabular-nums">{range}</span>
+    </div>
+  );
+}
+
 export default function Outlook({
   daily,
+  hourly,
   units,
   todayIso,
+  fromIndex,
+  windLine,
   model,
   climatology,
 }: {
   daily: DayOutlook[];
+  /** Full hourly series, for each day's calmest flyable window. */
+  hourly: HourPoint[];
   units: UnitPrefs;
   todayIso: string;
+  /** Current-hour index, so today's calm window looks forward. */
+  fromIndex: number;
+  /** Personal wind line, or null for the 20 mph reference. */
+  windLine: number | null;
   model: string;
   /** Seasonal wind normal, when the best-effort archive lookup landed. */
   climatology?: ClimatologyNormal | null;
 }) {
   const u = resolveUnits(units);
+  const limit = windLine ?? SURFACE_LIMIT_MPH;
   return (
     <>
       {climatology && <SeasonalContext climatology={climatology} daily={daily} units={units} />}
@@ -114,6 +165,13 @@ export default function Outlook({
                 {degToCompass(d.windDirDeg)} ·{" "}
                 {d.precipProbMaxPct != null ? `${d.precipProbMaxPct}%` : "—"} precip
               </div>
+              <DayCalmWindow
+                hourly={hourly}
+                date={d.date}
+                limitMph={limit}
+                fromIndex={fromIndex}
+                unit={u.wind}
+              />
               {d.sunrise && d.sunset && (
                 <div
                   className="mt-1 flex items-center justify-center gap-1 border-t border-zinc-100 pt-1 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"
@@ -129,7 +187,13 @@ export default function Outlook({
       </div>
       <SourceLine>
         Daily outlook from Open-Meteo ({model}). Wind is the day&apos;s maximum sustained /
-        gust; red marks a day whose max crosses the {limitLabel(u.wind)} limit. Temperatures in{" "}
+        gust; red marks a day whose max crosses the{" "}
+        {`${limitLabel(u.wind)} limit`}. The green line is that day&apos;s calmest daylight
+        stretch with sustained wind at or under{" "}
+        {windLine != null
+          ? `your ${fmtWind(windLine, u.wind)} ${WIND_LABEL[u.wind]} line`
+          : `the ${limitLabel(u.wind)} reference`}
+        {" — "}so a windy day can still show a flyable morning. Temperatures in{" "}
         {TEMP_LABEL[u.temp]}; sunrise/sunset are field-local — useful for planning setup and
         leaving daylight for recovery.
       </SourceLine>

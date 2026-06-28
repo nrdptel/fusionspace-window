@@ -100,6 +100,17 @@ test("the outlook shows sunrise and sunset", async ({ page }) => {
   await expect(page.locator("#outlook").getByText(/5:42 AM/)).toBeVisible();
 });
 
+test("the outlook shows each day's calmest flyable window", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  const outlook = page.locator("#outlook");
+  // At least one day surfaces a compact calm-window range (fixture today/tomorrow: ~2p–7p).
+  await expect(outlook.getByText(/\d{1,2}[ap]\s*[–-]\s*\d{1,2}[ap]/).first()).toBeVisible();
+  // The source line explains the green line and reads the limit cleanly (no "mphlimit").
+  await expect(outlook.getByText(/calmest daylight stretch/)).toBeVisible();
+  await expect(outlook.getByText(/crosses the 20 mph limit/)).toBeVisible();
+});
+
 test("the outlook sets the week against the seasonal normal", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

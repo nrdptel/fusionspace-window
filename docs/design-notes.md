@@ -319,6 +319,18 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Methodology, collapsed (post-v1)
+
+"How this is derived" had grown — every feature added its own honest write-up — into a long
+wall of always-open paragraphs at the foot of the page. The fix matches the sibling tools
+(Charge's "Where the numbers come from", the Motor Finder): the deep explanations belong one
+click away, not in your face. The eighteen entries are now grouped into eight collapsed
+`<details>` disclosures (Surface conditions; The 20 mph line; Winds aloft; Sky; Storm potential
+& alerts; Planning ahead; The field briefing; Freshness & offline), styled exactly like the
+"How to read this" box at the top. The content is unchanged — same careful, sourced prose — but
+the default page is clean, and a curious flyer opens only the section they care about. The
+restraint the family is known for, applied to its own documentation.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

@@ -12,6 +12,21 @@ function Method({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
+/** A collapsed methodology group — keeps the deep write-ups one click away, like the
+ *  sibling tools, so the page stays clean by default. */
+function Disclosure({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <summary className="cursor-pointer select-none text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        {title}
+      </summary>
+      <div className="mt-4 space-y-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export default function Page() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
@@ -116,11 +131,12 @@ export default function Page() {
         <h2 className="text-lg font-semibold tracking-tight">How this is derived</h2>
         <p className="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">
           Every number on this page is fetched live from a free public provider, in your
-          browser, for the field you chose. Here is where each one comes from, the model and
-          valid time behind it, and where it can be wrong.
+          browser, for the field you chose. Open a section for where it comes from, the model
+          and valid time behind it, and where it can be wrong.
         </p>
 
-        <div className="mt-6 space-y-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <div className="mt-6 space-y-3">
+          <Disclosure title="Surface conditions — wind, density altitude & pressure">
           <Method title="Surface wind, temperature & precip">
             From the Open-Meteo Forecast API, using a US-optimised GFS/HRRR blend
             (<code className="font-mono text-xs">gfs_seamless</code>), requested in imperial
@@ -159,13 +175,19 @@ export default function Page() {
             the pressure drops is a sharper heads-up than either alone. The rate is shown, not a
             verdict.
           </Method>
-          <Method title="The 20 mph line">
-            NFPA 1127 and the NAR/Tripoli safety codes set 20 mph as the surface-wind ceiling
-            for launching. Window draws it as a reference and colours the current wind as it
-            approaches and crosses it — but it never says no-go. The call is yours, with your
-            field&apos;s rules and your own judgment. A personal, lower line can be set and is
-            stored only in your browser.
-          </Method>
+          </Disclosure>
+
+          <Disclosure title="The 20 mph launch line">
+            <p className="max-w-3xl">
+              NFPA 1127 and the NAR/Tripoli safety codes set 20 mph as the surface-wind ceiling
+              for launching. Window draws it as a reference and colours the current wind as it
+              approaches and crosses it — but it never says no-go. The call is yours, with your
+              field&apos;s rules and your own judgment. A personal, lower line can be set and is
+              stored only in your browser.
+            </p>
+          </Disclosure>
+
+          <Disclosure title="Winds aloft — profile, shear, drift &amp; freezing level">
           <Method title="Winds aloft (the profile)">
             Open-Meteo pressure-level winds (1000 down to 250 hPa) for the selected hour. Each
             level is placed at its true height above the field: the level&apos;s geopotential
@@ -206,6 +228,9 @@ export default function Page() {
             altimeter batteries and recovery electronics; it&apos;s hidden when the shown column
             is entirely above or below it. A figure, not a verdict.
           </Method>
+          </Disclosure>
+
+          <Disclosure title="Sky, ceiling &amp; visibility">
           <Method title="Cloud ceiling, visibility & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS
             reporting station&apos;s latest observation (a METAR), converted to feet; the nearest
@@ -224,6 +249,9 @@ export default function Page() {
             labelled <em>modelled</em>. Observed values top out around the METAR&apos;s 10-mile
             reporting ceiling; the model can read higher in genuinely clear air.
           </Method>
+          </Disclosure>
+
+          <Disclosure title="Storm potential &amp; active alerts">
           <Method title="Storm potential (CAPE)">
             Convective available potential energy from Open-Meteo — the standard measure of how
             primed the atmosphere is to build thunderstorms, in joules per kilogram. Window shows
@@ -241,6 +269,9 @@ export default function Page() {
             modelled cloud cover. The seasonal normal (above) and the observed station readings are
             best-effort in the same way — the forecast itself is the only hard dependency.
           </Method>
+          </Disclosure>
+
+          <Disclosure title="Planning ahead — calm windows, outlook &amp; seasonal normal">
           <Method title="Calm windows">
             The hourly forecast already knows when the wind lays down, so Window surfaces the
             upcoming stretches where the <em>sustained</em> wind stays at or below your line (the
@@ -268,23 +299,29 @@ export default function Page() {
             enhancement: if the archive can&apos;t be reached it&apos;s simply absent, and the
             board is unaffected. A descriptive comparison, not a verdict.
           </Method>
-          <Method title="The field briefing">
-            &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface
-            wind against the limit, sky and ceiling, density altitude, a few winds-aloft levels
-            and the mean wind, any alerts, the next calm window, and a short outlook — to paste
-            into a club chat.
-            It&apos;s exactly the figures shown on the page, with the share link and the
-            not-authoritative disclaimer baked in, so a briefing carries the same honesty as the
-            board. Nothing is sent anywhere; the text is built in your browser and copied to your
-            clipboard.
-          </Method>
-          <Method title="Freshness, caching & offline">
+          </Disclosure>
+
+          <Disclosure title="The field briefing">
+            <p className="max-w-3xl">
+              &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface
+              wind against the limit, sky and ceiling, density altitude, a few winds-aloft levels
+              and the mean wind, any alerts, the next calm window, and a short outlook — to paste
+              into a club chat. It&apos;s exactly the figures shown on the page, with the share
+              link and the not-authoritative disclaimer baked in, so a briefing carries the same
+              honesty as the board. Nothing is sent anywhere; the text is built in your browser
+              and copied to your clipboard.
+            </p>
+          </Disclosure>
+
+          <Disclosure title="Freshness, caching &amp; offline">
+            <p className="max-w-3xl">
             A field is fetched once and cached in your browser for about ten minutes, so a reload
             or a units change doesn&apos;t refetch. If you&apos;re offline or a fetch fails, Window
             shows the last data it successfully loaded for that field, with a prominent
             &ldquo;as of&rdquo; staleness flag. The service worker caches only the app shell for
             instant load — it never caches a forecast, so freshness is always real.
-          </Method>
+            </p>
+          </Disclosure>
         </div>
       </section>
 

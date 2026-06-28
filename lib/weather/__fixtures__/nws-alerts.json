@@ -1,0 +1,17 @@
+{
+  "features": [
+    {
+      "id": "urn:oid:2.49.0.1.840.0.windadvisory.1",
+      "properties": {
+        "event": "Wind Advisory",
+        "severity": "Moderate",
+        "urgency": "Expected",
+        "headline": "Wind Advisory issued June 27 at 11:52AM PDT until June 28 at 5:00AM PDT by NWS San Diego CA",
+        "description": "WHAT...Southwest winds 20 to 30 mph with gusts up to 50 mph expected.\n\nWHERE...San Bernardino County Mountains and high desert.\n\nWHEN...Until 5 AM PDT Sunday.",
+        "onset": "2026-06-27T11:52:00-07:00",
+        "ends": "2026-06-28T05:00:00-07:00",
+        "senderName": "NWS San Diego CA"
+      }
+    }
+  ]
+}

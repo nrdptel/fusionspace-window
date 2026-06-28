@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "cwa": "SGX",
+    "gridId": "SGX",
+    "observationStations": "https://api.weather.gov/gridpoints/SGX/77,88/stations",
+    "forecast": "https://api.weather.gov/gridpoints/SGX/77,88/forecast",
+    "relativeLocation": {
+      "properties": { "city": "Lucerne Valley", "state": "CA" }
+    }
+  }
+}

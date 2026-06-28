@@ -2,11 +2,59 @@
 
 import { useMemo } from "react";
 import type { HourPoint } from "@/lib/weather/model";
-import { degToCompass, fmtWind, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
+import {
+  degToCompass,
+  fmtLength,
+  fmtTemp,
+  fmtWind,
+  LENGTH_LABEL,
+  resolveUnits,
+  TEMP_LABEL,
+  WIND_LABEL,
+  type UnitPrefs,
+} from "@/lib/units";
 import { clockShort, dayLabel } from "@/lib/format";
+import { hourSnapshot } from "@/lib/weather/snapshot";
 import { SourceLine } from "./ui";
 
 const SURFACE_LIMIT_MPH = 20;
+
+type Tone = "emerald" | "amber" | "red";
+
+function windTone(windMph: number, personalLine: number | null): Tone {
+  if (windMph >= SURFACE_LIMIT_MPH) return "red";
+  if (windMph >= (personalLine ?? 15)) return "amber";
+  return "emerald";
+}
+
+/** A compact labelled figure in the fly-time snapshot. */
+function Metric({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: Tone;
+}) {
+  const toneCls =
+    tone === "red"
+      ? "text-red-700 dark:text-red-400"
+      : tone === "amber"
+        ? "text-amber-700 dark:text-amber-400"
+        : tone === "emerald"
+          ? "text-emerald-700 dark:text-emerald-400"
+          : "text-zinc-900 dark:text-zinc-100";
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-zinc-600 dark:text-zinc-400">{label}</div>
+      <div className={"font-mono text-sm tabular-nums " + toneCls}>{value}</div>
+      {sub && <div className="text-[10px] text-zinc-600 dark:text-zinc-400">{sub}</div>}
+    </div>
+  );
+}
 const STEP = 19; // px per hour
 const TOP = 14;
 const BOT = 30;
@@ -117,31 +165,52 @@ export default function HourlyTimeline({
         </svg>
       </div>
 
-      {/* selected-hour read-out + accessible scrubber */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <label className="flex flex-1 items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-          <span className="shrink-0">Hour</span>
-          <input
-            type="range"
-            min={0}
-            max={Math.max(0, window.length - 1)}
-            value={selLocal}
-            onChange={(e) => onSelect(startIndex + Number(e.target.value))}
-            aria-label="Select the hour shown in the winds-aloft profile"
-            className="w-full accent-indigo-600"
-          />
-        </label>
-        {sel && (
-          <p className="font-mono text-xs tabular-nums text-zinc-600 dark:text-zinc-300">
-            {clockShort(sel.time)} · {fmtWind(sel.windMph, u.wind)} {WIND_LABEL[u.wind]}
-            <span className="text-zinc-500 dark:text-zinc-400"> (g{fmtWind(sel.gustMph, u.wind)})</span> · {degToCompass(sel.dirDeg)}
-          </p>
-        )}
-      </div>
+      {/* fly-time scrubber */}
+      <label className="mt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="shrink-0">Fly time</span>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, window.length - 1)}
+          value={selLocal}
+          onChange={(e) => onSelect(startIndex + Number(e.target.value))}
+          aria-label="Pick a launch time — sets the conditions snapshot and the winds-aloft profile"
+          className="w-full accent-indigo-600"
+        />
+      </label>
+
+      {/* fly-time snapshot: conditions at the selected hour */}
+      {sel && (
+        <div className="mt-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+          <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            At {dayLabel(sel.time, todayIso)} {clockShort(sel.time)}
+          </div>
+          {(() => {
+            const s = hourSnapshot(sel);
+            const da = Number.isFinite(s.densityAltitudeFt)
+              ? `${fmtLength(Math.round(s.densityAltitudeFt / 50) * 50, u.length)} ${LENGTH_LABEL[u.length]}`
+              : "—";
+            return (
+              <div className="mt-1.5 flex flex-wrap gap-x-5 gap-y-2">
+                <Metric
+                  label="Wind"
+                  value={`${fmtWind(s.windMph, u.wind)} ${WIND_LABEL[u.wind]}`}
+                  sub={`g${fmtWind(s.gustMph, u.wind)} · ${degToCompass(s.dirDeg)}`}
+                  tone={windTone(s.windMph, windLine)}
+                />
+                <Metric label="Temp" value={`${fmtTemp(s.tempF, u.temp)}${TEMP_LABEL[u.temp]}`} />
+                <Metric label="Density altitude" value={da} />
+                <Metric label="Storm" value={s.instability.label} tone={s.instability.tone} />
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       <SourceLine>
         Hourly surface wind from Open-Meteo ({model}); the dashed line is gusts. Drag the
-        slider to pick the hour shown in the winds-aloft profile below.
+        slider to pick a launch time — it sets the snapshot above and the winds-aloft profile
+        below, so you can read the conditions at the hour you plan to fly, not just now.
       </SourceLine>
 
       {/* Accessible table fallback */}

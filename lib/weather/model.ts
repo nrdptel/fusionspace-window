@@ -5,6 +5,8 @@
  *  is a pure display conversion on top (see lib/units.ts). Heights are feet because
  *  that is how US flyers and waivers talk about altitude. */
 
+import type { ClimatologyNormal } from "./climatology";
+
 export interface Field {
   lat: number;
   lon: number;
@@ -150,6 +152,8 @@ export interface BoardData {
   sky: Sky;
   /** null = NWS unreachable (we don't claim "none"); [] = checked, no active alerts. */
   alerts: WxAlert[] | null;
+  /** Seasonal wind normal from the archive — null when the best-effort lookup didn't land. */
+  climatology: ClimatologyNormal | null;
   /** Epoch ms the data was fetched (set by the network layer). */
   fetchedAt: number;
 }

@@ -7,6 +7,7 @@
 
 import type { BoardData, Sky } from "./model";
 import { parseForecast, PRESSURE_LEVELS, type RawForecast } from "./forecast";
+import { summarizeClimatology, type RawArchive } from "./climatology";
 import { parseAlerts } from "./alerts";
 import { parseGeocode, type Place } from "./geocode";
 import {
@@ -20,6 +21,7 @@ import {
 export const MODEL = "gfs_seamless";
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING = "https://geocoding-api.open-meteo.com/v1/search";
+const ARCHIVE = "https://archive-api.open-meteo.com/v1/archive";
 const NWS = "https://api.weather.gov";
 
 const CURRENT_VARS = [
@@ -107,6 +109,30 @@ export function buildGeocodeUrl(query: string): string {
   return `${GEOCODING}?${p.toString()}`;
 }
 
+/** A daily-max wind/gust history for the seasonal normal. Imperial wind to match the board. */
+export function buildArchiveUrl(lat: number, lon: number, startDate: string, endDate: string): string {
+  const p = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    start_date: startDate,
+    end_date: endDate,
+    daily: "wind_speed_10m_max,wind_gusts_10m_max",
+    wind_speed_unit: "mph",
+    timezone: "auto",
+  });
+  return `${ARCHIVE}?${p.toString()}`;
+}
+
+/** A ~`years`-long archive window ending a week back (the archive lags real-time). */
+function archiveRange(years = 5): { start: string; end: string } {
+  const end = new Date();
+  end.setUTCDate(end.getUTCDate() - 7);
+  const start = new Date(end);
+  start.setUTCFullYear(start.getUTCFullYear() - years);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return { start: fmt(start), end: fmt(end) };
+}
+
 /** NWS wants ≤4 decimals on a point or it 301-redirects. */
 function roundCoord(n: number): string {
   return n.toFixed(4);
@@ -188,6 +214,9 @@ export async function loadBoard(
   const alertsP = fetchJson(`${NWS}/alerts/active?point=${roundCoord(lat)},${roundCoord(lon)}`, 8_000)
     .then((raw) => parseAlerts(raw))
     .catch(() => null);
+  // Seasonal normal — best-effort, like NWS; the board renders fine without it.
+  const range = archiveRange();
+  const archiveP = fetchJson(buildArchiveUrl(lat, lon, range.start, range.end), 10_000).catch(() => null);
 
   const raw = await forecastP;
   const point = await pointP;
@@ -196,10 +225,13 @@ export async function loadBoard(
     ? fetchStationSky(lat, lon, point.stationsUrl).catch(() => null)
     : Promise.resolve(null);
 
-  const [stationSkyResult, alerts] = await Promise.all([skyP, alertsP]);
+  const [stationSkyResult, alerts, archiveRaw] = await Promise.all([skyP, alertsP, archiveP]);
 
   const forecast = parseForecast(raw, MODEL, label ?? point.label);
   const sky = stationSkyResult ?? modelSky(forecast.current.cloudCoverPct);
+  const climatology = archiveRaw
+    ? summarizeClimatology(archiveRaw as RawArchive, forecast.current.time)
+    : null;
 
-  return { forecast, sky, alerts, fetchedAt: Date.now() };
+  return { forecast, sky, alerts, climatology, fetchedAt: Date.now() };
 }

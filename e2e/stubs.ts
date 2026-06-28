@@ -24,6 +24,9 @@ export interface StubOptions {
   nws?: "ok" | "down";
   /** Open-Meteo historical archive availability (the seasonal normal). */
   archive?: "ok" | "down";
+  /** Station observations: "mixed" (a RAWS then a real METAR) or "allRaws" — every nearby
+   *  station is a no-sky RAWS, the real case at a remote desert field like Black Rock. */
+  observations?: "mixed" | "allRaws";
 }
 
 /** Install all provider stubs. Call BEFORE page.goto — the board fetches on mount. */
@@ -31,6 +34,7 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
   const forecast = opts.forecast ?? "ok";
   const nws = opts.nws ?? "ok";
   const archive = opts.archive ?? "ok";
+  const observations = opts.observations ?? "mixed";
 
   await page.route("https://api.open-meteo.com/v1/forecast**", (route) => {
     if (forecast === "down") return route.abort("failed");
@@ -51,6 +55,7 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
     const url = route.request().url();
     if (url.includes("/alerts/active")) return json(route, "nws-alerts.json");
     if (url.includes("/observations/latest")) {
+      if (observations === "allRaws") return json(route, "nws-observation-raws.json");
       if (url.includes("/stations/BPFC1/")) return json(route, "nws-observation-raws.json");
       if (url.includes("/stations/KDAG/")) return json(route, "nws-observation.json");
       return json(route, "nws-observation-clear.json");

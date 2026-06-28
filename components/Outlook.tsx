@@ -7,6 +7,7 @@ import {
   degToCompass,
   fmtTemp,
   fmtWind,
+  limitLabel,
   resolveUnits,
   TEMP_LABEL,
   WIND_LABEL,
@@ -129,7 +130,7 @@ export default function Outlook({
       </div>
       <SourceLine>
         Daily outlook from Open-Meteo ({model}). Wind is the day&apos;s maximum sustained /
-        gust; red marks a day whose max crosses the 20 mph limit. Temperatures in{" "}
+        gust; red marks a day whose max crosses the {limitLabel(u.wind)} limit. Temperatures in{" "}
         {TEMP_LABEL[u.temp]}; sunrise/sunset are field-local — useful for planning setup and
         leaving daylight for recovery.
       </SourceLine>

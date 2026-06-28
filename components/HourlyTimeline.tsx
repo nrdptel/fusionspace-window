@@ -8,6 +8,7 @@ import {
   fmtTemp,
   fmtWind,
   LENGTH_LABEL,
+  limitLabel,
   resolveUnits,
   TEMP_LABEL,
   WIND_LABEL,
@@ -105,7 +106,7 @@ export default function HourlyTimeline({
           width={width}
           height={H}
           role="img"
-          aria-label={`Hourly surface wind from ${clockShort(window[0]?.time ?? "")} over ${window.length} hours, in ${WIND_LABEL[u.wind]}. The 20 mph launch limit is drawn as a reference line.`}
+          aria-label={`Hourly surface wind from ${clockShort(window[0]?.time ?? "")} over ${window.length} hours, in ${WIND_LABEL[u.wind]}. The ${limitLabel(u.wind)} launch limit is drawn as a reference line.`}
           className="text-indigo-600 dark:text-indigo-400"
         >
           {/* grid baseline */}
@@ -113,11 +114,11 @@ export default function HourlyTimeline({
 
           {/* 20 mph reference + optional personal line */}
           <line x1={PAD_X} y1={y(SURFACE_LIMIT_MPH)} x2={width - PAD_X} y2={y(SURFACE_LIMIT_MPH)} className="stroke-red-500/70" strokeWidth="1.25" strokeDasharray="5 4" />
-          <text x={PAD_X + 2} y={y(SURFACE_LIMIT_MPH) - 3} className="fill-red-500" fontSize="10">20 mph limit</text>
+          <text x={PAD_X + 2} y={y(SURFACE_LIMIT_MPH) - 3} className="fill-red-500" fontSize="10">{limitLabel(u.wind)} limit</text>
           {windLine != null && windLine < SURFACE_LIMIT_MPH && (
             <>
               <line x1={PAD_X} y1={y(windLine)} x2={width - PAD_X} y2={y(windLine)} className="stroke-amber-500/70" strokeWidth="1.25" strokeDasharray="3 4" />
-              <text x={PAD_X + 2} y={y(windLine) - 3} className="fill-amber-500" fontSize="10">{windLine} mph (yours)</text>
+              <text x={PAD_X + 2} y={y(windLine) - 3} className="fill-amber-500" fontSize="10">{fmtWind(windLine, u.wind)} {WIND_LABEL[u.wind]} (yours)</text>
             </>
           )}
 

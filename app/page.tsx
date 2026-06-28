@@ -258,10 +258,12 @@ export default function Page() {
           <Method title="Seasonal normal (vs typical)">
             The outlook also sets the week against the field&apos;s own history: a
             <em> typical</em> max wind for this week of the year, averaged from about five years of
-            Open-Meteo&apos;s daily archive over a window of dates around the same week, with the
-            upcoming peak called <em>windier</em>, <em>about typical</em>, or <em>calmer</em> than
-            that. It answers the planning question — wait for a better window, or accept that this
-            is about as good as the season gets here. Like NWS, it&apos;s a best-effort
+            Open-Meteo&apos;s daily archive over a window of dates around the same week. The week
+            ahead is compared like with like — its <em>average</em> daily-max against that normal,
+            not a 7-day peak against an average (which would always read windy) — and called
+            <em> windier</em>, <em>about typical</em>, or <em>calmer</em>, with the peak shown for
+            context. It answers the planning question — wait for a better window, or accept that
+            this is about as good as the season gets here. Like NWS, it&apos;s a best-effort
             enhancement: if the archive can&apos;t be reached it&apos;s simply absent, and the
             board is unaffected. A descriptive comparison, not a verdict.
           </Method>

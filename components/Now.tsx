@@ -11,6 +11,7 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
+import type { PressureTendency } from "@/lib/weather/pressure";
 import { clock, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
 import WeatherIcon from "./WeatherIcon";
@@ -42,6 +43,17 @@ export interface ObservedWind {
   time: string;
 }
 
+/** A small glyph for the pressure trend: up triangle rising, down falling, dash steady. */
+function PressureGlyph({ trend, className = "" }: { trend: PressureTendency["trend"]; className?: string }) {
+  return (
+    <svg viewBox="0 0 12 12" className={className} aria-hidden="true">
+      {trend === "rising" && <path d="M6 2 L10 9 L2 9 Z" fill="currentColor" />}
+      {trend === "falling" && <path d="M6 10 L2 3 L10 3 Z" fill="currentColor" />}
+      {trend === "steady" && <rect x="2" y="5.25" width="8" height="1.5" rx="0.75" fill="currentColor" />}
+    </svg>
+  );
+}
+
 /** A small arrow pointing the way the wind blows TOWARD (from-direction + 180°). */
 function WindArrow({ fromDeg, className = "" }: { fromDeg: number; className?: string }) {
   return (
@@ -61,6 +73,7 @@ export default function Now({
   windLine,
   model,
   observed,
+  pressure,
   now,
 }: {
   current: CurrentConditions;
@@ -70,6 +83,8 @@ export default function Now({
   model: string;
   /** Nearest-station observed wind, when an observation is available. */
   observed?: ObservedWind | null;
+  /** Barometric tendency for the current hour, when there's enough history. */
+  pressure?: PressureTendency | null;
   now: number;
 }) {
   const u = resolveUnits(units);
@@ -167,6 +182,26 @@ export default function Now({
               {Math.round(current.cloudCoverPct)}% · {Math.round(current.humidityPct)}% RH
             </div>
           </div>
+          {pressure && (
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Pressure</div>
+              <div
+                className={
+                  "mt-0.5 flex items-center gap-1.5 text-sm " +
+                  (pressure.trend === "falling"
+                    ? "text-amber-700 dark:text-amber-400"
+                    : "text-zinc-800 dark:text-zinc-200")
+                }
+              >
+                <PressureGlyph trend={pressure.trend} className="h-3.5 w-3.5" />
+                <span>
+                  {pressure.trend === "steady"
+                    ? "Steady"
+                    : `${pressure.trend === "rising" ? "Rising" : "Falling"} ${Math.abs(pressure.changeHpa).toFixed(1)} hPa/${pressure.spanHours}h`}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

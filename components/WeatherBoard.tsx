@@ -5,6 +5,7 @@ import type { BoardData } from "@/lib/weather/model";
 import { loadBoard } from "@/lib/weather/net";
 import { readCache, writeCache } from "@/lib/cache";
 import { decodeState, encodeState, type UrlState } from "@/lib/state";
+import { pressureTendency } from "@/lib/weather/pressure";
 import { isStale, relativeAge, clock } from "@/lib/format";
 import {
   addSaved,
@@ -284,6 +285,7 @@ export default function WeatherBoard() {
               windLine={windLine}
               model={data.forecast.model}
               now={now || data.fetchedAt}
+              pressure={pressureTendency(data.forecast.hourly, currentHourIndex(data))}
               observed={
                 data.sky.source === "station" && data.sky.observedWindMph != null && data.sky.station
                   ? {

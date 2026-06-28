@@ -41,6 +41,10 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Nearest station \(KDAG\) observed 15 mph from WSW, gust 23/);
   });
 
+  it("notes a moving barometer", () => {
+    expect(text).toMatch(/Pressure: falling 3\.0 hPa over 3h/);
+  });
+
   it("includes the observed ceiling, density altitude, and winds aloft", () => {
     expect(text).toMatch(/Sky: Mostly Cloudy, ceiling [\d,]+ ft \(KDAG, observed\)/);
     expect(text).toMatch(/Visibility: 10 mi \(observed\)/);

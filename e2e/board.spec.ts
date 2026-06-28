@@ -99,6 +99,8 @@ test("the field briefing previews and copies", async ({ page }) => {
   await expect(preview).toContainText("Window — Lucerne Valley, CA");
   await expect(preview).toContainText("Surface wind: 21 mph");
   await expect(preview).toContainText("Nearest station (KDAG) observed 15 mph");
+  await expect(preview).toContainText("Storm potential: Marginally unstable");
+  await expect(preview).toContainText("0°C level:");
   await expect(preview).toContainText("lat=34.45"); // the shareable URL (host varies by env)
   await expect(preview).toContainText("Best-effort, not authoritative");
 

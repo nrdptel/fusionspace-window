@@ -1,10 +1,14 @@
 import { describe, it, expect } from "vitest";
 import forecastFixture from "./__fixtures__/forecast.json";
-import { parseForecast, heightToFeet, type RawForecast } from "./forecast";
+import { parseForecast, heightToFeet, visibilityToMiles, type RawForecast } from "./forecast";
 import { FT_PER_M } from "../units";
 
 const raw = forecastFixture as unknown as RawForecast;
 
+// Open-Meteo returns length variables (visibility, freezing level, geopotential height) in
+// FEET when imperial wind/temperature units are requested — which is how the app asks. The
+// fixture mirrors that, and these conversions are tested both ways so a regression in either
+// the feet path (production) or the metres path (a model that reports SI) is caught.
 describe("heightToFeet", () => {
   it("passes feet through and converts metres", () => {
     expect(heightToFeet(1000, "ft")).toBe(1000);
@@ -12,6 +16,16 @@ describe("heightToFeet", () => {
     expect(heightToFeet(100, "m")).toBeCloseTo(328.08, 1);
     // Unknown/missing unit defaults to metres (Open-Meteo's documented default).
     expect(heightToFeet(100, undefined)).toBeCloseTo(328.08, 1);
+  });
+});
+
+describe("visibilityToMiles", () => {
+  it("converts feet (the imperial-request unit) and metres to statute miles", () => {
+    expect(visibilityToMiles(52800, "ft")).toBeCloseTo(10, 4); // 52,800 ft = 10 mi
+    expect(visibilityToMiles(16093.44, "m")).toBeCloseTo(10, 4); // 16,093.44 m = 10 mi
+    expect(visibilityToMiles(5, "mi")).toBe(5);
+    // Unknown/missing unit defaults to metres.
+    expect(visibilityToMiles(1609.344, undefined)).toBeCloseTo(1, 4);
   });
 });
 
@@ -46,15 +60,15 @@ describe("parseForecast", () => {
     expect(fc.aloftHourly[0].time).toBe(fc.hourly[0].time);
   });
 
-  it("converts hourly visibility from metres to statute miles", () => {
-    // Fixture: overnight haze ~10 mi (16093 m), clear ~50 mi (80467 m) by day.
+  it("converts hourly visibility (feet, per the imperial request) to statute miles", () => {
+    // Fixture: overnight haze ~10 mi (52,800 ft), clear ~50 mi (264,000 ft) by day.
     expect(fc.hourly[0].visibilityMi).toBeCloseTo(10, 2);
     expect(fc.hourly[12].visibilityMi).toBeCloseTo(50, 2);
     expect(fc.hourly[12].visibilityMi).toBeGreaterThan(fc.hourly[0].visibilityMi);
   });
 
-  it("expresses the 0°C freezing level as height above the field", () => {
-    // Fixture: 4500 m MSL, field 900 m → ~11,811 ft AGL.
+  it("expresses the 0°C freezing level (feet MSL) as height above the field", () => {
+    // Fixture: 14,763.78 ft MSL (≈4,500 m), field ≈2,953 ft → ~11,811 ft AGL.
     expect(fc.aloftHourly[0].freezingLevelAglFt).toBeCloseTo((4500 - 900) * FT_PER_M, 0);
   });
 
@@ -64,7 +78,7 @@ describe("parseForecast", () => {
       hourly: { ...raw.hourly, freezing_level_height: raw.hourly!.time.map(() => 100) },
     } as RawForecast;
     const fcc = parseForecast(cold, "gfs_seamless");
-    // 100 m MSL is below the ~900 m field — no line to draw.
+    // 100 ft MSL is below the ~2,953 ft field — no line to draw.
     expect(Number.isNaN(fcc.aloftHourly[0].freezingLevelAglFt)).toBe(true);
   });
 

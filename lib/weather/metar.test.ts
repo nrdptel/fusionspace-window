@@ -6,11 +6,17 @@ import stations from "./__fixtures__/nws-stations.json";
 import {
   haversineMiles,
   modelSky,
+  parseMetarSky,
   parseObservation,
   parseStations,
   stationSky,
   summarizeLayers,
 } from "./metar";
+
+/** Build a minimal observation properties object for the raw-METAR fallback tests. */
+function obsOf(rawMessage: string, extra: Record<string, unknown> = {}) {
+  return { properties: { rawMessage, cloudLayers: [], timestamp: "2026-06-28T18:50:00Z", ...extra } };
+}
 
 describe("parseObservation", () => {
   it("takes the ceiling from the lowest broken/overcast base (m→ft)", () => {
@@ -60,6 +66,72 @@ describe("parseObservation", () => {
   it("marks a station with no sky data (a RAWS site) unusable", () => {
     const p = parseObservation(obsRaws);
     expect(p.usable).toBe(false);
+  });
+
+  // The NWS API often returns an EMPTY cloudLayers array even when the raw METAR reports the
+  // sky (a real, common case at the nearest station on clear days). The raw-METAR fallback
+  // recovers it so the closest station isn't skipped for one 20+ miles out.
+  it("recovers a clear sky (CLR) from the raw METAR when cloudLayers is empty", () => {
+    const p = parseObservation(obsOf("KFIN 281850Z 06005KT 10SM CLR 33/24 A3006"));
+    expect(p.usable).toBe(true);
+    expect(p.ceilingFt).toBeNull();
+    expect(p.layers).toHaveLength(0);
+    expect(p.description).toBe("Clear");
+  });
+
+  it("recovers cloud layers (SCT030) from the raw METAR when cloudLayers is empty", () => {
+    const p = parseObservation(obsOf("KEVB 281847Z 07009KT 10SM SCT030 31/26 A3006"));
+    expect(p.usable).toBe(true);
+    expect(p.layers).toEqual([{ amount: "SCT", baseFt: 3000 }]);
+    // Scattered is not a ceiling, so there's still no ceiling figure.
+    expect(p.ceilingFt).toBeNull();
+    expect(p.description).toBe("Scattered clouds");
+  });
+
+  it("recovers a real ceiling (BKN/OVC) the structured field dropped", () => {
+    const p = parseObservation(obsOf("KXYZ 281850Z 24013KT 6SM BKN015 OVC025 20/18 A2990"));
+    // Lowest broken/overcast wins: BKN015 = 1,500 ft.
+    expect(p.ceilingFt).toBe(1500);
+    expect(p.usable).toBe(true);
+  });
+
+  it("leaves a sky-less AUTO report (wind/temp only) unusable", () => {
+    // A real station with a cloud-sensor outage: wind and temp, but no visibility, no sky group.
+    const p = parseObservation(obsOf("KP28 281856Z AUTO 18015G29KT 36/22 A2967 RMK AO1 $"));
+    expect(p.usable).toBe(false);
+    expect(p.layers).toHaveLength(0);
+  });
+
+  it("prefers the structured cloudLayers when they are present (no raw override)", () => {
+    const p = parseObservation(obs); // KDAG: 3 structured layers + a raw METAR
+    expect(p.layers).toHaveLength(3);
+    expect(p.ceilingFt).toBeGreaterThan(6000);
+  });
+});
+
+describe("parseMetarSky", () => {
+  it("reads cloud groups as hundreds of feet AGL, ignoring the remarks section", () => {
+    const sky = parseMetarSky("KDAG 271953Z 25013G20KT 10SM FEW030 BKN065 OVC120 28/09 A2989 RMK AO2 SLP123");
+    expect(sky.clear).toBe(false);
+    expect(sky.layers).toEqual([
+      { amount: "FEW", baseFt: 3000 },
+      { amount: "BKN", baseFt: 6500 },
+      { amount: "OVC", baseFt: 12000 },
+    ]);
+  });
+
+  it("flags clear-sky tokens and a vertical-visibility ceiling", () => {
+    expect(parseMetarSky("KFIN 281850Z 06005KT 10SM CLR 33/24 A3006").clear).toBe(true);
+    expect(parseMetarSky("X 010000Z 00000KT CAVOK 20/10 Q1015").clear).toBe(true);
+    const vv = parseMetarSky("X 010000Z 09005KT 1/4SM FG VV002 12/12 A2990");
+    expect(vv.clear).toBe(false);
+    expect(vv.layers).toEqual([{ amount: "VV", baseFt: 200 }]);
+  });
+
+  it("finds nothing in a report with no sky group", () => {
+    const sky = parseMetarSky("KP28 281856Z AUTO 18015G29KT 36/22 A2967 RMK AO1");
+    expect(sky.layers).toHaveLength(0);
+    expect(sky.clear).toBe(false);
   });
 });
 

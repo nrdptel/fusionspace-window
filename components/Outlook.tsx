@@ -13,6 +13,8 @@ import {
 import { describeWeather } from "@/lib/weather/wmo";
 import { clockShort, dayLabel, shortDate } from "@/lib/format";
 import { SourceLine } from "./ui";
+import WeatherIcon from "./WeatherIcon";
+import { SunIcon } from "./icons";
 
 const SURFACE_LIMIT_MPH = 20;
 
@@ -43,8 +45,8 @@ export default function Outlook({
                 {dayLabel(d.date, todayIso)}
               </div>
               <div className="text-[11px] text-zinc-500 dark:text-zinc-400">{shortDate(d.date)}</div>
-              <div className="my-1.5 text-2xl" aria-hidden title={sky.label}>
-                {sky.glyph}
+              <div className="my-1.5 flex justify-center" title={sky.label}>
+                <WeatherIcon kind={sky.icon} className="h-7 w-7 text-zinc-600 dark:text-zinc-300" />
               </div>
               <div className="font-mono text-sm tabular-nums text-zinc-900 dark:text-zinc-100">
                 {fmtTemp(d.tempMaxF, u.temp)}°
@@ -69,10 +71,11 @@ export default function Outlook({
               </div>
               {d.sunrise && d.sunset && (
                 <div
-                  className="mt-1 border-t border-zinc-100 pt-1 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"
+                  className="mt-1 flex items-center justify-center gap-1 border-t border-zinc-100 pt-1 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"
                   title="Sunrise and sunset — daylight for setup and recovery"
                 >
-                  <span aria-hidden>☀</span> {clockShort(d.sunrise)} · {clockShort(d.sunset)}
+                  <SunIcon className="h-3 w-3" />
+                  {clockShort(d.sunrise)} · {clockShort(d.sunset)}
                 </div>
               )}
             </div>

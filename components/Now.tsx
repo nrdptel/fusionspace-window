@@ -13,6 +13,7 @@ import {
 import { describeWeather } from "@/lib/weather/wmo";
 import { clock } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
+import WeatherIcon from "./WeatherIcon";
 
 const SURFACE_LIMIT_MPH = 20;
 
@@ -103,9 +104,7 @@ export default function Now({
           <div>
             <div className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Sky</div>
             <div className="mt-0.5 flex items-center gap-1.5">
-              <span aria-hidden className="text-2xl leading-none">
-                {sky.glyph}
-              </span>
+              <WeatherIcon kind={sky.icon} className="h-6 w-6 text-zinc-600 dark:text-zinc-300" />
               <span className="text-sm text-zinc-800 dark:text-zinc-200">{sky.label}</span>
             </div>
           </div>

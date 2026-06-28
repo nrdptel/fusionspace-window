@@ -2,6 +2,7 @@
 
 import type { WxAlert } from "@/lib/weather/model";
 import { severityTone } from "@/lib/weather/alerts";
+import { AlertTriangleIcon } from "./icons";
 
 export default function Alerts({ alerts }: { alerts: WxAlert[] }) {
   if (alerts.length === 0) return null;
@@ -17,9 +18,7 @@ export default function Alerts({ alerts }: { alerts: WxAlert[] }) {
         return (
           <div key={a.id} className={`rounded-xl border p-4 ${cls}`}>
             <div className="flex items-start gap-3">
-              <span aria-hidden className="mt-0.5 shrink-0 text-base">
-                ⚠
-              </span>
+              <AlertTriangleIcon className={`mt-0.5 h-4 w-4 shrink-0 ${text}`} />
               <div className="min-w-0">
                 <h3 className={`font-semibold ${text}`}>
                   {a.event}

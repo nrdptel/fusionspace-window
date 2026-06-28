@@ -1,6 +1,7 @@
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
 import WeatherBoard from "@/components/WeatherBoard";
+import { AlertTriangleIcon } from "@/components/icons";
 
 function Method({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -26,9 +27,7 @@ export default function Page() {
 
       {/* Safety framing — Window informs, it does not decide. */}
       <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed text-amber-900 dark:text-amber-200">
-        <span aria-hidden className="mt-0.5 shrink-0 text-base">
-          ⚠
-        </span>
+        <AlertTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
           <strong className="font-semibold">Window informs; it doesn&apos;t decide.</strong> It
           shows the weather and the published reference lines — the 20 mph surface-wind limit,

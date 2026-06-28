@@ -5,6 +5,7 @@ import type { HourPoint } from "@/lib/weather/model";
 import { findCalmWindows, type CalmWindow } from "@/lib/weather/windows";
 import { fmtWind, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
 import { clockShort, dayLabel } from "@/lib/format";
+import { MoonIcon, SunIcon } from "./icons";
 
 const SURFACE_LIMIT_MPH = 20;
 const MAX_SHOWN = 4;
@@ -106,7 +107,11 @@ function WindowChip({
       }
     >
       <span className="flex items-center gap-1.5 font-medium text-zinc-800 dark:text-zinc-200">
-        <span aria-hidden>{w.daylight ? "☀️" : "🌙"}</span>
+        {w.daylight ? (
+          <SunIcon className="h-3.5 w-3.5 text-amber-500" />
+        ) : (
+          <MoonIcon className="h-3.5 w-3.5 text-zinc-500" />
+        )}
         {range}
       </span>
       <span className="mt-0.5 block font-mono tabular-nums text-emerald-700 dark:text-emerald-400">

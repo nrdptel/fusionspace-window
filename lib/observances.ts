@@ -16,8 +16,6 @@
 export type Observance = {
   /** Stable key (for React lists). */
   id: string;
-  /** Leading emoji for the footer line. */
-  emoji: string;
   /** Warm one-line footer message. */
   message: string;
   /** Optional supportive/resource link shown after the message. */
@@ -55,177 +53,158 @@ const OBSERVANCES: Record<number, Observance[]> = {
   0: [
     {
       id: "blood-donor",
-      emoji: "🩸",
       message: "National Blood Donor Month — give blood, save lives.",
       href: "https://www.redcrossblood.org",
       hrefLabel: "Red Cross",
-      bar: { background: BLOOD, title: "National Blood Donor Month 🩸" },
+      bar: { background: BLOOD, title: "National Blood Donor Month" },
     },
   ],
   1: [
     {
       id: "black-history",
-      emoji: "✊🏿",
       message: "Black History Month — celebrating Black history, culture, and achievement.",
       href: "https://nmaahc.si.edu",
       hrefLabel: "Museum of African American History",
-      bar: { background: PAN_AFRICAN, title: "Black History Month ✊🏿" },
+      bar: { background: PAN_AFRICAN, title: "Black History Month" },
     },
     {
       id: "american-heart",
-      emoji: "❤️",
       message: "American Heart Month — look after your heart.",
       href: "https://www.heart.org",
       hrefLabel: "American Heart Association",
-      bar: { background: HEART_RED, title: "American Heart Month ❤️" },
+      bar: { background: HEART_RED, title: "American Heart Month" },
     },
   ],
   2: [
     {
       id: "womens-history",
-      emoji: "♀️",
       message: "Women's History Month — honoring the women who've shaped our world.",
       href: "https://www.womenshistory.org",
       hrefLabel: "Women's History Museum",
-      bar: { background: SUFFRAGE_PURPLE, title: "Women's History Month ♀️" },
+      bar: { background: SUFFRAGE_PURPLE, title: "Women's History Month" },
     },
   ],
   3: [
     {
       id: "autism-acceptance",
-      emoji: "♾️",
       message: "Autism Acceptance Month — celebrating neurodiversity.",
       href: "https://autisticadvocacy.org",
       hrefLabel: "ASAN",
-      bar: { background: AUTISM_GOLD, title: "Autism Acceptance Month ♾️" },
+      bar: { background: AUTISM_GOLD, title: "Autism Acceptance Month" },
     },
     {
       id: "sexual-assault-awareness",
-      emoji: "💙",
       message: "Sexual Assault Awareness Month — support survivors, end the silence.",
       href: "https://www.rainn.org",
       hrefLabel: "RAINN",
-      bar: { background: SAAM_TEAL, title: "Sexual Assault Awareness Month 💙" },
+      bar: { background: SAAM_TEAL, title: "Sexual Assault Awareness Month" },
     },
   ],
   4: [
     {
       id: "mental-health",
-      emoji: "💚",
       message: "Mental Health Awareness Month — it's okay to ask for help.",
       href: "https://www.nami.org",
       hrefLabel: "NAMI",
-      bar: { background: MH_GREEN, title: "Mental Health Awareness Month 💚" },
+      bar: { background: MH_GREEN, title: "Mental Health Awareness Month" },
     },
     {
       id: "aapi-heritage",
-      emoji: "🌏",
       message: "AAPI Heritage Month — celebrating Asian American & Pacific Islander communities.",
       href: "https://asianpacificheritage.gov",
       hrefLabel: "Asian Pacific Heritage",
-      bar: { background: AAPI_WARM, title: "AAPI Heritage Month 🌏" },
+      bar: { background: AAPI_WARM, title: "AAPI Heritage Month" },
     },
   ],
   5: [
     {
       id: "pride",
-      emoji: "🏳️‍🌈",
       message: "Happy Pride Month — fly high.",
       href: "https://www.thetrevorproject.org",
       hrefLabel: "The Trevor Project",
-      bar: { background: PRIDE, title: "Happy Pride Month 🏳️‍🌈" },
+      bar: { background: PRIDE, title: "Happy Pride Month" },
     },
     {
       id: "mens-mental-health",
-      emoji: "💚",
       message: "June is Men's Mental Health Month — you're not flying solo.",
       href: "https://988lifeline.org",
       hrefLabel: "988 Lifeline",
-      bar: { background: MENS_MH, title: "Men's Mental Health Month 💚" },
+      bar: { background: MENS_MH, title: "Men's Mental Health Month" },
     },
   ],
   6: [
     {
       id: "disability-pride",
-      emoji: "♿",
       message: "Disability Pride Month — celebrating disability identity and access for all.",
       href: "https://www.ada.gov",
       hrefLabel: "ADA.gov",
-      bar: { background: DISABILITY_PRIDE, title: "Disability Pride Month ♿" },
+      bar: { background: DISABILITY_PRIDE, title: "Disability Pride Month" },
     },
   ],
   7: [
     {
       id: "overdose-awareness",
-      emoji: "💜",
       message: "International Overdose Awareness — end the stigma, save lives.",
       href: "https://www.samhsa.gov/find-help",
       hrefLabel: "SAMHSA help",
-      bar: { background: OVERDOSE_PURPLE, title: "International Overdose Awareness 💜" },
+      bar: { background: OVERDOSE_PURPLE, title: "International Overdose Awareness" },
     },
   ],
   8: [
     {
       id: "suicide-prevention",
-      emoji: "💛",
       message: "Suicide Prevention Month — you matter, and help is here.",
       href: "https://988lifeline.org",
       hrefLabel: "988 Lifeline",
-      bar: { background: SUICIDE_TEAL_PURPLE, title: "Suicide Prevention Month 💛" },
+      bar: { background: SUICIDE_TEAL_PURPLE, title: "Suicide Prevention Month" },
     },
     {
       id: "hispanic-heritage",
-      emoji: "🌎",
       message: "Hispanic Heritage Month — celebrating Hispanic & Latino cultures and contributions.",
       href: "https://www.hispanicheritagemonth.gov",
       hrefLabel: "Hispanic Heritage",
-      bar: { background: HISPANIC_FIESTA, title: "Hispanic Heritage Month 🌎" },
+      bar: { background: HISPANIC_FIESTA, title: "Hispanic Heritage Month" },
     },
   ],
   9: [
     {
       id: "breast-cancer",
-      emoji: "🎀",
       message: "Breast Cancer Awareness Month — early detection saves lives.",
       href: "https://www.komen.org",
       hrefLabel: "Susan G. Komen",
-      bar: { background: BREAST_PINK, title: "Breast Cancer Awareness Month 🎀" },
+      bar: { background: BREAST_PINK, title: "Breast Cancer Awareness Month" },
     },
     {
       id: "domestic-violence-awareness",
-      emoji: "💜",
       message: "Domestic Violence Awareness Month — you're not alone; help is confidential.",
       href: "https://www.thehotline.org",
       hrefLabel: "The Hotline",
-      bar: { background: DV_PURPLE, title: "Domestic Violence Awareness Month 💜" },
+      bar: { background: DV_PURPLE, title: "Domestic Violence Awareness Month" },
     },
   ],
   10: [
     {
       id: "native-american-heritage",
-      emoji: "🪶",
       message: "Native American Heritage Month — honoring Indigenous peoples and cultures.",
       href: "https://americanindian.si.edu",
       hrefLabel: "Museum of the American Indian",
-      bar: { background: NATIVE_EARTH, title: "Native American Heritage Month 🪶" },
+      bar: { background: NATIVE_EARTH, title: "Native American Heritage Month" },
     },
     {
       id: "movember",
-      emoji: "💙",
       message: "Movember — men's health: prostate & testicular cancer, and mental health.",
       href: "https://movember.com",
       hrefLabel: "Movember",
-      bar: { background: MOVEMBER_BLUE, title: "Movember 💙" },
+      bar: { background: MOVEMBER_BLUE, title: "Movember" },
     },
   ],
   11: [
     {
       id: "world-aids-day",
-      emoji: "🎗️",
       message: "World AIDS Day — remember, support, and end HIV stigma.",
       href: "https://www.hiv.gov/world-aids-day",
       hrefLabel: "HIV.gov",
-      bar: { background: AIDS_RED, title: "World AIDS Day 🎗️" },
+      bar: { background: AIDS_RED, title: "World AIDS Day" },
     },
   ],
 };

@@ -31,6 +31,7 @@ import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
 import Outlook from "./Outlook";
 import { Panel, Pill } from "./ui";
+import { StarIcon } from "./icons";
 
 /** The hourly index for the field's current hour. */
 function currentHourIndex(data: BoardData): number {
@@ -250,9 +251,10 @@ export default function WeatherBoard() {
               <button
                 type="button"
                 onClick={toggleSave}
-                className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="inline-flex items-center gap-1.5 rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
               >
-                {isSaved ? "★ Saved" : "☆ Save field"}
+                <StarIcon filled={isSaved} className={`h-3.5 w-3.5 ${isSaved ? "text-amber-500" : ""}`} />
+                {isSaved ? "Saved" : "Save field"}
               </button>
             </div>
           </div>

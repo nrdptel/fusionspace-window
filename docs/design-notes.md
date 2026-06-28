@@ -306,6 +306,23 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Observed wind cross-check & raw METAR (post-v1)
+
+The surface wind on the board is a *model analysis*, not a measurement — the explainer always
+said so, but the board offered nothing to weigh it against. The nearest NWS station we already
+fetch for the ceiling also reports its *observed* wind, so "Right now" now shows that beside
+the model figure: the station's measured wind and gust (converted from the METAR's km/h, or
+m/s, to your unit), tagged with the station, its distance, and how long ago it reported, and
+toned against the same 20 mph line. When the model says 21 and the anemometer twelve miles away
+says 15, that gap is exactly what a flyer wants to see — it's the family's "model vs observed,
+labelled honestly" ethos applied to the single most important number on the page. It's absent
+when no station is reachable (the same graceful degradation as the ceiling), and it can differ
+with distance and terrain, which the caption says plainly. The same observation carries the raw
+METAR string, so the sky panel gained a "show the raw report" disclosure for anyone who reads
+them. Both are free — the observation was already on the wire — and both ride into the field
+briefing. No new request, no dependency; `metar.ts` just reads three more fields it was
+ignoring.
+
 ### Field briefing (post-v1)
 
 The family ships text/share exports everywhere — Charge's copy-as-text card, Debrief's

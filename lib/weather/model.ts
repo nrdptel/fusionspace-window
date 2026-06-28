@@ -119,6 +119,12 @@ export interface Sky {
   ceilingFt?: number | null;
   /** Observed horizontal visibility, statute miles — null when the station omits it. */
   visibilityMi?: number | null;
+  /** Station-observed surface wind (mph) / gust (mph) / direction (FROM, deg) — null when absent. */
+  observedWindMph?: number | null;
+  observedGustMph?: number | null;
+  observedWindDirDeg?: number | null;
+  /** The station's raw METAR string, when reported. */
+  raw?: string | null;
   layers?: CloudLayer[];
   description?: string;
   // Model fallback:

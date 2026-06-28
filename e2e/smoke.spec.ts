@@ -52,6 +52,15 @@ test("shows the active NWS alert and the observed ceiling", async ({ page }) => 
   // The observed visibility (10 mi) is surfaced beside the ceiling.
   await expect(sky.getByText("Visibility", { exact: true })).toBeVisible();
   await expect(sky.getByText("mi", { exact: true })).toBeVisible();
+
+  // The raw METAR is available behind a disclosure.
+  await sky.getByText("Show the raw report (METAR)").click();
+  await expect(sky.getByText(/KDAG 271953Z/)).toBeVisible();
+
+  // "Right now" cross-checks the model wind against the station's observed reading.
+  const nowPanel = page.locator("#now");
+  await expect(nowPanel.getByText("Nearest station")).toBeVisible();
+  await expect(nowPanel.getByText(/Observed at KDAG/)).toBeVisible();
 });
 
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {

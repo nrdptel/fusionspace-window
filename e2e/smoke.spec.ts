@@ -46,8 +46,12 @@ test("shows the active NWS alert and the observed ceiling", async ({ page }) => 
 
   // The first station (a RAWS) is skipped; KDAG's observed ceiling is shown.
   const sky = page.locator("#sky");
-  await expect(sky.getByText("Observed", { exact: true })).toBeVisible();
   await expect(sky.getByText("Barstow-Daggett Airport")).toBeVisible();
+  // Both the ceiling and the observed visibility carry the "Observed" tag.
+  await expect(sky.getByText("Observed", { exact: true })).toHaveCount(2);
+  // The observed visibility (10 mi) is surfaced beside the ceiling.
+  await expect(sky.getByText("Visibility", { exact: true })).toBeVisible();
+  await expect(sky.getByText("mi", { exact: true })).toBeVisible();
 });
 
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {

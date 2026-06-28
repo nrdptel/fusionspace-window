@@ -55,6 +55,8 @@ export interface HourPoint {
   isDay: boolean;
   /** Convective available potential energy, J/kg. */
   capeJkg: number;
+  /** Horizontal visibility, statute miles (modeled). NaN when the model omits it. */
+  visibilityMi: number;
 }
 
 export interface AloftLevel {
@@ -115,6 +117,8 @@ export interface Sky {
   station?: { id: string; name: string; distanceMi: number | null; time: string };
   /** Lowest broken/overcast base, feet above the station — null when sky is clear/scattered. */
   ceilingFt?: number | null;
+  /** Observed horizontal visibility, statute miles — null when the station omits it. */
+  visibilityMi?: number | null;
   layers?: CloudLayer[];
   description?: string;
   // Model fallback:

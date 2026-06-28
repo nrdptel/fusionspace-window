@@ -7,7 +7,7 @@
  *  request (it can come back in feet or metres), so we read the reported unit per field
  *  and normalise everything to feet before subtracting the field's ground level. */
 
-import { FT_PER_M } from "../units";
+import { FT_PER_M, M_PER_MILE } from "../units";
 import type {
   AloftLevel,
   AloftProfile,
@@ -50,6 +50,17 @@ export function heightToFeet(value: number, unit: string | undefined): number {
   return value * FT_PER_M;
 }
 
+/** Normalise a visibility to statute miles given the unit the API reported for it.
+ *  Open-Meteo reports visibility in metres (it ignores the imperial request); guard for
+ *  a feet response just in case. */
+export function visibilityToMiles(value: number, unit: string | undefined): number {
+  const u = (unit ?? "").toLowerCase();
+  if (u === "ft" || u === "feet") return (value / FT_PER_M) / M_PER_MILE;
+  if (u === "mi" || u === "mile" || u === "miles") return value;
+  // Default and explicit metres → miles.
+  return value / M_PER_MILE;
+}
+
 function buildField(raw: RawForecast, label?: string): Field {
   return {
     lat: raw.latitude,
@@ -83,6 +94,7 @@ function buildCurrent(raw: RawForecast): CurrentConditions {
 
 function buildHourly(raw: RawForecast): HourPoint[] {
   const h = raw.hourly ?? {};
+  const units = raw.hourly_units ?? {};
   const time = (h.time ?? []) as string[];
   return time.map((t, i) => ({
     time: t,
@@ -100,6 +112,10 @@ function buildHourly(raw: RawForecast): HourPoint[] {
     // never wrongly hidden as "after dark".
     isDay: num(h.is_day?.[i]) !== 0,
     capeJkg: num(h.cape?.[i]) ?? NaN,
+    visibilityMi: (() => {
+      const v = num(h.visibility?.[i]);
+      return v == null ? NaN : visibilityToMiles(v, units.visibility);
+    })(),
   }));
 }
 

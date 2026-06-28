@@ -39,6 +39,7 @@ describe("buildBriefing", () => {
 
   it("includes the observed ceiling, density altitude, and winds aloft", () => {
     expect(text).toMatch(/Sky: Mostly Cloudy, ceiling [\d,]+ ft \(KDAG, observed\)/);
+    expect(text).toMatch(/Visibility: 10 mi \(observed\)/);
     expect(text).toMatch(/density altitude ~[\d,]+ ft/);
     expect(text).toMatch(/Winds aloft \(AGL ft\/mph\):/);
     expect(text).toMatch(/Mean wind to [\d,]+ ft: \d+ mph from [NSEW]+ — drift toward [NSEW]+/);

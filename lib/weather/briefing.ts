@@ -13,10 +13,12 @@ import {
   degToCompass,
   fmtLength,
   fmtTemp,
+  fmtVisibility,
   fmtWind,
   LENGTH_LABEL,
   resolveUnits,
   TEMP_LABEL,
+  VIS_LABEL,
   WIND_LABEL,
   type UnitPrefs,
 } from "../units";
@@ -94,6 +96,15 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     lines.push(`Sky: ${sky.description}, ${ceil}${station}`);
   } else {
     lines.push(`Sky: ${Math.round(sky.cloudCoverPct ?? 0)}% cloud (modeled)`);
+  }
+
+  // Visibility — observed where the station reports it, otherwise the modeled value.
+  const obsVis = sky.source === "station" ? sky.visibilityMi : null;
+  const visMi = obsVis != null ? obsVis : forecast.hourly[hourIndex]?.visibilityMi;
+  if (visMi != null && Number.isFinite(visMi)) {
+    lines.push(
+      `Visibility: ${fmtVisibility(visMi, u.length)} ${VIS_LABEL[u.length]} (${obsVis != null ? "observed" : "modeled"})`,
+    );
   }
 
   // Temp + density altitude

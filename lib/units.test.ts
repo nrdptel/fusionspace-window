@@ -1,11 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
   degToCompass,
+  fmtVisibility,
   fmtWind,
   lengthFromFt,
   precipFromIn,
   resolveUnits,
   tempFromF,
+  visFromMiles,
   windFromMph,
 } from "./units";
 
@@ -31,6 +33,15 @@ describe("length & precip conversion", () => {
     expect(lengthFromFt(1000, "m")).toBeCloseTo(304.8, 1);
     expect(lengthFromFt(1000, "ft")).toBe(1000);
     expect(precipFromIn(1, "mm")).toBeCloseTo(25.4, 6);
+  });
+});
+
+describe("visibility conversion", () => {
+  it("keeps statute miles for imperial and converts to km for metric", () => {
+    expect(visFromMiles(10, "ft")).toBe(10);
+    expect(visFromMiles(10, "m")).toBeCloseTo(16.09, 2);
+    expect(fmtVisibility(10, "ft")).toBe("10");
+    expect(fmtVisibility(10, "m")).toBe("16");
   });
 });
 

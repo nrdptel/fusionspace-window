@@ -9,6 +9,7 @@ import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
 import { meanWindAloft } from "./drift";
 import { pressureTendency } from "./pressure";
+import { SURFACE_LIMIT_MPH } from "./limits";
 import { findCalmWindows } from "./windows";
 import {
   degToCompass,
@@ -27,7 +28,6 @@ import {
 } from "../units";
 import { clock, clockShort, dayLabel } from "../format";
 
-const SURFACE_LIMIT_MPH = 20;
 // Representative AGL heights to sample the winds-aloft profile for the briefing.
 const ALOFT_TARGETS_FT = [3000, 6000, 12000, 20000];
 // Cap the mean-wind column at the board's default winds-aloft view, so the briefing's drift

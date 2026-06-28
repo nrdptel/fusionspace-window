@@ -4,10 +4,10 @@ import { useMemo } from "react";
 import type { HourPoint } from "@/lib/weather/model";
 import { findCalmWindows, type CalmWindow } from "@/lib/weather/windows";
 import { fmtWind, limitLabel, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
+import { SURFACE_LIMIT_MPH } from "@/lib/weather/limits";
 import { clockShort, dayLabel } from "@/lib/format";
 import { MoonIcon, SunIcon } from "./icons";
 
-const SURFACE_LIMIT_MPH = 20;
 const MAX_SHOWN = 4;
 
 export default function CalmWindows({

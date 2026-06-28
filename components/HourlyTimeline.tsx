@@ -16,17 +16,8 @@ import {
 } from "@/lib/units";
 import { clockShort, dayLabel } from "@/lib/format";
 import { hourSnapshot } from "@/lib/weather/snapshot";
+import { SURFACE_LIMIT_MPH, windTone, windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { SourceLine } from "./ui";
-
-const SURFACE_LIMIT_MPH = 20;
-
-type Tone = "emerald" | "amber" | "red";
-
-function windTone(windMph: number, personalLine: number | null): Tone {
-  if (windMph >= SURFACE_LIMIT_MPH) return "red";
-  if (windMph >= (personalLine ?? 15)) return "amber";
-  return "emerald";
-}
 
 /** A compact labelled figure in the fly-time snapshot. */
 function Metric({
@@ -38,16 +29,9 @@ function Metric({
   label: string;
   value: string;
   sub?: string;
-  tone?: Tone;
+  tone?: WindTone;
 }) {
-  const toneCls =
-    tone === "red"
-      ? "text-red-700 dark:text-red-400"
-      : tone === "amber"
-        ? "text-amber-700 dark:text-amber-400"
-        : tone === "emerald"
-          ? "text-emerald-700 dark:text-emerald-400"
-          : "text-zinc-900 dark:text-zinc-100";
+  const toneCls = tone ? windToneTextClass(tone) : "text-zinc-900 dark:text-zinc-100";
   return (
     <div>
       <div className="text-[10px] uppercase tracking-wide text-zinc-600 dark:text-zinc-400">{label}</div>

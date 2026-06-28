@@ -1,0 +1,16 @@
+{
+  "features": [
+    {
+      "properties": { "stationIdentifier": "BPFC1", "name": "Big Pine Flat" },
+      "geometry": { "type": "Point", "coordinates": [-116.96, 34.41] }
+    },
+    {
+      "properties": { "stationIdentifier": "KDAG", "name": "Barstow-Daggett Airport" },
+      "geometry": { "type": "Point", "coordinates": [-116.787, 34.854] }
+    },
+    {
+      "properties": { "stationIdentifier": "KVCV", "name": "Victorville (Southern California Logistics)" },
+      "geometry": { "type": "Point", "coordinates": [-117.383, 34.597] }
+    }
+  ]
+}

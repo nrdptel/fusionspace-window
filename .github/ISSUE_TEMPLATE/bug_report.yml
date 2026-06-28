@@ -1,0 +1,43 @@
+name: Bug report
+description: Something on the site is wrong or broken
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! A reminder up front: Window is informational and
+        gives no go/no-go verdict — a forecast that turns out wrong is the
+        best-effort nature of weather data, not a bug. Bugs are when a figure is
+        derived incorrectly (e.g. winds-aloft altitude, ceiling, a unit
+        conversion), a provider field is parsed wrong, or the UI misbehaves.
+  - type: input
+    id: where
+    attributes:
+      label: Where?
+      description: Which panel or part of the page is affected? A share link (it carries the field) is ideal.
+      placeholder: e.g. winds aloft, or paste the URL
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong?
+      description: What did you expect, and what did you actually see?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - A figure looks wrong (wind, ceiling, altitude, temp)
+        - Winds-aloft profile / AGL altitude
+        - Unit conversion
+        - Location / search / geolocation
+        - Shareable link / saved state
+        - Offline / staleness flag
+        - Layout / dark mode / display
+        - Something else
+  - type: input
+    id: env
+    attributes:
+      label: Browser / device (optional)
+      placeholder: e.g. Chrome on Android, Safari on iPhone

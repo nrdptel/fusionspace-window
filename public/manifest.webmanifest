@@ -1,0 +1,16 @@
+{
+  "name": "Window — HPR launch weather",
+  "short_name": "Window",
+  "description": "A weather board for high-power and model rocketry: surface wind against the limit, winds aloft, ceiling, and a multi-day outlook for any US launch field.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

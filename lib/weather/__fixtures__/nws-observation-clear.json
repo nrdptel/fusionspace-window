@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "@id": "https://api.weather.gov/stations/KVCV/observations/latest",
+    "timestamp": "2026-06-27T19:55:00+00:00",
+    "textDescription": "Clear",
+    "cloudLayers": [{ "base": { "unitCode": "wmoUnit:m", "value": null }, "amount": "CLR" }]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "@id": "https://api.weather.gov/stations/BPFC1/observations/latest",
+    "timestamp": "2026-06-27T20:35:00+00:00",
+    "textDescription": "",
+    "temperature": { "unitCode": "wmoUnit:degC", "value": null },
+    "windSpeed": { "unitCode": "wmoUnit:km_h-1", "value": 6.4 },
+    "cloudLayers": []
+  }
+}

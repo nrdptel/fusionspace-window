@@ -7,6 +7,7 @@
 
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
+import { meanWindAloft } from "./drift";
 import { findCalmWindows } from "./windows";
 import {
   degToCompass,
@@ -112,6 +113,14 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
       (l) => `${fmtLength(l.aglFt, u.length)} ${fmtWind(l.windMph, u.wind)} ${degToCompass(l.dirDeg)}`,
     );
     lines.push(`Winds aloft (AGL ${LENGTH_LABEL[u.length]}/${WIND_LABEL[u.wind]}): ${parts.join(" · ")}`);
+
+    const mean = meanWindAloft(profile.levels);
+    if (mean) {
+      lines.push(
+        `Mean wind to ${fmtLength(mean.topFt, u.length)} ${LENGTH_LABEL[u.length]}: ` +
+          `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}`,
+      );
+    }
   }
 
   // Alerts

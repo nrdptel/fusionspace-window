@@ -14,6 +14,7 @@ import {
 } from "@/lib/units";
 import { clockShort } from "@/lib/format";
 import { strongestShear } from "@/lib/weather/shear";
+import { meanWindAloft } from "@/lib/weather/drift";
 import { Segmented, SourceLine } from "./ui";
 
 const W = 580;
@@ -92,6 +93,7 @@ export default function WindsAloft({
 
   const empty = profile.levels.length === 0;
   const shear = strongestShear(shown);
+  const mean = meanWindAloft(shown, topFt);
 
   return (
     <div>
@@ -166,6 +168,25 @@ export default function WindsAloft({
               );
             })}
           </svg>
+        </div>
+      )}
+
+      {!empty && mean && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+            Drift
+          </span>
+          <span className="text-zinc-700 dark:text-zinc-300">
+            Mean wind to {fmtLength(mean.topFt, u.length)} {LENGTH_LABEL[u.length]}{" "}
+            <span className="font-mono tabular-nums">
+              {fmtWind(mean.speedMph, u.wind)} {WIND_LABEL[u.wind]}
+            </span>{" "}
+            from {degToCompass(mean.fromDeg)} — recovery tends to walk{" "}
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200">{degToCompass(mean.towardDeg)}</span>.
+          </span>
+          <span className="text-zinc-500 dark:text-zinc-400">
+            The column&apos;s average wind, the way drift leans — not a landing prediction.
+          </span>
         </div>
       )}
 

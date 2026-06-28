@@ -28,6 +28,9 @@ test("the winds-aloft profile has an accessible table fallback with a surface ro
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { name: "Winds aloft", exact: true })).toBeVisible();
 
+  // The column's mean wind is surfaced with the drift direction.
+  await expect(page.locator("#aloft").getByText(/recovery tends to walk/)).toBeVisible();
+
   await page.getByText("Show the winds-aloft numbers as a table").click();
   await expect(page.getByRole("columnheader", { name: /Altitude AGL/ })).toBeVisible();
   await expect(page.getByRole("cell", { name: "Surface" })).toBeVisible();

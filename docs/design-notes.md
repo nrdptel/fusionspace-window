@@ -271,6 +271,25 @@ about why it matters. Same posture: it points the layer out, it doesn't decide. 
 strengthens exactly the panel that makes Window worth opening, at no new dependency or
 request.
 
+### Mean wind & drift (post-v1)
+
+Shear answers "what knocks it off heading"; the other question every flyer asks of a sounding
+is "which way does it walk on the way down." The classic answer is the **mean wind** (the
+"ballistic wind"): the single vector that, blowing uniformly through the column, produces the
+same net drift as the real profile. So the winds-aloft panel now reports it. A pure, tested
+helper (`lib/weather/drift.ts`) takes the plotted levels, turns each wind into a velocity
+vector (FROM convention), and averages them weighted by the thickness of the altitude band
+each level represents — trapezoidal over height, so a deep steady layer outweighs a thin
+jutting one and opposing winds genuinely cancel (a column that veers around the compass has a
+smaller mean than its scalar average — the honest behaviour). It renders as an indigo-tagged
+callout beside the shear one ("Mean wind to 20,000 ft 14 mph from WSW — recovery tends to walk
+ENE") and is named for the direction the rocket drifts *toward*, the opposite of the wind's
+source. It honours the Top selector, so you can read the mean to 10k or the whole column, and
+it rides along into the field briefing. Deliberately it takes no rocket parameter and no
+descent rate — it leans the drift, it doesn't predict a landing — keeping Window's
+informational, no-verdict posture. No new dependency or request; it's geometry over levels the
+board already plots.
+
 ### Field briefing (post-v1)
 
 The family ships text/share exports everywhere — Charge's copy-as-text card, Debrief's

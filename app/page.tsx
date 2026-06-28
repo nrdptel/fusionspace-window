@@ -68,7 +68,8 @@ export default function Page() {
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Winds aloft</strong>{" "}
               is wind speed and direction by true height above the field, surface up to waiver
               altitudes — the thing general weather apps bury. Each pressure level is placed at
-              its real height AGL.
+              its real height AGL, and the column&apos;s <strong>mean wind</strong> tells you
+              which way recovery tends to drift.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Storm potential</strong>{" "}
@@ -157,6 +158,19 @@ export default function Page() {
             It&apos;s plain geometry over the levels already plotted — pure and tested — and,
             like everything here, it points the layer out and leaves the decision to you.
           </Method>
+          <Method title="Mean wind & drift">
+            The profile also reports its <em>mean wind</em> — the single wind vector that,
+            blowing uniformly from the ground to the top of the shown column, would carry a
+            recovering rocket the same net distance as the real profile. Each level&apos;s wind
+            is turned into a velocity vector and averaged, weighted by the thickness of the
+            altitude band it stands for, so opposing winds cancel the way they do in the air: a
+            column that veers around the compass has a smaller mean than its scalar average.
+            It&apos;s the honest one-number answer to which way recovery tends to walk, named
+            for the direction the rocket drifts <em>toward</em> (the opposite of the wind&apos;s
+            source). It changes with the Top selector, so you can read the mean to 10k or to the
+            whole column. It assumes nothing about your rocket or descent rate — it leans the
+            drift, it doesn&apos;t predict the landing.
+          </Method>
           <Method title="Cloud ceiling & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS
             reporting station&apos;s latest observation (a METAR), converted to feet; the nearest
@@ -199,8 +213,9 @@ export default function Page() {
           </Method>
           <Method title="The field briefing">
             &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface
-            wind against the limit, sky and ceiling, density altitude, a few winds-aloft levels,
-            any alerts, the next calm window, and a short outlook — to paste into a club chat.
+            wind against the limit, sky and ceiling, density altitude, a few winds-aloft levels
+            and the mean wind, any alerts, the next calm window, and a short outlook — to paste
+            into a club chat.
             It&apos;s exactly the figures shown on the page, with the share link and the
             not-authoritative disclaimer baked in, so a briefing carries the same honesty as the
             board. Nothing is sent anywhere; the text is built in your browser and copied to your

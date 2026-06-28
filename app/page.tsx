@@ -90,7 +90,8 @@ export default function Page() {
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Units &amp; sharing</strong>{" "}
               — toggle Imperial/Metric (and knots) any time; it never refetches. The field is in
               the URL, so a link is shareable and reload-proof. Saved fields, units, and your
-              personal wind line stay in this browser.
+              personal wind line stay in this browser, and each saved field shows its current
+              wind at a glance — handy when a club runs more than one site.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Take it to the field</strong>{" "}

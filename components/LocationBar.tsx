@@ -1,20 +1,65 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { fetchGeocode } from "@/lib/weather/net";
+import { useEffect, useRef, useState } from "react";
+import { fetchGeocode, fetchWindPeek } from "@/lib/weather/net";
 import type { Place } from "@/lib/weather/geocode";
+import type { WindPeek } from "@/lib/weather/peek";
 import type { SavedField } from "@/lib/prefs";
-import { PinIcon, CrosshairIcon, SearchIcon } from "./icons";
+import {
+  degToCompass,
+  fmtWind,
+  resolveUnits,
+  WIND_LABEL,
+  type UnitPrefs,
+} from "@/lib/units";
+import { PinIcon, CrosshairIcon, CloseIcon, SearchIcon } from "./icons";
+
+const SURFACE_LIMIT_MPH = 20;
+const PEEK_TTL_MS = 10 * 60 * 1000;
+// Module-level so the glance survives remounts and back/forward without refetching.
+const peekCache = new Map<string, { peek: WindPeek | null; at: number }>();
+const fieldKey = (f: { lat: number; lon: number }) => `${f.lat.toFixed(3)},${f.lon.toFixed(3)}`;
+
+function peekTone(windMph: number): string {
+  if (windMph >= SURFACE_LIMIT_MPH) return "text-red-700 dark:text-red-400";
+  if (windMph >= 15) return "text-amber-700 dark:text-amber-400";
+  return "text-emerald-700 dark:text-emerald-400";
+}
 
 export default function LocationBar({
   onPick,
   saved,
   onRemoveSaved,
+  units,
 }: {
   onPick: (lat: number, lon: number, label?: string) => void;
   saved: SavedField[];
   onRemoveSaved: (f: SavedField) => void;
+  units: UnitPrefs;
 }) {
+  const u = resolveUnits(units);
+  const [peeks, setPeeks] = useState<Record<string, WindPeek | null>>({});
+
+  // Best-effort current wind for each saved field, cached, so a multi-site club sees which is
+  // flyable without opening each one. Failures are silent; the picker never waits on it.
+  useEffect(() => {
+    let cancelled = false;
+    saved.forEach((f) => {
+      const key = fieldKey(f);
+      const cached = peekCache.get(key);
+      if (cached && Date.now() - cached.at < PEEK_TTL_MS) {
+        setPeeks((p) => (key in p ? p : { ...p, [key]: cached.peek }));
+        return;
+      }
+      fetchWindPeek(f.lat, f.lon).then((peek) => {
+        peekCache.set(key, { peek, at: Date.now() });
+        if (!cancelled) setPeeks((p) => ({ ...p, [key]: peek }));
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [saved]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Place[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -201,28 +246,39 @@ export default function LocationBar({
       {saved.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-zinc-500 dark:text-zinc-400">Saved:</span>
-          {saved.map((f) => (
-            <span
-              key={`${f.lat},${f.lon}`}
-              className="group inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-50 py-0.5 pl-2.5 pr-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              <button
-                type="button"
-                onClick={() => onPick(f.lat, f.lon, f.label)}
-                className="font-medium text-zinc-700 hover:text-indigo-600 dark:text-zinc-200 dark:hover:text-indigo-400"
+          {saved.map((f) => {
+            const peek = peeks[fieldKey(f)];
+            return (
+              <span
+                key={`${f.lat},${f.lon}`}
+                className="group inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-50 py-0.5 pl-2.5 pr-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
               >
-                {f.label}
-              </button>
-              <button
-                type="button"
-                onClick={() => onRemoveSaved(f)}
-                aria-label={`Remove ${f.label} from saved fields`}
-                className="rounded-full px-1 text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
-              >
-                ✕
-              </button>
-            </span>
-          ))}
+                <button
+                  type="button"
+                  onClick={() => onPick(f.lat, f.lon, f.label)}
+                  className="font-medium text-zinc-700 hover:text-indigo-600 dark:text-zinc-200 dark:hover:text-indigo-400"
+                >
+                  {f.label}
+                </button>
+                {peek && (
+                  <span
+                    className={"font-mono tabular-nums " + peekTone(peek.windMph)}
+                    title={`Current wind ${fmtWind(peek.windMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(peek.dirDeg)}${Number.isFinite(peek.gustMph) ? `, gust ${fmtWind(peek.gustMph, u.wind)}` : ""}`}
+                  >
+                    {fmtWind(peek.windMph, u.wind)} {degToCompass(peek.dirDeg)}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onRemoveSaved(f)}
+                  aria-label={`Remove ${f.label} from saved fields`}
+                  className="rounded-full p-1 text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
+                >
+                  <CloseIcon className="h-3 w-3" />
+                </button>
+              </span>
+            );
+          })}
         </div>
       )}
     </div>

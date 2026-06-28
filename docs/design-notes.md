@@ -319,6 +319,20 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Saved fields, wind at a glance (post-v1)
+
+Saved fields were just labels you click to load. A club running more than one launch site,
+though, wants to know which is flyable *now* without opening each one — so each saved chip now
+carries that field's current surface wind, toned against the 20 mph line (green/amber/red). It's
+a deliberately tiny slice of the forecast — a "wind peek", current wind only, its own minimal
+Open-Meteo request (`buildWindPeekUrl`) and pure parser (`lib/weather/peek.ts`) rather than a
+whole board — fetched best-effort and held in a module-level cache with a ten-minute TTL, so the
+glance survives remounts and back/forward without refetching and the picker never waits on it.
+Failures are silent (no chip, not an error). It's the first thing that fetches for a field other
+than the one in view, but it stays within the family's posture: a small honest figure, the same
+20 mph reference as everywhere else, no verdict. (While here, the leftover `✕` text glyph on the
+remove control became a proper `CloseIcon`, finishing the no-emoji, all-SVG iconography.)
+
 ### Seasonal normal — vs typical (post-v1)
 
 The forecast says what's coming; it never says whether what's coming is *normal*. That's the

@@ -139,7 +139,17 @@ function buildAloft(raw: RawForecast, field: Field): AloftProfile[] {
       levels.push({ pressureHpa: p, aglFt, mslFt, windMph: ws, dirDeg: dir });
     }
     levels.sort((a, b) => a.aglFt - b.aglFt);
-    return { time: t, levels };
+
+    // 0°C level: reported MSL, expressed as height above the field. Below-field (already
+    // freezing at the surface) or absent → NaN, and the chart simply doesn't draw it.
+    const fl = num(h.freezing_level_height?.[i]);
+    let freezingLevelAglFt = NaN;
+    if (fl != null) {
+      const aglFt = heightToFeet(fl, units.freezing_level_height) - field.elevationFt;
+      freezingLevelAglFt = aglFt > 0 ? aglFt : NaN;
+    }
+
+    return { time: t, levels, freezingLevelAglFt };
   });
 }
 

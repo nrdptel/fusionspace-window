@@ -30,6 +30,8 @@ test("the winds-aloft profile has an accessible table fallback with a surface ro
 
   // The column's mean wind is surfaced with the drift direction.
   await expect(page.locator("#aloft").getByText(/recovery tends to walk/)).toBeVisible();
+  // The 0°C freezing level is drawn on the profile (fixture: ~11,800 ft AGL, in view).
+  await expect(page.locator("#aloft").getByText("0°C", { exact: true })).toBeVisible();
 
   await page.getByText("Show the winds-aloft numbers as a table").click();
   await expect(page.getByRole("columnheader", { name: /Altitude AGL/ })).toBeVisible();

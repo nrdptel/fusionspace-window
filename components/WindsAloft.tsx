@@ -95,6 +95,10 @@ export default function WindsAloft({
   const shear = strongestShear(shown);
   const mean = meanWindAloft(shown, topFt);
 
+  // 0°C level, drawn as a reference line when it falls inside the shown column.
+  const freezingAglFt = profile.freezingLevelAglFt;
+  const showFreezing = Number.isFinite(freezingAglFt) && freezingAglFt > 0 && freezingAglFt <= topFt;
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -141,6 +145,17 @@ export default function WindsAloft({
               wind speed ({WIND_LABEL[u.wind]})
             </text>
             <text x={12} y={MT + 4} className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">altitude AGL ({LENGTH_LABEL[u.length]})</text>
+
+            {/* 0°C freezing level — where the air turns sub-freezing on the way up */}
+            {showFreezing && (
+              <g>
+                <line x1={ML} y1={y(freezingAglFt)} x2={ML + innerW} y2={y(freezingAglFt)} className="stroke-sky-500/70" strokeWidth="1.25" strokeDasharray="4 4" />
+                <text x={ML + 4} y={y(freezingAglFt) - 3} className="fill-sky-600 dark:fill-sky-400" fontSize="10">0°C</text>
+                <text x={ML + innerW} y={y(freezingAglFt) - 3} textAnchor="end" className="fill-sky-600 dark:fill-sky-400" fontSize="10">
+                  {fmtLength(freezingAglFt, u.length)} {LENGTH_LABEL[u.length]} AGL
+                </text>
+              </g>
+            )}
 
             {/* the speed curve */}
             <path d={curve} className="fill-none stroke-current" strokeWidth="2" strokeLinejoin="round" />
@@ -221,6 +236,7 @@ export default function WindsAloft({
         the field (ground elevation {fmtLength(field.elevationFt, u.length)}{" "}
         {LENGTH_LABEL[u.length]}) via geopotential height. Barbs point the way the wind
         blows — winds are named for the direction they come <em>from</em>.
+        {showFreezing && " The blue line is the 0°C level for this hour."}
       </SourceLine>
 
       {/* Accessible table fallback */}

@@ -70,8 +70,9 @@ export default function Page() {
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Winds aloft</strong>{" "}
               is wind speed and direction by true height above the field, surface up to waiver
               altitudes — the thing general weather apps bury. Each pressure level is placed at
-              its real height AGL, and the column&apos;s <strong>mean wind</strong> tells you
-              which way recovery tends to drift.
+              its real height AGL, the column&apos;s <strong>mean wind</strong> tells you which
+              way recovery tends to drift, and the <strong>0°C line</strong> marks where the air
+              turns sub-freezing.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Storm potential</strong>{" "}
@@ -183,6 +184,15 @@ export default function Page() {
             source). It changes with the Top selector, so you can read the mean to 10k or to the
             whole column. It assumes nothing about your rocket or descent rate — it leans the
             drift, it doesn&apos;t predict the landing.
+          </Method>
+          <Method title="Freezing level (0°C)">
+            The profile also draws the <strong>0°C level</strong> — the height where the air
+            turns sub-freezing on the way up — as a blue reference line. It&apos;s Open-Meteo&apos;s
+            modelled freezing-level height (reported above sea level) expressed as height above
+            the field, and it moves with the fly-time hour like the rest of the profile. A high
+            flight that punches well past it climbs into real cold, which is worth knowing for
+            altimeter batteries and recovery electronics; it&apos;s hidden when the shown column
+            is entirely above or below it. A figure, not a verdict.
           </Method>
           <Method title="Cloud ceiling, visibility & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS

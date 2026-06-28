@@ -334,7 +334,7 @@ export default function WeatherBoard() {
 
           <Panel id="aloft" title="Winds aloft">
             <WindsAloft
-              profile={data.forecast.aloftHourly[selectedHour] ?? data.forecast.aloftHourly[currentHourIndex(data)] ?? { time: todayIso, levels: [] }}
+              profile={data.forecast.aloftHourly[selectedHour] ?? data.forecast.aloftHourly[currentHourIndex(data)] ?? { time: todayIso, levels: [], freezingLevelAglFt: NaN }}
               surfaceWindMph={data.forecast.hourly[selectedHour]?.windMph ?? data.forecast.current.windMph}
               surfaceDirDeg={data.forecast.hourly[selectedHour]?.dirDeg ?? data.forecast.current.dirDeg}
               field={f}

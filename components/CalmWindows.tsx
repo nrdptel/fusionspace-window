@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import type { HourPoint } from "@/lib/weather/model";
 import { findCalmWindows, type CalmWindow } from "@/lib/weather/windows";
-import { fmtWind, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
+import { fmtWind, limitLabel, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
 import { clockShort, dayLabel } from "@/lib/format";
 import { MoonIcon, SunIcon } from "./icons";
 
@@ -41,7 +41,7 @@ export default function CalmWindows({
     [hourly, limit, fromIndex],
   );
 
-  const lineLabel = `under ${windLine != null ? `${windLine} mph (your line)` : "20 mph"}`;
+  const lineLabel = `under ${windLine != null ? `${fmtWind(windLine, u.wind)} ${WIND_LABEL[u.wind]} (your line)` : limitLabel(u.wind)}`;
 
   if (windows.length === 0) {
     return (

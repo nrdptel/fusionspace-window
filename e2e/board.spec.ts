@@ -15,6 +15,8 @@ test("the units toggle converts in place and never refetches", async ({ page }) 
   // Switch to metric — the wind unit becomes km/h, with no new forecast request.
   await page.getByRole("button", { name: "Metric" }).click();
   await expect(page.locator("#now").getByText(/km\/h/).first()).toBeVisible();
+  // The 20 mph limit is restated in the active unit, with the canonical mph kept in parens.
+  await expect(page.locator("#now").getByText(/km\/h \(20 mph\) limit/)).toBeVisible();
   expect(forecastRequests).toBe(1);
 
   // Knots is offered for wind specifically.

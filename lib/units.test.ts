@@ -4,6 +4,7 @@ import {
   fmtVisibility,
   fmtWind,
   lengthFromFt,
+  limitLabel,
   precipFromIn,
   resolveUnits,
   tempFromF,
@@ -33,6 +34,14 @@ describe("length & precip conversion", () => {
     expect(lengthFromFt(1000, "m")).toBeCloseTo(304.8, 1);
     expect(lengthFromFt(1000, "ft")).toBe(1000);
     expect(precipFromIn(1, "mm")).toBeCloseTo(25.4, 6);
+  });
+});
+
+describe("limitLabel", () => {
+  it("shows the bare 20 mph in imperial, and the converted value with mph in parens otherwise", () => {
+    expect(limitLabel("mph")).toBe("20 mph");
+    expect(limitLabel("kmh")).toBe("32 km/h (20 mph)");
+    expect(limitLabel("kn")).toBe("17 kn (20 mph)");
   });
 });
 

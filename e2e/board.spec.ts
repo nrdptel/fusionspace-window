@@ -133,6 +133,21 @@ test("saved fields show a current-wind glance", async ({ page }) => {
   await expect(chip).toContainText(/\d+ [NSEW]/);
 });
 
+test("a bare visit returns to the last field", async ({ page }) => {
+  await installStubs(page);
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "window.lastField",
+      JSON.stringify({ lat: 34.45, lon: -116.95, label: "Lucerne Valley, CA" }),
+    );
+  });
+  // No field in the URL — a returning flyer should still land on their field.
+  await page.goto("/", { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
+  // And the URL is restored so the view stays shareable and reload-proof.
+  await expect(page).toHaveURL(/lat=34\.45/);
+});
+
 test("the field rides in the URL and survives a reload", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

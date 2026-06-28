@@ -13,6 +13,7 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { clockShort } from "@/lib/format";
+import { strongestShear } from "@/lib/weather/shear";
 import { Segmented, SourceLine } from "./ui";
 
 const W = 580;
@@ -90,6 +91,7 @@ export default function WindsAloft({
   for (let s = 0; s <= xMaxU; s += 10) speedTicks.push(s);
 
   const empty = profile.levels.length === 0;
+  const shear = strongestShear(shown);
 
   return (
     <div>
@@ -164,6 +166,32 @@ export default function WindsAloft({
               );
             })}
           </svg>
+        </div>
+      )}
+
+      {!empty && shear && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
+            Shear
+          </span>
+          <span className="text-zinc-700 dark:text-zinc-300">
+            Strongest layer{" "}
+            <span className="font-mono tabular-nums">
+              {fmtLength(shear.lowerFt, u.length)} → {fmtLength(shear.upperFt, u.length)} {LENGTH_LABEL[u.length]}
+            </span>{" "}
+            — {shear.deltaSpeedMph >= 0 ? "+" : "−"}
+            {fmtWind(Math.abs(shear.deltaSpeedMph), u.wind)} {WIND_LABEL[u.wind]}
+            {Math.abs(shear.deltaDirDeg) >= 5 && (
+              <>
+                {" "}and {shear.deltaDirDeg >= 0 ? "veers" : "backs"}{" "}
+                <span className="font-mono tabular-nums">{Math.abs(Math.round(shear.deltaDirDeg))}°</span>
+              </>
+            )}
+            .
+          </span>
+          <span className="text-zinc-500 dark:text-zinc-400">
+            Sharp layers can tip a rocket off its heading and walk the recovery — your call.
+          </span>
         </div>
       )}
 

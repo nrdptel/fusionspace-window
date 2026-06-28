@@ -142,6 +142,15 @@ export default function Page() {
             best free upper-air data available, since NOAA retired the public RAP/rucsoundings
             feed for the continental US.
           </Method>
+          <Method title="Wind shear">
+            The profile also flags its <em>strongest shear layer</em> — the adjacent pair of
+            levels whose wind changes the most, measured as the magnitude of the vector
+            difference between the two winds (so a big speed jump, a directional veer, or both
+            all count). A sharp layer is what tips a rocket off its heading off the rail and
+            walks the recovery downrange, which is part of why flyers read soundings at all.
+            It&apos;s plain geometry over the levels already plotted — pure and tested — and,
+            like everything here, it points the layer out and leaves the decision to you.
+          </Method>
           <Method title="Cloud ceiling & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS
             reporting station&apos;s latest observation (a METAR), converted to feet; the nearest

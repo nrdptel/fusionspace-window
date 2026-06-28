@@ -2,10 +2,11 @@
  *  null individual cells (a model gap, a level below ground), so every read is guarded
  *  and a missing figure is dropped rather than rendered as zero.
  *
- *  The one derivation that needs care is the winds-aloft AGL height. Open-Meteo always
- *  reports `elevation` in metres, but the geopotential-height unit varies with the unit
- *  request (it can come back in feet or metres), so we read the reported unit per field
- *  and normalise everything to feet before subtracting the field's ground level. */
+ *  Units need care. Open-Meteo always reports `elevation` in metres, but the length-type
+ *  variables — geopotential height, visibility, freezing level — follow the imperial
+ *  request and come back in FEET (not the SI default), so we read the reported unit per
+ *  field and normalise (heights to feet before subtracting ground level; visibility to
+ *  statute miles) rather than assume a unit. The fixtures mirror that feet behaviour. */
 
 import { FT_PER_M, M_PER_MILE } from "../units";
 import type {

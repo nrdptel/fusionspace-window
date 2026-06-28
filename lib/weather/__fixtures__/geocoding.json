@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "id": 5369150,
+      "name": "Lucerne Valley",
+      "latitude": 34.44389,
+      "longitude": -116.96781,
+      "elevation": 900,
+      "feature_code": "PPL",
+      "country_code": "US",
+      "timezone": "America/Los_Angeles",
+      "population": 5811,
+      "country": "United States",
+      "admin1": "California",
+      "admin2": "San Bernardino"
+    },
+    {
+      "id": 5380420,
+      "name": "Lucerne",
+      "latitude": 39.09154,
+      "longitude": -122.79611,
+      "elevation": 412,
+      "country_code": "US",
+      "country": "United States",
+      "admin1": "California"
+    }
+  ],
+  "generationtime_ms": 0.4
+}

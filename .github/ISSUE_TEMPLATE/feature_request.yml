@@ -1,0 +1,23 @@
+name: Feature or data request
+description: Suggest a feature, a unit, a data source, or a correction to how a figure is derived
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas welcome — especially anything that makes the data clearer or more
+        trustworthy. New data must stay within the hard line: free, keyless, and
+        CORS-friendly from the browser (no backend). If you're proposing a change to
+        how a figure is derived, please include a source so it can be verified.
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the feature, unit, data source, or correction.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source (for data/derivation changes)
+      description: A reference for a proposed data source or a change to how something is derived.

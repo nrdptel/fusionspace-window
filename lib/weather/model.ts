@@ -75,6 +75,8 @@ export interface AloftProfile {
   time: string;
   /** Levels at or above the field, sorted ascending by AGL height. */
   levels: AloftLevel[];
+  /** Height of the 0°C level above the field, feet — NaN when absent or below the field. */
+  freezingLevelAglFt: number;
 }
 
 export interface DayOutlook {

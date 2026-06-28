@@ -218,6 +218,20 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Fly-time snapshot (post-v1)
+
+The board reads "what's it like now," but the decision a flyer is making is "what will it be
+like when I drive out this afternoon." The winds-aloft profile already time-travelled with the
+hourly slider, so this extends that into a proper launch-time planner: the slider is relabelled
+"fly time," and scrubbing it to any hour shows a compact snapshot of that hour's decision
+figures — surface wind against the 20 mph line (toned), gust and direction, temperature,
+density altitude, and storm potential (CAPE band) — right above the aloft profile, which
+follows the same selection. It's a thin, pure composition (`lib/weather/snapshot.ts`, tested)
+of figures the board already derives — density altitude and the CAPE classifier — over the
+hourly point, so it needed three more fields on the existing request (hourly humidity, station
+pressure for per-hour density altitude; CAPE was already hourly) and no new dependency. Same
+posture: it surfaces the hour's numbers against the reference, never a go/no-go.
+
 ### Iconography — monochrome SVG, no emoji (post-v1)
 
 Every glyph on the board is a line-style, monochrome SVG that inherits `currentColor` — the

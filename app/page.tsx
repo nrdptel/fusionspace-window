@@ -58,9 +58,11 @@ export default function Page() {
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
-              is the hourly wind, with the upcoming <strong>calm windows</strong> (stretches under
-              your line, day or night) surfaced above it. Tap a window, or drag the slider, to set
-              the hour shown in the winds-aloft profile.
+              is the hourly wind, with the upcoming <strong>calm windows</strong> surfaced above
+              it. Drag the <strong>fly-time</strong> slider (or tap a window) to any hour and the
+              snapshot shows that hour&apos;s wind, density altitude, and storm potential — and the
+              winds-aloft profile follows it — so you read the conditions for when you plan to fly,
+              not just now.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Winds aloft</strong>{" "}

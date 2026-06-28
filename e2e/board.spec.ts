@@ -33,12 +33,22 @@ test("the winds-aloft profile has an accessible table fallback with a surface ro
   await expect(page.getByRole("cell", { name: "Surface" })).toBeVisible();
 });
 
-test("the hour scrubber is keyboard-accessible", async ({ page }) => {
+test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("slider", { name: /Select the hour shown in the winds-aloft profile/ }),
-  ).toBeVisible();
+  const hourly = page.locator("#hourly");
+
+  // The snapshot shows the selected hour's decision figures.
+  const header = hourly.getByText(/^At /).first();
+  await expect(header).toContainText("12 PM"); // the fixture's current hour
+  await expect(hourly.getByText("Density altitude")).toBeVisible();
+  await expect(hourly.getByText("Storm", { exact: true })).toBeVisible();
+
+  // Scrubbing the slider moves the snapshot to another hour.
+  const slider = page.getByRole("slider", { name: /Pick a launch time/ });
+  await slider.focus();
+  await slider.press("End");
+  await expect(header).not.toContainText("12 PM");
 });
 
 test("calm windows are surfaced and jump the profile when tapped", async ({ page }) => {

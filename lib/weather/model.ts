@@ -40,6 +40,10 @@ export interface CurrentConditions {
 export interface HourPoint {
   time: string;
   tempF: number;
+  /** Relative humidity, % — with temp and pressure, the input for this hour's density altitude. */
+  humidityPct: number;
+  /** Station pressure at the field, hPa. */
+  surfacePressureHpa: number;
   windMph: number;
   gustMph: number;
   dirDeg: number;

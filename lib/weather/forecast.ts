@@ -87,6 +87,8 @@ function buildHourly(raw: RawForecast): HourPoint[] {
   return time.map((t, i) => ({
     time: t,
     tempF: num(h.temperature_2m?.[i]) ?? NaN,
+    humidityPct: num(h.relative_humidity_2m?.[i]) ?? NaN,
+    surfacePressureHpa: num(h.surface_pressure?.[i]) ?? NaN,
     windMph: num(h.wind_speed_10m?.[i]) ?? NaN,
     gustMph: num(h.wind_gusts_10m?.[i]) ?? NaN,
     dirDeg: num(h.wind_direction_10m?.[i]) ?? NaN,

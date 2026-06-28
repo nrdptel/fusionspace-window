@@ -76,6 +76,7 @@ function buildCurrent(raw: RawForecast): CurrentConditions {
     weatherCode: num(c.weather_code) ?? 0,
     isDay: num(c.is_day) !== 0,
     pressureMslHpa: num(c.pressure_msl) ?? NaN,
+    surfacePressureHpa: num(c.surface_pressure) ?? NaN,
   };
 }
 

@@ -218,6 +218,22 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Density altitude (post-v1)
+
+The honest "how thin is the air" number, and one the v1 brief flagged for later. A pure
+helper (`lib/weather/density.ts`, tested) takes the field's actual station pressure,
+temperature, and humidity, computes the moist-air density (dry + water-vapour partial
+pressures over their gas constants), and inverts the ISA density profile to the altitude
+where standard air has that density. It needed exactly one new field on the existing
+forecast request — `surface_pressure` — and no new dependency. It sits under "Right now" as
+a slim card showing the value, how far it stands above (or below) the field's ground
+elevation, and a one-line, factual note when the air is notably thin (less thrust, faster
+descent, higher out-of-sight flights). Field elevation is shown for context only — it is
+*not* an input to DA, a common misconception the explainer calls out. Same posture as the
+rest of the board: a real meteorological figure with its formula shown, never a verdict.
+It's the most useful at exactly the fields where it bites — high-desert and hot-day
+launches.
+
 ### Calm windows & daylight (post-v1)
 
 The single question every flyer asks is "when's the wind going to lay down so I can fly?"

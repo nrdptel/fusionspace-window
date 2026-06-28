@@ -21,6 +21,10 @@ test("home loads cleanly and renders the board on stubbed data", async ({ page }
   // The 20 mph reference line is stated as a reference, not a verdict.
   await expect(page.getByText(/20 mph/).first()).toBeVisible();
 
+  // Density altitude is derived and shown under "Right now" (~5,000 ft for the fixture).
+  await expect(page.locator("#now").getByText("Density altitude")).toBeVisible();
+  await expect(page.locator("#now").getByText(/5,0\d{2}/).first()).toBeVisible();
+
   // The signature panels are present.
   await expect(page.getByRole("heading", { name: "Winds aloft", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "The next several days" })).toBeVisible();

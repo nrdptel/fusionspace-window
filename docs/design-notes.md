@@ -470,6 +470,14 @@ the browser supports it, native "Share". Nothing is uploaded — the text is bui
 browser and put on the clipboard. A `<details>` preview shows (and lets you select) the text
 for browsers where the clipboard is blocked.
 
+As the board grew, the briefing fell behind it, so it was brought back in sync: it now also
+carries the observed-wind cross-check, visibility, the pressure trend, **storm potential**
+(the CAPE band with the day's peak — a whole board panel that the briefing had been silent on,
+so a calm morning that towers up by afternoon now makes it into the club-chat post), and the
+**0°C level** beside the winds-aloft samples. The principle holds: the briefing is exactly the
+figures the board shows, nothing more — when a figure is absent (a model gap, no station), its
+line is simply dropped rather than guessed.
+
 ### Density altitude (post-v1)
 
 The honest "how thin is the air" number, and one the v1 brief flagged for later. A pure

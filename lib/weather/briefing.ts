@@ -9,6 +9,7 @@ import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
 import { meanWindAloft } from "./drift";
 import { pressureTendency } from "./pressure";
+import { classifyCape, peakCape } from "./instability";
 import { SURFACE_LIMIT_MPH } from "./limits";
 import { findCalmWindows } from "./windows";
 import {
@@ -140,6 +141,18 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     `Temp: ${fmtTemp(c.tempF, u.temp)}${TEMP_LABEL[u.temp]} (feels ${fmtTemp(c.apparentF, u.temp)}${TEMP_LABEL[u.temp]})${daStr}`,
   );
 
+  // Storm potential — the convective (CAPE) read the board surfaces, with the day's peak so a
+  // calm morning that towers up by afternoon makes it into the briefing.
+  if (Number.isFinite(c.capeJkg)) {
+    const inst = classifyCape(c.capeJkg);
+    const peak = peakCape(forecast.hourly, hourIndex, 24);
+    const peakStr =
+      peak && peak.valueJkg > c.capeJkg + 50
+        ? `, peaking ~${Math.round(peak.valueJkg)} by ${clockShort(peak.time)}`
+        : "";
+    lines.push(`Storm potential: ${inst.label} (CAPE ${Math.round(c.capeJkg)} J/kg now${peakStr})`);
+  }
+
   // Winds aloft
   const profile = forecast.aloftHourly[hourIndex] ?? forecast.aloftHourly[0];
   if (profile && profile.levels.length > 0) {
@@ -154,6 +167,16 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
       lines.push(
         `Mean wind to ${fmtLength(mean.topFt, u.length)} ${LENGTH_LABEL[u.length]}: ` +
           `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}`,
+      );
+    }
+
+    // 0°C level — the same reference line the chart draws, for cold recovery electronics.
+    const fl = profile.freezingLevelAglFt;
+    if (Number.isFinite(fl)) {
+      lines.push(
+        fl > 0
+          ? `0°C level: ${fmtLength(fl, u.length)} ${LENGTH_LABEL[u.length]} AGL`
+          : `0°C level: below the field — sub-freezing from the surface up`,
       );
     }
   }

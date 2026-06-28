@@ -34,6 +34,22 @@ describe("parseObservation", () => {
     expect(p.visibilityMi).toBeNull();
   });
 
+  it("converts observed wind and gust from km/h to mph and keeps the raw report", () => {
+    const p = parseObservation(obs);
+    expect(p.windMph).toBeCloseTo(24.1 / 1.609344, 3); // ~14.98 mph
+    expect(p.gustMph).toBeCloseTo(37.0 / 1.609344, 3); // ~22.99 mph
+    expect(p.windDirDeg).toBe(250);
+    expect(p.raw).toBe("KDAG 271953Z 25013G20KT 10SM FEW030 BKN065 OVC120 28/09 A2989 RMK AO2");
+  });
+
+  it("reports null wind and raw when the station omits them", () => {
+    const p = parseObservation(obsClear);
+    expect(p.windMph).toBeNull();
+    expect(p.gustMph).toBeNull();
+    expect(p.windDirDeg).toBeNull();
+    expect(p.raw).toBeNull();
+  });
+
   it("reports no ceiling for a clear sky but is still usable", () => {
     const p = parseObservation(obsClear);
     expect(p.ceilingFt).toBeNull();
@@ -85,6 +101,10 @@ describe("sky builders", () => {
     expect(s.station?.id).toBe("KDAG");
     expect(s.station?.distanceMi).toBe(28);
     expect(s.visibilityMi).toBeCloseTo(10, 3);
+    expect(s.observedWindMph).toBeCloseTo(14.98, 1);
+    expect(s.observedGustMph).toBeCloseTo(22.99, 1);
+    expect(s.observedWindDirDeg).toBe(250);
+    expect(s.raw).toContain("KDAG");
 
     const m = modelSky(42);
     expect(m.source).toBe("model");

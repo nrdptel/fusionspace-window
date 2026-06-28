@@ -54,7 +54,9 @@ export default function Page() {
               is the surface wind against the <strong>20 mph</strong> NFPA/NAR/Tripoli launch
               limit — a reference line, never a go/no-go — plus temperature, sky, and{" "}
               <strong>density altitude</strong> (how thin the air is, which sets thrust and
-              descent). Winds are named for the direction they blow <em>from</em>.
+              descent). The model wind is cross-checked against the nearest station&apos;s{" "}
+              <strong>observed</strong> reading. Winds are named for the direction they blow{" "}
+              <em>from</em>.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
@@ -122,6 +124,16 @@ export default function Page() {
             units. The current reading carries its own valid time; it&apos;s a model analysis,
             not a station observation, so a gusty or terrain-affected field can differ from what
             you feel at the pad. Winds are the direction the air comes <em>from</em>.
+          </Method>
+          <Method title="Observed wind cross-check">
+            Because the surface wind above is a model analysis, &ldquo;Right now&rdquo; also
+            shows the <em>observed</em> wind from the nearest NWS reporting station — the same
+            METAR that gives the ceiling — converted from its reported units to your wind unit,
+            and stamped with the station, its distance, and how long ago it reported. It&apos;s a
+            real anemometer reading to weigh the model against: when they disagree, that gap is
+            itself worth knowing. It can differ with distance and terrain, and it&apos;s absent
+            when no station is reachable. The full raw report (the METAR text) is available under
+            the sky panel for anyone who reads them.
           </Method>
           <Method title="Density altitude">
             The altitude in the standard atmosphere where the air has the same density as the

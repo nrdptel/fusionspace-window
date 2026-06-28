@@ -86,6 +86,15 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
       `gusting ${fmtWind(c.gustMph, u.wind)} — ${surfacePhrase(c.windMph, windLine)}`,
   );
 
+  // Observed cross-check from the nearest station, where one reported wind.
+  if (sky.source === "station" && sky.observedWindMph != null) {
+    const dir = sky.observedWindDirDeg != null ? ` from ${degToCompass(sky.observedWindDirDeg)}` : "";
+    const gust = sky.observedGustMph != null ? `, gust ${fmtWind(sky.observedGustMph, u.wind)}` : "";
+    lines.push(
+      `  Nearest station${sky.station ? ` (${sky.station.id})` : ""} observed ${fmtWind(sky.observedWindMph, u.wind)} ${WIND_LABEL[u.wind]}${dir}${gust}`,
+    );
+  }
+
   // Sky / ceiling
   if (sky.source === "station") {
     const ceil =

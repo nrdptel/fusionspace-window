@@ -3,9 +3,11 @@
     "@id": "https://api.weather.gov/stations/KDAG/observations/latest",
     "timestamp": "2026-06-27T19:53:00+00:00",
     "textDescription": "Mostly Cloudy",
+    "rawMessage": "KDAG 271953Z 25013G20KT 10SM FEW030 BKN065 OVC120 28/09 A2989 RMK AO2",
     "temperature": { "unitCode": "wmoUnit:degC", "value": 28.3 },
     "windSpeed": { "unitCode": "wmoUnit:km_h-1", "value": 24.1 },
     "windDirection": { "unitCode": "wmoUnit:degree_(angle)", "value": 250 },
+    "windGust": { "unitCode": "wmoUnit:km_h-1", "value": 37.0 },
     "barometricPressure": { "unitCode": "wmoUnit:Pa", "value": 101200 },
     "visibility": { "unitCode": "wmoUnit:m", "value": 16093.44 },
     "cloudLayers": [

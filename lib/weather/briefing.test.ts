@@ -37,6 +37,10 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Surface wind: 21 mph from WSW \(255°\), gusting 29 — over the 20 mph limit/);
   });
 
+  it("adds the nearest station's observed wind as a cross-check", () => {
+    expect(text).toMatch(/Nearest station \(KDAG\) observed 15 mph from WSW, gust 23/);
+  });
+
   it("includes the observed ceiling, density altitude, and winds aloft", () => {
     expect(text).toMatch(/Sky: Mostly Cloudy, ceiling [\d,]+ ft \(KDAG, observed\)/);
     expect(text).toMatch(/Visibility: 10 mi \(observed\)/);

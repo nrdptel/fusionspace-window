@@ -3,7 +3,15 @@
  *  an observed ceiling/coverage, and provides the "is this observation usable" test the
  *  network layer uses to skip automated stations (RAWS sites) that report no cloud
  *  layers. All pure; the actual multi-station fetch lives in net.ts. NWS reports SI, so
- *  cloud-layer bases (metres) are converted to feet. */
+ *  cloud-layer bases (metres) are converted to feet.
+ *
+ *  The structured `cloudLayers` array is primary, but the NWS API sometimes returns it
+ *  EMPTY even when the raw METAR clearly reports the sky — a bare "CLR", or a layer like
+ *  "SCT030"/"BKN015". Left unhandled that skips the nearest station on exactly the clear
+ *  days people fly (its near-field wind/visibility lost to a station 20+ miles out), and
+ *  can drop a real BKN/OVC ceiling the structured field omitted. So when `cloudLayers` is
+ *  empty we parse the METAR sky group as a fallback. A genuine no-sky RAWS (no rawMessage
+ *  at all) still reads unusable. */
 
 import { FT_PER_M, KMH_PER_MPH, M_PER_MILE, MS_PER_MPH } from "../units";
 import type { CloudLayer, Sky } from "./model";
@@ -90,6 +98,31 @@ export function haversineMiles(
 
 const CEILING_AMOUNTS = new Set(["BKN", "OVC", "VV"]);
 
+/** Cloud groups (FEW/SCT/BKN/OVC/VV + height in hundreds of feet AGL) from a raw METAR. */
+const SKY_GROUP = /\b(VV|FEW|SCT|BKN|OVC)(\d{3})\b/g;
+/** Explicit clear-sky tokens: clear, sky clear, no significant/detected cloud, CAVOK. */
+const CLEAR_SKY = /\b(CLR|SKC|NSC|NCD|CAVOK)\b/;
+
+export interface MetarSky {
+  layers: CloudLayer[];
+  /** The METAR explicitly reported clear / no-significant-cloud. */
+  clear: boolean;
+}
+
+/** Parse the sky section of a raw METAR — the fallback when the structured `cloudLayers`
+ *  array is empty. Heights in a METAR cloud group are hundreds of feet AGL (BKN015 →
+ *  1,500 ft). Only the body is scanned, never the remarks after `RMK`. */
+export function parseMetarSky(raw: string): MetarSky {
+  const body = raw.split(" RMK")[0];
+  const layers: CloudLayer[] = [];
+  SKY_GROUP.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = SKY_GROUP.exec(body)) !== null) {
+    layers.push({ amount: m[1], baseFt: Number(m[2]) * 100 });
+  }
+  return { layers, clear: layers.length === 0 && CLEAR_SKY.test(body) };
+}
+
 export interface ParsedObservation {
   time: string;
   layers: CloudLayer[];
@@ -110,13 +143,24 @@ export interface ParsedObservation {
 /** Parse a `/observations/latest` properties object into cloud layers + a ceiling. */
 export function parseObservation(raw: unknown): ParsedObservation {
   const p = (raw as { properties?: RawObservation })?.properties ?? (raw as RawObservation) ?? {};
-  const layers: CloudLayer[] = (p.cloudLayers ?? []).map((l) => ({
+  const rawMsg = typeof p.rawMessage === "string" && p.rawMessage.trim() ? p.rawMessage.trim() : null;
+
+  let layers: CloudLayer[] = (p.cloudLayers ?? []).map((l) => ({
     amount: (l.amount ?? "").toUpperCase(),
     baseFt:
       typeof l.base?.value === "number" && Number.isFinite(l.base.value)
         ? l.base.value * FT_PER_M
         : null,
   }));
+  // When the structured array is empty but a raw METAR is present, recover the sky from it —
+  // the NWS API drops cloudLayers on plenty of CLR / scattered / even ceiling reports.
+  let clear = false;
+  if (layers.length === 0 && rawMsg) {
+    const sky = parseMetarSky(rawMsg);
+    layers = sky.layers;
+    clear = sky.clear;
+  }
+
   // Ceiling = lowest broken/overcast (or vertical-visibility) base.
   let ceilingFt: number | null = null;
   for (const l of layers) {
@@ -124,9 +168,12 @@ export function parseObservation(raw: unknown): ParsedObservation {
       ceilingFt = ceilingFt == null ? l.baseFt : Math.min(ceilingFt, l.baseFt);
     }
   }
-  const description = (p.textDescription ?? "").trim() || summarizeLayers(layers);
-  const usable = layers.length > 0 || Boolean((p.textDescription ?? "").trim());
-  const rawMsg = typeof p.rawMessage === "string" && p.rawMessage.trim() ? p.rawMessage.trim() : null;
+
+  const text = (p.textDescription ?? "").trim();
+  const description = text || (layers.length ? summarizeLayers(layers) : clear ? "Clear" : "—");
+  // Usable for the sky panel when it carries cloud layers, a text summary, or an explicit
+  // clear-sky report — but not a bare station that says nothing about the sky at all.
+  const usable = layers.length > 0 || Boolean(text) || clear;
   return {
     time: p.timestamp ?? "",
     layers,

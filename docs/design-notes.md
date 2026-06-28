@@ -345,6 +345,29 @@ miles/AGL values are identical, and `visibilityToMiles`/`heightToFeet` are unit-
 so neither path can rot. The lesson the family already lives by — read the unit, never assume —
 now has the test coverage to match.
 
+### Raw-METAR sky fallback (post-v1)
+
+A second pass of the same real-data validation — running the live NWS parser against a spread
+of fields (coastal Florida, the Kansas plains, a no-coverage point in Canada) — turned up a
+quiet but consequential gap. The sky panel reads the *structured* `cloudLayers` array NWS
+returns, and treats an empty array as "this station has nothing to say about the sky," skipping
+it for the next one out. But the NWS API returns `cloudLayers: []` on a surprising number of
+observations whose *raw METAR clearly reports the sky* — a bare `CLR`, or even a layer like
+`SCT030` or `BKN015`. At Bunnell, FL the nearest station (KFIN, 3 miles out) was reporting
+`...10SM CLR...` and getting skipped, so the board pulled its ceiling, visibility, *and* the
+observed-wind cross-check from a station 23 miles away — on exactly the clear day someone would
+be flying. So when `cloudLayers` is empty and a raw METAR is present, the parser now falls back
+to reading the METAR sky group itself (`parseMetarSky`, pure and tested): clear tokens
+(`CLR`/`SKC`/`NSC`/`NCD`/`CAVOK`) mark a usable clear sky with no ceiling, and `FEW`/`SCT`/`BKN`/
+`OVC`/`VV` groups become layers at their hundreds-of-feet AGL heights — which also recovers a
+genuine `BKN`/`OVC` ceiling the structured field had dropped. The scoping is careful: a station
+that issues no METAR at all (a true no-sky RAWS like Black Rock's BLUN2) and a sky-less AUTO
+report (wind and temperature, cloud sensor out — verified against a real `$`-flagged KP28
+observation) both still read unusable, so the degradation that PR #26 locked down is untouched.
+The structured array stays primary when it's populated; the fallback only fills the gap the API
+leaves. The upshot: on the clear days people actually fly, the *nearest* station's reading is
+used, not one tens of miles away.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

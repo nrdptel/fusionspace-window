@@ -232,12 +232,14 @@ export default function Page() {
           <Disclosure title="Sky, ceiling &amp; visibility">
           <Method title="Cloud ceiling, visibility & sky">
             The observed ceiling is the lowest broken or overcast layer from the nearest NWS
-            reporting station&apos;s latest observation (a METAR), converted to feet; the nearest
-            automated stations that report no cloud layers are skipped. It&apos;s labelled
-            <em> observed</em> and stamped with the station and how long ago it reported. The
-            multi-day sky picture and the fallback when no station is reachable are Open-Meteo&apos;s
-            modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling in feet (TAF) is
-            planned for a later version — its source has no browser access today.
+            reporting station&apos;s latest observation (a METAR), converted to feet. A clear sky
+            counts: when a station reports <em>clear</em> (or a layer the structured feed happens
+            to drop), the raw METAR is read directly so the nearest station is used rather than one
+            tens of miles out — only a station that says nothing about the sky at all is skipped.
+            It&apos;s labelled <em>observed</em> and stamped with the station and how long ago it
+            reported. The multi-day sky picture and the fallback when no station is reachable are
+            Open-Meteo&apos;s modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling
+            in feet (TAF) is planned for a later version — its source has no browser access today.
           </Method>
           <Method title="Visibility">
             Horizontal visibility in statute miles — it matters for keeping a high flight in

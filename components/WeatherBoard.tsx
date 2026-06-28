@@ -24,6 +24,7 @@ import Alerts from "./Alerts";
 import Now from "./Now";
 import DensityAltitude from "./DensityAltitude";
 import CalmWindows from "./CalmWindows";
+import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
@@ -262,6 +263,8 @@ export default function WeatherBoard() {
               <RetryButton onClick={() => field && load(field)} />
             </Notice>
           )}
+
+          <FieldBriefing board={data} units={units} windLine={windLine} hourIndex={currentHourIndex(data)} />
 
           {/* Units / personal line */}
           <div className="mt-4">

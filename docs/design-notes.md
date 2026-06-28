@@ -218,6 +218,20 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Field briefing (post-v1)
+
+The family ships text/share exports everywhere — Charge's copy-as-text card, Debrief's
+share link — and a flyer's real habit before a launch is to post the conditions to the club
+chat. So "Copy briefing" assembles a plain-text summary of the field (surface wind vs the
+limit, sky and ceiling, density altitude, a few winds-aloft levels, any alerts, the next
+calm window, a short outlook) with the share link and the not-authoritative disclaimer baked
+in — exactly the figures on the page, so a pasted briefing carries the same honesty. The
+generator (`lib/weather/briefing.ts`) is pure and tested; the share URL is passed in so it
+stays free of browser globals. The strip also offers "Copy link" (the exact view) and, where
+the browser supports it, native "Share". Nothing is uploaded — the text is built in the
+browser and put on the clipboard. A `<details>` preview shows (and lets you select) the text
+for browsers where the clipboard is blocked.
+
 ### Density altitude (post-v1)
 
 The honest "how thin is the air" number, and one the v1 brief flagged for later. A pure

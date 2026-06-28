@@ -53,6 +53,16 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Mean wind to [\d,]+ ft: \d+ mph from [NSEW]+ — drift toward [NSEW]+/);
   });
 
+  it("surfaces storm potential with the day's CAPE peak", () => {
+    // Fixture: current CAPE 900 (marginal), towering to 1,700 by mid-afternoon.
+    expect(text).toMatch(/Storm potential: Marginally unstable \(CAPE 900 J\/kg now, peaking ~1700 by 2 PM\)/);
+  });
+
+  it("includes the 0°C freezing level alongside the winds aloft", () => {
+    // Fixture: ~11,800 ft AGL at noon (14,763 ft MSL over a 2,953 ft field).
+    expect(text).toMatch(/0°C level: 11,8\d\d ft AGL/);
+  });
+
   it("includes alerts, a calm window, and the short outlook", () => {
     expect(text).toContain("Alerts: Wind Advisory (Moderate)");
     // The window runs overnight, so the end day is named — not a bare "2 PM–10 AM".

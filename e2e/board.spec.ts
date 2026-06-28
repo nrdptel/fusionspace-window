@@ -40,6 +40,20 @@ test("the winds-aloft profile has an accessible table fallback with a surface ro
   await expect(page.getByRole("cell", { name: "Surface" })).toBeVisible();
 });
 
+test("the 0°C line captions why it's absent when out of the shown column", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  const aloft = page.locator("#aloft");
+  // Default top (20k) shows the line (fixture freezing ≈ 11,800 ft AGL).
+  await expect(aloft.getByText("0°C", { exact: true })).toBeVisible();
+
+  // Drop the top to 10k: the line is now above the shown column, so it's replaced by a caption
+  // that says the air in view stays above freezing — not an ambiguous blank.
+  await aloft.locator("button", { hasText: "10k" }).click();
+  await expect(aloft.getByText("0°C", { exact: true })).toHaveCount(0);
+  await expect(aloft.getByText(/0°C is above the shown column/)).toBeVisible();
+});
+
 test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

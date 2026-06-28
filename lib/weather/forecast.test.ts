@@ -72,14 +72,26 @@ describe("parseForecast", () => {
     expect(fc.aloftHourly[0].freezingLevelAglFt).toBeCloseTo((4500 - 900) * FT_PER_M, 0);
   });
 
-  it("drops a below-field freezing level to NaN", () => {
+  it("expresses a below-field freezing level as a negative AGL (sub-freezing from the surface)", () => {
     const cold = {
       ...raw,
       hourly: { ...raw.hourly, freezing_level_height: raw.hourly!.time.map(() => 100) },
     } as RawForecast;
     const fcc = parseForecast(cold, "gfs_seamless");
-    // 100 ft MSL is below the ~2,953 ft field — no line to draw.
-    expect(Number.isNaN(fcc.aloftHourly[0].freezingLevelAglFt)).toBe(true);
+    // 100 ft MSL is below the ~2,953 ft field → a negative height, not NaN, so the chart can
+    // say "sub-freezing from the surface up" rather than leave an ambiguous blank.
+    const agl = fcc.aloftHourly[0].freezingLevelAglFt;
+    expect(agl).toBeLessThan(0);
+    expect(agl).toBeCloseTo(100 - 900 * FT_PER_M, 0);
+  });
+
+  it("leaves the freezing level NaN only when the model omits it", () => {
+    const none = {
+      ...raw,
+      hourly: { ...raw.hourly, freezing_level_height: raw.hourly!.time.map(() => null) },
+    } as RawForecast;
+    const fcn = parseForecast(none, "gfs_seamless");
+    expect(Number.isNaN(fcn.aloftHourly[0].freezingLevelAglFt)).toBe(true);
   });
 
   it("derives true AGL as geopotential height minus field elevation", () => {

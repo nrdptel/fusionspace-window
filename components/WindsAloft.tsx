@@ -96,9 +96,13 @@ export default function WindsAloft({
   const shear = strongestShear(shown);
   const mean = meanWindAloft(shown, topFt);
 
-  // 0°C level, drawn as a reference line when it falls inside the shown column.
+  // 0°C level, drawn as a reference line when it falls inside the shown column. When it
+  // doesn't, the blank is ambiguous between two opposite cases, so we caption which: below the
+  // field (sub-freezing from the surface up) vs above the shown column (warmer throughout view).
   const freezingAglFt = profile.freezingLevelAglFt;
   const showFreezing = Number.isFinite(freezingAglFt) && freezingAglFt > 0 && freezingAglFt <= topFt;
+  const freezingBelowField = Number.isFinite(freezingAglFt) && freezingAglFt <= 0;
+  const freezingAboveShown = Number.isFinite(freezingAglFt) && freezingAglFt > topFt;
 
   // Declutter the right-hand value labels: keep the surface (lowest) and skip any whose label
   // would land on the one below it. The dot and barb still draw — only the text is dropped.
@@ -200,6 +204,14 @@ export default function WindsAloft({
             })}
           </svg>
         </div>
+      )}
+
+      {!empty && !showFreezing && (freezingBelowField || freezingAboveShown) && (
+        <p className="mt-2 text-xs text-sky-700 dark:text-sky-400">
+          {freezingBelowField
+            ? "0°C is below the field this hour — the air is sub-freezing from the surface up, worth knowing for recovery electronics."
+            : "0°C is above the shown column this hour — the air in view stays above freezing."}
+        </p>
       )}
 
       {!empty && mean && (

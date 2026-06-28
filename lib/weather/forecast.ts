@@ -141,14 +141,14 @@ function buildAloft(raw: RawForecast, field: Field): AloftProfile[] {
     }
     levels.sort((a, b) => a.aglFt - b.aglFt);
 
-    // 0°C level: reported MSL, expressed as height above the field. Below-field (already
-    // freezing at the surface) or absent → NaN, and the chart simply doesn't draw it.
+    // 0°C level: reported MSL height, expressed above the field. Kept SIGNED — it goes
+    // negative when the freezing level sits below the field (the air is already sub-freezing
+    // from the surface up), so the chart can tell that apart from an absent value (NaN, a model
+    // gap). The line is only drawn for a positive in-range height; the component reads the sign
+    // to caption the two ways the line can be missing.
     const fl = num(h.freezing_level_height?.[i]);
-    let freezingLevelAglFt = NaN;
-    if (fl != null) {
-      const aglFt = heightToFeet(fl, units.freezing_level_height) - field.elevationFt;
-      freezingLevelAglFt = aglFt > 0 ? aglFt : NaN;
-    }
+    const freezingLevelAglFt =
+      fl != null ? heightToFeet(fl, units.freezing_level_height) - field.elevationFt : NaN;
 
     return { time: t, levels, freezingLevelAglFt };
   });

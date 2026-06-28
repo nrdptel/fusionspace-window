@@ -276,13 +276,28 @@ request.
 The winds-aloft panel is built on an altitude axis, which makes it the natural home for one
 more atmospheric figure a high-altitude flyer wants: the **0°C level**. A flight that punches
 well past it climbs into genuine cold, which is worth knowing for altimeter batteries and
-recovery electronics. Open-Meteo reports `freezing_level_height` (metres above sea level), so
-one more hourly variable on the existing request, expressed as height above the field in
-`forecast.ts` (and dropped to NaN when it sits below the field — already freezing at the
-surface), gives `AloftProfile.freezingLevelAglFt`. The chart draws it as a blue dashed
-reference line with a `0°C` tag and its height, but only when it falls inside the shown column,
-so the Top selector and the fly-time hour both move it naturally. It's the same posture as the
-20 mph and shear callouts: a labelled line, never a verdict. No new request, no dependency.
+recovery electronics. Open-Meteo reports `freezing_level_height` (in feet under the imperial request, as the
+visibility/geopotential fields are), so one more hourly variable on the existing request,
+expressed as height above the field in `forecast.ts`, gives `AloftProfile.freezingLevelAglFt`.
+The chart draws it as a blue dashed reference line with a `0°C` tag and its height, but only
+when it falls inside the shown column, so the Top selector and the fly-time hour both move it
+naturally. It's the same posture as the 20 mph and shear callouts: a labelled line, never a
+verdict. No new request, no dependency.
+
+A second real-data validation pass — high-latitude and Southern-Hemisphere-winter fields
+(the Alaska Range at 18,500 ft and −6 °F, Patagonia, the Bolivian Altiplano) — exposed that
+the *absence* of the line was ambiguous. It can mean two opposite things: the 0°C level is
+**below the field** (sub-freezing from the surface up, the Alaska case — important for cold
+electronics), or it's **above the shown column** (warmer than freezing throughout the view).
+The original parser collapsed below-field *and* model-absent both to `NaN`, so the component
+couldn't tell them apart. `freezingLevelAglFt` is now kept **signed** — negative when the
+level sits below the field — with `NaN` reserved strictly for a model gap. The chart still
+draws the line only for a positive in-range height, but now captions the blank when there is
+one: "0°C is below the field — sub-freezing from the surface up," or "0°C is above the shown
+column — the air in view stays above freezing." The same honest no-ambiguous-blank habit the
+rest of the board follows. (The pass otherwise confirmed robustness: below/at/above-field
+freezing levels, extreme-altitude fields dropping their below-ground pressure levels, strong
+winter jets aloft, and the global NWS degradation all parsed correctly with no other change.)
 
 ### Mean wind & drift (post-v1)
 

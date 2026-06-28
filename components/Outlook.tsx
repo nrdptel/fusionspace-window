@@ -3,6 +3,7 @@
 import type { DayOutlook } from "@/lib/weather/model";
 import type { ClimatologyNormal } from "@/lib/weather/climatology";
 import { compareToNormal } from "@/lib/weather/climatology";
+import { SURFACE_LIMIT_MPH } from "@/lib/weather/limits";
 import {
   degToCompass,
   fmtTemp,
@@ -18,8 +19,6 @@ import { clockShort, dayLabel, shortDate } from "@/lib/format";
 import { SourceLine } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import { SunIcon } from "./icons";
-
-const SURFACE_LIMIT_MPH = 20;
 
 /** A one-line "how does the week compare to normal" read, when the archive lookup landed. */
 function SeasonalContext({

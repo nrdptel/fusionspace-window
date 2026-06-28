@@ -12,19 +12,13 @@ import {
   WIND_LABEL,
   type UnitPrefs,
 } from "@/lib/units";
+import { windTone, windToneTextClass } from "@/lib/weather/limits";
 import { PinIcon, CrosshairIcon, CloseIcon, SearchIcon } from "./icons";
 
-const SURFACE_LIMIT_MPH = 20;
 const PEEK_TTL_MS = 10 * 60 * 1000;
 // Module-level so the glance survives remounts and back/forward without refetching.
 const peekCache = new Map<string, { peek: WindPeek | null; at: number }>();
 const fieldKey = (f: { lat: number; lon: number }) => `${f.lat.toFixed(3)},${f.lon.toFixed(3)}`;
-
-function peekTone(windMph: number): string {
-  if (windMph >= SURFACE_LIMIT_MPH) return "text-red-700 dark:text-red-400";
-  if (windMph >= 15) return "text-amber-700 dark:text-amber-400";
-  return "text-emerald-700 dark:text-emerald-400";
-}
 
 export default function LocationBar({
   onPick,
@@ -262,7 +256,7 @@ export default function LocationBar({
                 </button>
                 {peek && (
                   <span
-                    className={"font-mono tabular-nums " + peekTone(peek.windMph)}
+                    className={"font-mono tabular-nums " + windToneTextClass(windTone(peek.windMph))}
                     title={`Current wind ${fmtWind(peek.windMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(peek.dirDeg)}${Number.isFinite(peek.gustMph) ? `, gust ${fmtWind(peek.gustMph, u.wind)}` : ""}`}
                   >
                     {fmtWind(peek.windMph, u.wind)} {degToCompass(peek.dirDeg)}

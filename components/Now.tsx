@@ -13,27 +13,10 @@ import {
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
 import type { PressureTendency } from "@/lib/weather/pressure";
+import { SURFACE_LIMIT_MPH, windTone, windToneTextClass } from "@/lib/weather/limits";
 import { clock, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
 import WeatherIcon from "./WeatherIcon";
-
-const SURFACE_LIMIT_MPH = 20;
-
-type Tone = "emerald" | "amber" | "red";
-
-function windTone(windMph: number, personalLine: number | null): Tone {
-  if (windMph >= SURFACE_LIMIT_MPH) return "red";
-  if (windMph >= (personalLine ?? 15)) return "amber";
-  return "emerald";
-}
-
-function toneText(tone: Tone): string {
-  return tone === "red"
-    ? "text-red-700 dark:text-red-400"
-    : tone === "amber"
-      ? "text-amber-700 dark:text-amber-400"
-      : "text-emerald-700 dark:text-emerald-400";
-}
 
 export interface ObservedWind {
   windMph: number;
@@ -144,7 +127,7 @@ export default function Now({
                 Nearest station
               </div>
               <div className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
-                <span className={"font-mono font-semibold tabular-nums " + toneText(windTone(observed.windMph, windLine))}>
+                <span className={"font-mono font-semibold tabular-nums " + windToneTextClass(windTone(observed.windMph, windLine))}>
                   {fmtWind(observed.windMph, u.wind)} {WIND_LABEL[u.wind]}
                 </span>
                 {observed.dirDeg != null && <> from {degToCompass(observed.dirDeg)}</>}

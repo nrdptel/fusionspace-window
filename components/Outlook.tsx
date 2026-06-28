@@ -11,7 +11,7 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
-import { dayLabel, shortDate } from "@/lib/format";
+import { clockShort, dayLabel, shortDate } from "@/lib/format";
 import { SourceLine } from "./ui";
 
 const SURFACE_LIMIT_MPH = 20;
@@ -67,6 +67,14 @@ export default function Outlook({
                 {degToCompass(d.windDirDeg)} ·{" "}
                 {d.precipProbMaxPct != null ? `${d.precipProbMaxPct}%` : "—"} precip
               </div>
+              {d.sunrise && d.sunset && (
+                <div
+                  className="mt-1 border-t border-zinc-100 pt-1 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-400"
+                  title="Sunrise and sunset — daylight for setup and recovery"
+                >
+                  <span aria-hidden>☀</span> {clockShort(d.sunrise)} · {clockShort(d.sunset)}
+                </div>
+              )}
             </div>
           );
         })}
@@ -74,7 +82,8 @@ export default function Outlook({
       <SourceLine>
         Daily outlook from Open-Meteo ({model}). Wind is the day&apos;s maximum sustained /
         gust; red marks a day whose max crosses the 20 mph limit. Temperatures in{" "}
-        {TEMP_LABEL[u.temp]}.
+        {TEMP_LABEL[u.temp]}; sunrise/sunset are field-local — useful for planning setup and
+        leaving daylight for recovery.
       </SourceLine>
     </>
   );

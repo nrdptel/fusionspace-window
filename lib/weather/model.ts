@@ -43,6 +43,8 @@ export interface HourPoint {
   precipIn: number;
   cloudCoverPct: number;
   weatherCode: number;
+  /** Daylight at this hour (Open-Meteo `is_day`). */
+  isDay: boolean;
 }
 
 export interface AloftLevel {
@@ -75,6 +77,9 @@ export interface DayOutlook {
   /** Dominant wind direction (FROM), degrees. */
   windDirDeg: number;
   cloudCoverMeanPct: number | null;
+  /** Local-naive sunrise/sunset, when available. */
+  sunrise: string | null;
+  sunset: string | null;
 }
 
 export interface Forecast {

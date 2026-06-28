@@ -218,6 +218,22 @@ reload or a units toggle doesn't refetch, and a longer last-known retention so a
 visit still shows something. Switching units never hits the network — units are a display
 transform over the stored view model.
 
+### Calm windows & daylight (post-v1)
+
+The single question every flyer asks is "when's the wind going to lay down so I can fly?"
+— and the hourly forecast already answers it, so Window surfaces it directly. A pure
+analyzer (`lib/weather/windows.ts`, tested) scans forward from the current hour and returns
+the upcoming stretches where the *sustained* wind stays at or below the active line (the
+20 mph reference, or a lower personal one), each annotated with its peak wind/gust and how
+much of it falls in daylight. They render as tappable chips above the hourly chart;
+tapping one drops the winds-aloft profile onto that hour, the same selection the slider
+drives. It's the same honest posture as the rest of the board — it highlights low-wind
+daylight stretches against a line *you* chose, it doesn't tell you to fly — just made
+literal for the decision flyers actually make. Daylight comes from Open-Meteo's hourly
+`is_day` flag; the multi-day outlook also gained sunrise/sunset, because losing light
+mid-recovery is a real way to lose a rocket. Both are cheap reads on data already fetched,
+so they cost no new dependency and no extra request.
+
 ### Units
 
 Imperial by default: wind **mph**, altitude/height **ft**, temperature **°F**, precip

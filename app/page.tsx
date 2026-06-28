@@ -58,8 +58,9 @@ export default function Page() {
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
-              is the hourly wind, so you can find the calm window. Drag the slider to choose the
-              hour shown in the winds-aloft profile.
+              is the hourly wind, with the upcoming <strong>calm windows</strong> (stretches under
+              your line, day or night) surfaced above it. Tap a window, or drag the slider, to set
+              the hour shown in the winds-aloft profile.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Winds aloft</strong>{" "}
@@ -140,11 +141,20 @@ export default function Page() {
             ceiling are simply absent rather than shown as an error, and the sky falls back to the
             modelled cloud cover.
           </Method>
-          <Method title="Multi-day outlook">
+          <Method title="Calm windows">
+            The hourly forecast already knows when the wind lays down, so Window surfaces the
+            upcoming stretches where the <em>sustained</em> wind stays at or below your line (the
+            20 mph reference, or a lower personal one), scanning the next two days from now. Each
+            window shows its peak wind and gust and whether it falls in daylight (Open-Meteo&apos;s
+            day/night flag). It is plain aggregation of the hourly numbers against a line you
+            chose — it highlights low-wind daylight stretches, it doesn&apos;t tell you to fly.
+          </Method>
+          <Method title="Multi-day outlook & daylight">
             Open-Meteo daily aggregates for ~7 days: high/low temperature, the day&apos;s maximum
-            sustained wind and gust, dominant wind direction, peak precipitation probability, and
-            mean cloud cover. A day whose max wind crosses 20 mph is marked — again as a
-            reference, not a verdict.
+            sustained wind and gust, dominant wind direction, peak precipitation probability, mean
+            cloud cover, and sunrise/sunset (field-local — for planning setup and leaving daylight
+            for recovery). A day whose max wind crosses 20 mph is marked — again as a reference,
+            not a verdict.
           </Method>
           <Method title="Freshness, caching & offline">
             A field is fetched once and cached in your browser for about ten minutes, so a reload

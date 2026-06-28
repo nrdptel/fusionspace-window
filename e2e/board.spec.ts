@@ -41,6 +41,27 @@ test("the hour scrubber is keyboard-accessible", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("calm windows are surfaced and jump the profile when tapped", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  await expect(page.locator("#hourly").getByText("Calm windows")).toBeVisible();
+
+  // No window is selected at the current (windy) hour; tapping one selects it.
+  const chip = page.locator('#hourly button[aria-pressed]').first();
+  await expect(chip).toBeVisible();
+  await expect(chip).toHaveAttribute("aria-pressed", "false");
+  await chip.click();
+  await expect(chip).toHaveAttribute("aria-pressed", "true");
+  // The winds-aloft profile follows the selection.
+  await expect(page.locator("#aloft").getByText(/Valid .* field-local/)).toBeVisible();
+});
+
+test("the outlook shows sunrise and sunset", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  await expect(page.locator("#outlook").getByText(/5:42 AM/)).toBeVisible();
+});
+
 test("the field rides in the URL and survives a reload", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

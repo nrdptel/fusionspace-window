@@ -77,7 +77,8 @@ export interface AloftProfile {
   time: string;
   /** Levels at or above the field, sorted ascending by AGL height. */
   levels: AloftLevel[];
-  /** Height of the 0°C level above the field, feet — NaN when absent or below the field. */
+  /** Height of the 0°C level above the field, feet. Signed: negative when it sits below the
+   *  field (sub-freezing from the surface up). NaN only when the model omits it. */
   freezingLevelAglFt: number;
 }
 

@@ -22,6 +22,7 @@ import LocationBar from "./LocationBar";
 import UnitsControl from "./UnitsControl";
 import Alerts from "./Alerts";
 import Now from "./Now";
+import DensityAltitude from "./DensityAltitude";
 import CalmWindows from "./CalmWindows";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
@@ -271,6 +272,7 @@ export default function WeatherBoard() {
 
           <Panel id="now" title="Right now">
             <Now current={data.forecast.current} field={f} units={units} windLine={windLine} model={data.forecast.model} />
+            <DensityAltitude current={data.forecast.current} field={f} units={units} model={data.forecast.model} />
           </Panel>
 
           <Panel id="hourly" title="Today & tomorrow">

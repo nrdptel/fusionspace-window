@@ -53,8 +53,9 @@ export default function Page() {
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Right now</strong>{" "}
               is the surface wind against the <strong>20 mph</strong> NFPA/NAR/Tripoli launch
-              limit — a reference line, never a go/no-go. Winds are named for the direction they
-              blow <em>from</em>.
+              limit — a reference line, never a go/no-go — plus temperature, sky, and{" "}
+              <strong>density altitude</strong> (how thin the air is, which sets thrust and
+              descent). Winds are named for the direction they blow <em>from</em>.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
@@ -108,6 +109,17 @@ export default function Page() {
             units. The current reading carries its own valid time; it&apos;s a model analysis,
             not a station observation, so a gusty or terrain-affected field can differ from what
             you feel at the pad. Winds are the direction the air comes <em>from</em>.
+          </Method>
+          <Method title="Density altitude">
+            The altitude in the standard atmosphere where the air has the same density as the
+            air at the field right now — the honest way to say how thin the air is. It&apos;s
+            computed from the field&apos;s actual (station) pressure, temperature, and humidity:
+            the moist-air density (dry and water-vapour partial pressures over the gas
+            constants) inverted through the ISA density profile. Field elevation is shown only
+            for context — it isn&apos;t an input, a common misconception. It matters because
+            thinner air means a motor makes less thrust, descent under chute runs a little
+            faster, and the rocket climbs higher out of sight for tracking; hot, high, humid
+            days push it well above the ground. A figure, with its formula — not a verdict.
           </Method>
           <Method title="The 20 mph line">
             NFPA 1127 and the NAR/Tripoli safety codes set 20 mph as the surface-wind ceiling

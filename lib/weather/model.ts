@@ -31,6 +31,8 @@ export interface CurrentConditions {
   weatherCode: number;
   isDay: boolean;
   pressureMslHpa: number;
+  /** Actual pressure at the field (station pressure), hPa — the input for density altitude. */
+  surfacePressureHpa: number;
 }
 
 export interface HourPoint {

@@ -41,14 +41,13 @@ export default function Page() {
       <SiteHeader />
 
       {/* Safety framing — Window informs, it does not decide. */}
-      <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-relaxed text-amber-900 dark:text-amber-200">
+      <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-relaxed text-amber-900 dark:text-amber-200">
         <AlertTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
           <strong className="font-semibold">Window informs; it doesn&apos;t decide.</strong> It
-          shows the weather and the published reference lines — the 20 mph surface-wind limit,
-          winds aloft, the ceiling — and leaves the go/no-go call to you and your range&apos;s
-          rules. Every figure is best-effort and carries its source and valid time. Confirm
-          conditions yourself before you fly.
+          surfaces the weather against the published reference lines — the 20 mph wind limit,
+          winds aloft, the ceiling — and leaves the go/no-go call to you. Confirm conditions
+          yourself before you fly.
         </p>
       </div>
 
@@ -58,10 +57,9 @@ export default function Page() {
         </summary>
         <div className="mt-3 space-y-3 text-zinc-600 dark:text-zinc-400">
           <p>
-            Pick a launch field and Window pulls the weather a flyer actually needs to decide
-            whether to fly — fetched live in your browser, from the field you choose. It takes
-            no rocket parameters and gives no verdict; it surfaces the data and the reference
-            lines and lets you decide.
+            Pick a launch field and Window pulls the weather a flyer needs — live, in your
+            browser. It takes no rocket parameters and gives no verdict; it surfaces the data and
+            the reference lines and lets you decide.
           </p>
           <ul className="space-y-2">
             <li>

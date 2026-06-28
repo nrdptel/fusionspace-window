@@ -271,6 +271,19 @@ about why it matters. Same posture: it points the layer out, it doesn't decide. 
 strengthens exactly the panel that makes Window worth opening, at no new dependency or
 request.
 
+### Freezing level (post-v1)
+
+The winds-aloft panel is built on an altitude axis, which makes it the natural home for one
+more atmospheric figure a high-altitude flyer wants: the **0°C level**. A flight that punches
+well past it climbs into genuine cold, which is worth knowing for altimeter batteries and
+recovery electronics. Open-Meteo reports `freezing_level_height` (metres above sea level), so
+one more hourly variable on the existing request, expressed as height above the field in
+`forecast.ts` (and dropped to NaN when it sits below the field — already freezing at the
+surface), gives `AloftProfile.freezingLevelAglFt`. The chart draws it as a blue dashed
+reference line with a `0°C` tag and its height, but only when it falls inside the shown column,
+so the Top selector and the fly-time hour both move it naturally. It's the same posture as the
+20 mph and shear callouts: a labelled line, never a verdict. No new request, no dependency.
+
 ### Mean wind & drift (post-v1)
 
 Shear answers "what knocks it off heading"; the other question every flyer asks of a sounding

@@ -53,6 +53,21 @@ describe("parseForecast", () => {
     expect(fc.hourly[12].visibilityMi).toBeGreaterThan(fc.hourly[0].visibilityMi);
   });
 
+  it("expresses the 0°C freezing level as height above the field", () => {
+    // Fixture: 4500 m MSL, field 900 m → ~11,811 ft AGL.
+    expect(fc.aloftHourly[0].freezingLevelAglFt).toBeCloseTo((4500 - 900) * FT_PER_M, 0);
+  });
+
+  it("drops a below-field freezing level to NaN", () => {
+    const cold = {
+      ...raw,
+      hourly: { ...raw.hourly, freezing_level_height: raw.hourly!.time.map(() => 100) },
+    } as RawForecast;
+    const fcc = parseForecast(cold, "gfs_seamless");
+    // 100 m MSL is below the ~900 m field — no line to draw.
+    expect(Number.isNaN(fcc.aloftHourly[0].freezingLevelAglFt)).toBe(true);
+  });
+
   it("derives true AGL as geopotential height minus field elevation", () => {
     const levels = fc.aloftHourly[0].levels;
     const l500 = levels.find((l) => l.pressureHpa === 500)!;

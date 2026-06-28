@@ -52,6 +52,7 @@ const HOURLY_SURFACE = [
   "is_day",
   "cape",
   "visibility",
+  "freezing_level_height",
 ];
 
 const DAILY_VARS = [

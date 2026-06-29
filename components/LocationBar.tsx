@@ -5,6 +5,7 @@ import { fetchGeocode, fetchWindPeek } from "@/lib/weather/net";
 import type { Place } from "@/lib/weather/geocode";
 import type { WindPeek } from "@/lib/weather/peek";
 import type { SavedField } from "@/lib/prefs";
+import { LAUNCH_SITES } from "@/lib/launchSites";
 import {
   degToCompass,
   fmtWind,
@@ -59,6 +60,7 @@ export default function LocationBar({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCoords, setShowCoords] = useState(false);
+  const [showSites, setShowSites] = useState(false);
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
@@ -201,7 +203,21 @@ export default function LocationBar({
           </button>
           <button
             type="button"
-            onClick={() => setShowCoords((s) => !s)}
+            onClick={() => {
+              setShowSites((s) => !s);
+              setShowCoords(false);
+            }}
+            aria-expanded={showSites}
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            Sites
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowCoords((s) => !s);
+              setShowSites(false);
+            }}
             aria-expanded={showCoords}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
@@ -209,6 +225,32 @@ export default function LocationBar({
           </button>
         </div>
       </div>
+
+      {showSites && (
+        <div className="mt-3">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Popular launch sites — one-tap starting points. Coordinates are{" "}
+            <strong className="font-medium">approximate</strong>; fine-tune with search or
+            coordinates for your exact pad.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {LAUNCH_SITES.map((s) => (
+              <button
+                key={s.name}
+                type="button"
+                onClick={() => {
+                  setShowSites(false);
+                  onPick(s.lat, s.lon, s.name);
+                }}
+                className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500/50 dark:hover:text-indigo-400"
+              >
+                <PinIcon className="h-3 w-3 shrink-0 text-zinc-400" />
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {showCoords && (
         <form

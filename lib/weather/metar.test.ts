@@ -63,6 +63,23 @@ describe("parseObservation", () => {
     expect(p.description).toBe("Clear");
   });
 
+  it("does not treat a structured CLR layer carrying a sensor-max base as a ceiling", () => {
+    // Real automated stations (confirmed live at KORD and KDAG) send a structured cloudLayers
+    // entry of CLR with a base at the sensor's ~12,000 ft clear-below height. It must read as
+    // clear sky, never as a 12,500 ft "ceiling" the apogee read would clear against.
+    const p = parseObservation({
+      properties: {
+        timestamp: "2026-06-28T18:50:00Z",
+        textDescription: "Clear",
+        cloudLayers: [{ amount: "CLR", base: { unitCode: "wmoUnit:m", value: 3810 } }],
+      },
+    });
+    expect(p.layers[0].amount).toBe("CLR");
+    expect(p.layers[0].baseFt).toBeGreaterThan(12000);
+    expect(p.ceilingFt).toBeNull();
+    expect(p.usable).toBe(true);
+  });
+
   it("marks a station with no sky data (a RAWS site) unusable", () => {
     const p = parseObservation(obsRaws);
     expect(p.usable).toBe(false);

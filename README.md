@@ -38,6 +38,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
   multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a
   go/no-go gate — you can't fly into cloud under a waiver, so a peak at the deck is a *No-go*.
+  A **low-cloud outlook** (modeled) sits alongside as the forward-looking companion: the observed
+  ceiling is now-only, this flags low cloud building over the next two days before you drive out.
 - **Air quality & smoke** — the US AQI and the smoke (PM2.5) / dust (PM10) particulate, because
   haze cuts the visibility you need to track a high flight and a smoked-out field is a real scrub.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.

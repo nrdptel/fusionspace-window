@@ -12,6 +12,7 @@ import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
 import { gustiness } from "./gust";
 import { ceilingRead } from "./ceiling";
+import { lowCloudOutlook, lowCloudHeadline } from "./lowcloud";
 import { SURFACE_LIMIT_MPH } from "./limits";
 import { findCalmWindows } from "./windows";
 import {
@@ -131,6 +132,17 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     }
   } else {
     lines.push(`Sky: ${Math.round(sky.cloudCoverPct ?? 0)}% cloud (modeled)`);
+  }
+
+  // Low-cloud outlook — the forward-looking companion to the now-only observed ceiling.
+  const lowCloud = lowCloudOutlook(forecast.hourly.slice(hourIndex, hourIndex + 48));
+  if (lowCloud) {
+    lines.push(
+      `  Low cloud (modeled): ${lowCloudHeadline(
+        lowCloud,
+        (iso) => `${dayLabel(iso, c.time)} ${clockShort(iso)}`,
+      )}`,
+    );
   }
 
   // Visibility — observed where the station reports it, otherwise the modeled value.

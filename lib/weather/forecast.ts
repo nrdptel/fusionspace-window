@@ -108,6 +108,7 @@ function buildHourly(raw: RawForecast): HourPoint[] {
     precipProbPct: num(h.precipitation_probability?.[i]),
     precipIn: num(h.precipitation?.[i]) ?? 0,
     cloudCoverPct: num(h.cloud_cover?.[i]) ?? NaN,
+    cloudCoverLowPct: num(h.cloud_cover_low?.[i]) ?? NaN,
     weatherCode: num(h.weather_code?.[i]) ?? 0,
     // `is_day` is absent on some models; default to daytime so a calm window is
     // never wrongly hidden as "after dark".

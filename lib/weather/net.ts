@@ -50,6 +50,7 @@ const HOURLY_SURFACE = [
   "precipitation",
   "weather_code",
   "cloud_cover",
+  "cloud_cover_low",
   "surface_pressure",
   "wind_speed_10m",
   "wind_direction_10m",

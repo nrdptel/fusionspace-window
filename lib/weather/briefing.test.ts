@@ -2,9 +2,11 @@ import { describe, it, expect } from "vitest";
 import forecastFixture from "./__fixtures__/forecast.json";
 import obs from "./__fixtures__/nws-observation.json";
 import alertsFixture from "./__fixtures__/nws-alerts.json";
+import airQualityFixture from "./__fixtures__/airquality.json";
 import { parseForecast, type RawForecast } from "./forecast";
 import { parseObservation, stationSky } from "./metar";
 import { parseAlerts } from "./alerts";
+import { parseAirQuality } from "./airquality";
 import { buildBriefing } from "./briefing";
 import type { BoardData } from "./model";
 import { DEFAULT_UNITS } from "../units";
@@ -16,7 +18,14 @@ function board(): BoardData {
     28,
     parseObservation(obs),
   );
-  return { forecast, sky, alerts: parseAlerts(alertsFixture), climatology: null, fetchedAt: 0 };
+  return {
+    forecast,
+    sky,
+    alerts: parseAlerts(alertsFixture),
+    climatology: null,
+    airQuality: parseAirQuality(airQualityFixture),
+    fetchedAt: 0,
+  };
 }
 
 describe("buildBriefing", () => {
@@ -62,6 +71,11 @@ describe("buildBriefing", () => {
   it("includes the 0°C freezing level alongside the winds aloft", () => {
     // Fixture: ~11,800 ft AGL at noon (14,763 ft MSL over a 2,953 ft field).
     expect(text).toMatch(/0°C level: 11,8\d\d ft AGL/);
+  });
+
+  it("notes air quality when it's worse than Good", () => {
+    // Fixture: AQI 78 (Moderate), PM2.5 ~24.
+    expect(text).toMatch(/Air quality: AQI 78 \(Moderate\), PM2\.5 24/);
   });
 
   it("includes alerts, a calm window, and the short outlook", () => {

@@ -33,6 +33,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
   multi-day cloud picture beside it.
+- **Air quality & smoke** — the US AQI and the smoke (PM2.5) / dust (PM10) particulate, because
+  haze cuts the visibility you need to track a high flight and a smoked-out field is a real scrub.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.
 - **The next several days** — a ~7-day outlook with sunrise/sunset, set against the field's
   **seasonal normal** (is this week windier than typical, or about average?): the "is the drive
@@ -64,6 +66,8 @@ there is no backend.
 - **Open-Meteo Historical Archive** — about five years of the field's daily max wind for the
   "vs typical" seasonal normal in the outlook. Best-effort in the same way: absent if the lookup
   doesn't land, and the forecast stays the only hard dependency.
+- **Open-Meteo Air-Quality API** (CAMS) — the US AQI plus PM2.5/PM10 particulate for the air
+  quality & smoke read. Best-effort too: absent if it can't be reached.
 
 Winds aloft is Open-Meteo only — NOAA retired the public RAP/rucsoundings upper-air feed for
 the continental US, so there is no better free source.

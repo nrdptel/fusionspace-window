@@ -55,8 +55,11 @@ for (const scheme of ["light", "dark"] as const) {
     await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
     await page.getByRole("button", { name: "Sites" }).click();
     await page.getByText("Preview the text briefing").click();
+    // Set an apogee so the toned ceiling-clearance read renders (9,000 ft → the red "No-go").
+    await page.getByLabel(/Expected apogee/).fill("9000");
     await expect(page.getByText(/Popular launch sites/)).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Storms" })).toBeVisible();
+    await expect(page.locator("#sky").getByText("No-go", { exact: true })).toBeVisible();
 
     await audit(page, `expanded/${scheme}`);
   });

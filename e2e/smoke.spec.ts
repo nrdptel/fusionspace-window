@@ -67,6 +67,31 @@ test("shows the active NWS alert and the observed ceiling", async ({ page }) => 
   await expect(nowPanel.getByText(/Falling .* hPa\/3h/)).toBeVisible();
 });
 
+test("reads the observed ceiling against an expected apogee as a go/no-go gate", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  const sky = page.locator("#sky");
+  const apogee = page.getByLabel(/Expected apogee/);
+
+  // With no apogee set, the clearance line is absent — the ceiling is just a number.
+  await expect(sky.getByText(/of room below your/)).toHaveCount(0);
+
+  // The fixture ceiling is BKN ~6,496 ft. A 9,000 ft peak flies into the deck → No-go.
+  await apogee.fill("9000");
+  await expect(sky.getByText("No-go", { exact: true })).toBeVisible();
+  await expect(sky.getByText(/into the deck/)).toBeVisible();
+
+  // A 2,000 ft peak clears it comfortably → Clear.
+  await apogee.fill("2000");
+  await expect(sky.getByText("Clear", { exact: true })).toBeVisible();
+  await expect(sky.getByText(/of room below your 2,000 ft peak/)).toBeVisible();
+
+  // Clearing the field removes the read again.
+  await apogee.fill("");
+  await expect(sky.getByText(/of room below your/)).toHaveCount(0);
+});
+
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);

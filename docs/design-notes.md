@@ -447,6 +447,28 @@ regions), and the expanded-state audit now runs in CI in both themes so those st
 The lesson mirrors the data passes: audit the states users actually reach, not just the one that
 renders first.
 
+### Ceiling vs your apogee — a go/no-go gate (post-v1)
+
+The board already parsed the observed cloud **ceiling** out of the nearest METAR (lowest BKN/OVC
+base, in feet) and printed it — but it was the one figure on the whole board with *no
+interpretation*. Every other number gets toned against a reference: wind against the 20 mph line,
+gusts against their spread, storms by CAPE band, drift against a distance. The ceiling was a bare
+number. And for rocketry it's not a comfort metric, it's a **hard go/no-go gate**: FAR 101 waivers
+and the NAR/Tripoli safety codes forbid flying into or through cloud, so a flight whose predicted
+apogee reaches the deck simply can't go up, however calm the wind. General weather apps never frame
+the ceiling this way because they don't know you're about to put something *through* it.
+
+So the flyer sets an **expected apogee** (a new optional field beside the personal wind line, kept
+in feet because that's how US waivers and altimeters talk — `lib/prefs.ts`, capped at 100,000 ft),
+and `lib/weather/ceiling.ts` reads the ceiling against it: comfortably below → *Clear*, within a
+buffer → *Tight*, at or above → *No-go*. The buffer is the larger of 500 ft or **15% of the
+apogee** — a predicted peak carries real error (motor impulse, liftoff mass, drag all move it), so a
+flight that only just sneaks under the deck isn't a confident clearance; the percentage scales that
+honestly with altitude. A clear sky (no BKN/OVC) is the absence of a ceiling, so the caller owns it
+as an unlimited margin rather than feeding it through the comparison. The read lands in the sky
+panel and the text briefing, both gated on the apogee being set so the default board is unchanged.
+It fits the house style exactly: draw the line, state the margin, leave the call to the flyer.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

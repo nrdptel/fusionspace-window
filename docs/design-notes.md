@@ -428,6 +428,25 @@ NWS land station reports km/h, so that defensive `windToMph` branch can't be exe
 app's real source; it stays as cheap, unit-tested insurance. A pass that confirms robustness rather
 than fixing a bug is still worth running for a safety-adjacent tool — and it leaves a guard behind.
 
+### Health sweep — deps, security, a11y depth (post-v1)
+
+A maintenance pass rather than a feature. `npm audit` flagged three moderate advisories, all from
+one transitive `postcss <8.5.10` (an XSS in CSS *stringify* — a build-time path, not exploitable in
+a pre-built static export, but it shows up in any scan). The naive `audit fix --force` wanted to
+*downgrade Next to 9.x*, which is absurd; the clean fix is a single `overrides: { postcss:
+"^8.5.10" }` that forces the patched line (8.5.16) across the tree without touching the exact-pinned
+Next/React — audit goes to zero, build and tests stay green. Performance needed nothing: 1.7 MB of
+static output, the largest chunk ~70 KB gzipped, self-hosted Geist, SVG-only icons. The a11y axe
+suite was the interesting part: it only ever audited the *default* render, so it was extended to the
+**expanded** states behind a toggle (every disclosure opened, the chart table fallbacks, the
+popular-sites picker, the briefing preview) — and that immediately caught two real issues hidden in
+those states: toned status text (`amber-700`, `red-600`) failing contrast on the indigo *selected-row*
+tint in the table fallbacks, and the scrollable `max-h-72` table wrappers not being keyboard-focusable.
+Both fixed (lighter selected-row tint + weight so every tone clears 4.5:1; `tabIndex` on the scroll
+regions), and the expanded-state audit now runs in CI in both themes so those states can't regress.
+The lesson mirrors the data passes: audit the states users actually reach, not just the one that
+renders first.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

@@ -205,7 +205,11 @@ export default function HourlyTimeline({
         <summary className="cursor-pointer select-none text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Show the hourly numbers as a table
         </summary>
-        <div className="mt-2 max-h-72 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800">
+        <div
+          tabIndex={0}
+          aria-label="Hourly wind, gust, and direction table"
+          className="mt-2 max-h-72 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800"
+        >
           <table className="w-full text-left text-xs tabular-nums">
             <caption className="sr-only">Hourly surface wind, gust, and direction</caption>
             <thead className="sticky top-0 bg-zinc-50 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
@@ -218,9 +222,9 @@ export default function HourlyTimeline({
             </thead>
             <tbody>
               {window.map((h, i) => (
-                <tr key={i} className={i === selLocal ? "bg-indigo-500/10" : "odd:bg-zinc-50/60 dark:odd:bg-zinc-900/30"}>
+                <tr key={i} className={i === selLocal ? "bg-indigo-500/5 font-medium" : "odd:bg-zinc-50/60 dark:odd:bg-zinc-900/30"}>
                   <td className="px-3 py-1">{dayLabel(h.time, todayIso).slice(0, 3)} {clockShort(h.time)}</td>
-                  <td className={"px-3 py-1 " + (h.windMph >= SURFACE_LIMIT_MPH ? "text-red-600 dark:text-red-400" : "")}>
+                  <td className={"px-3 py-1 " + (h.windMph >= SURFACE_LIMIT_MPH ? "text-red-700 dark:text-red-400" : "")}>
                     {fmtWind(h.windMph, u.wind)}
                   </td>
                   <td className="px-3 py-1">{fmtWind(h.gustMph, u.wind)}</td>

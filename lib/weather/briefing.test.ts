@@ -33,8 +33,9 @@ describe("buildBriefing", () => {
     expect(text).toContain("valid 12:00 PM field-local");
   });
 
-  it("states the surface wind against the 20 mph limit", () => {
-    expect(text).toMatch(/Surface wind: 21 mph from WSW \(255°\), gusting 29 — over the 20 mph limit/);
+  it("states the surface wind against the 20 mph limit, noting the gustiness", () => {
+    // Fixture is 21 gusting 29 — an 8 mph spread reads as gusty.
+    expect(text).toMatch(/Surface wind: 21 mph from WSW \(255°\), gusting 29, gusty — over the 20 mph limit/);
   });
 
   it("adds the nearest station's observed wind as a cross-check", () => {

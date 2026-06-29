@@ -180,7 +180,9 @@ export default function HourlyTimeline({
                 <Metric
                   label="Wind"
                   value={`${fmtWind(s.windMph, u.wind)} ${WIND_LABEL[u.wind]}`}
-                  sub={`g${fmtWind(s.gustMph, u.wind)} · ${degToCompass(s.dirDeg)}`}
+                  sub={`g${fmtWind(s.gustMph, u.wind)} · ${degToCompass(s.dirDeg)}${
+                    s.gustiness.band !== "steady" ? ` · ${s.gustiness.label.toLowerCase()}` : ""
+                  }`}
                   tone={windTone(s.windMph, windLine)}
                 />
                 <Metric label="Temp" value={`${fmtTemp(s.tempF, u.temp)}${TEMP_LABEL[u.temp]}`} />

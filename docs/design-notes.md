@@ -489,6 +489,28 @@ The forecast ceiling in feet (TAF) is still the deferred-to-v2 item that would m
 forward go/no-go; until a proxy exists for that CORS-less source, the low-cloud band is the honest
 best-effort stand-in.
 
+### Validation pass #4 — the two sky features vs live data (post-v1)
+
+The same throwaway-spec discipline as the earlier passes, aimed at the new sky code: pull *real*
+Open-Meteo and NWS responses and run them through the actual parsers, not a fixture. Two things
+checked. (1) `cloud_cover_low` is genuinely returned by Open-Meteo — integer %, 0–100, no nulls,
+length-matched to `time` — so the parse and `lowCloudOutlook` assumptions hold; the live Black Rock
+series even carried an isolated 100% hour the bands read correctly. (2) `parseObservation` →
+`ceilingRead` against eight real stations spanning the sky: KAST (BKN@1700 / BKN@2600 / OVC@3700 →
+ceiling = the *lowest* BKN, 1700 ft), KSEA (OVC@2600), KKLS (FEW@2400 below a 3000 ft apogee + an
+OVC@3700 deck → reads **Clear**, because FEW/SCT below the apogee isn't a ceiling — exactly the
+rocketry semantics intended), KKIC (nothing → skipped). **No bug** — like the adversarial-edge pass,
+the value was the confirmation.
+
+The one durable, non-obvious shape it surfaced: real automated stations (KORD, KDAG, live) send a
+*structured* `cloudLayers` entry of **`CLR` with a base value** — clear-below the sensor's ~12,000 ft
+ceiling. The parser already ignores it (CLR isn't a ceiling amount), but nothing locked that exact
+shape, so a peak above 12,000 ft could in principle have read as flying into a phantom 12,500 ft
+"deck". A regression test now pins it: a structured CLR-with-base stays a null ceiling. A second
+real find worth noting in passing — `rawMessage` came back empty on every station sampled, so the
+structured path carries the load and the raw-METAR recovery only fires when `cloudLayers` is empty,
+exactly as designed.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

@@ -410,6 +410,24 @@ The structured array stays primary when it's populated; the fallback only fills 
 leaves. The upshot: on the clear days people actually fly, the *nearest* station's reading is
 used, not one tens of miles away.
 
+### Adversarial edge validation (post-v1)
+
+The first two real-data passes each found a bug (the CLR sky discard; the 0°C below/absent
+ambiguity); a third pass went looking specifically at the *geographic* edges most likely to break
+the parsers — below-sea-level fields (Death Valley −279 ft, the Salton Sea −236 ft), open ocean
+(a Gulf point at 0 ft elevation with no NWS stations), inland water (mid-Lake Michigan), and a
+barrier island — plus another hunt for a live m/s wind station. This time nothing broke: negative
+elevation keeps every pressure level (they're all above a sub-sea-level field) with sound AGL and
+freezing-level math; an ocean point parses fully, gets CAMS air quality, and degrades cleanly to a
+modeled sky when NWS returns no stations; a station feeding *no* wind at all (Lake Michigan's K8D4)
+reads `NaN`/unusable rather than crashing; and the conditions grid never threw. The one actionable
+output was test-hardening, the standing pattern for these passes: the *below-sea-level* path was
+real but untested, so it's now a `forecast.ts` regression case (negative elevation drops no levels;
+AGL and the 0°C line measure up from the negative datum). The m/s hunt came up empty again — every
+NWS land station reports km/h, so that defensive `windToMph` branch can't be exercised against the
+app's real source; it stays as cheap, unit-tested insurance. A pass that confirms robustness rather
+than fixing a bug is still worth running for a safety-adjacent tool — and it leaves a guard behind.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

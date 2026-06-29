@@ -212,7 +212,11 @@ export default function ConditionsTimeline({
         <summary className="cursor-pointer select-none text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Show the conditions grid as a table
         </summary>
-        <div className="mt-2 max-h-72 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800">
+        <div
+          tabIndex={0}
+          aria-label="Hourly conditions table"
+          className="mt-2 max-h-72 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800"
+        >
           <table className="w-full text-left text-xs tabular-nums">
             <caption className="sr-only">
               Wind, gusts, storm potential, and chance of rain by hour for the next two days
@@ -230,7 +234,7 @@ export default function ConditionsTimeline({
               {window.map((h, i) => {
                 const c = conds[i];
                 return (
-                  <tr key={i} className={i === selLocal ? "bg-indigo-500/10" : "odd:bg-zinc-50/60 dark:odd:bg-zinc-900/30"}>
+                  <tr key={i} className={i === selLocal ? "bg-indigo-500/5 font-medium" : "odd:bg-zinc-50/60 dark:odd:bg-zinc-900/30"}>
                     <td className="px-3 py-1">{dayLabel(h.time, todayIso).slice(0, 3)} {clockShort(h.time)}</td>
                     <td className={"px-3 py-1 " + windToneTextClass(c.wind.tone)}>{fmtWind(h.windMph, u.wind)}</td>
                     <td className={"px-3 py-1 " + windToneTextClass(c.gusts.tone)}>{c.gusts.label}</td>

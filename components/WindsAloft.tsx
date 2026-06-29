@@ -278,7 +278,11 @@ export default function WindsAloft({
           <summary className="cursor-pointer select-none text-xs font-medium text-zinc-600 dark:text-zinc-400">
             Show the winds-aloft numbers as a table
           </summary>
-          <div className="mt-2 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800">
+          <div
+            tabIndex={0}
+            aria-label="Winds-aloft table"
+            className="mt-2 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800"
+          >
             <table className="w-full text-left text-xs tabular-nums">
               <caption className="sr-only">Wind speed and direction by altitude above ground</caption>
               <thead className="bg-zinc-50 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">

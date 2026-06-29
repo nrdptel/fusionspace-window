@@ -42,4 +42,22 @@ for (const scheme of ["light", "dark"] as const) {
     await page.goto("/privacy/", { waitUntil: "networkidle" });
     await audit(page, `privacy/${scheme}`);
   });
+
+  // The default audit can't see content behind a toggle. This opens every disclosure (the
+  // methodology sections and each chart's table fallback), reveals the popular-sites picker and
+  // the briefing preview, so contrast/ARIA in those reached-but-collapsed states is covered too.
+  test(`a11y: expanded interactive state (${scheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await installStubs(page);
+    await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
+
+    await page.evaluate(() => document.querySelectorAll("details").forEach((d) => (d.open = true)));
+    await page.getByRole("button", { name: "Sites" }).click();
+    await page.getByText("Preview the text briefing").click();
+    await expect(page.getByText(/Popular launch sites/)).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Storms" })).toBeVisible();
+
+    await audit(page, `expanded/${scheme}`);
+  });
 }

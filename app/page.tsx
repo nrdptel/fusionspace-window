@@ -240,8 +240,11 @@ export default function Page() {
             It&apos;s the honest one-number answer to which way recovery tends to walk, named
             for the direction the rocket drifts <em>toward</em> (the opposite of the wind&apos;s
             source). It changes with the Top selector, so you can read the mean to 10k or to the
-            whole column. It assumes nothing about your rocket or descent rate — it leans the
-            drift, it doesn&apos;t predict the landing.
+            whole column. The drift also carries a <em>rate</em> — how far downrange recovery
+            walks for each minute aloft (just the mean wind as distance-over-time, ×88 from mph to
+            ft/min) — so you multiply by your own time under chute for a rough downrange distance.
+            It assumes nothing about your rocket or descent rate — you supply the hang time — so it
+            leans the drift and gives its scale, it doesn&apos;t predict the landing.
           </Method>
           <Method title="Freezing level (0°C)">
             The profile also draws the <strong>0°C level</strong> — the height where the air

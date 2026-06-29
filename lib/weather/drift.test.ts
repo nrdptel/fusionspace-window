@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { meanWindAloft, type DriftInput } from "./drift";
+import { driftFtPerMin, meanWindAloft, type DriftInput } from "./drift";
 
 function lvl(aglFt: number, windMph: number, dirDeg: number): DriftInput {
   return { aglFt, windMph, dirDeg };
@@ -51,5 +51,13 @@ describe("meanWindAloft", () => {
     expect(capped!.fromDeg).toBeCloseTo(270, 2);
     expect(capped!.topFt).toBe(10000);
     expect(capped!.count).toBe(2);
+  });
+});
+
+describe("driftFtPerMin", () => {
+  it("turns a mean wind (mph) into downrange feet per minute aloft", () => {
+    expect(driftFtPerMin(15)).toBeCloseTo(1320, 6); // 15 mph = 0.25 mi/min = 1,320 ft/min
+    expect(driftFtPerMin(0)).toBe(0);
+    expect(driftFtPerMin(60)).toBeCloseTo(5280, 6); // 60 mph = 1 mi/min
   });
 });

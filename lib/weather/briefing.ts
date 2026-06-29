@@ -7,7 +7,7 @@
 
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
-import { meanWindAloft } from "./drift";
+import { meanWindAloft, driftFtPerMin } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
 import { gustiness } from "./gust";
@@ -176,7 +176,8 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     if (mean) {
       lines.push(
         `Mean wind to ${fmtLength(mean.topFt, u.length)} ${LENGTH_LABEL[u.length]}: ` +
-          `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}`,
+          `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}, ` +
+          `~${fmtLength(driftFtPerMin(mean.speedMph), u.length)} ${LENGTH_LABEL[u.length]}/min aloft`,
       );
     }
 

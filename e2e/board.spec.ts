@@ -34,8 +34,9 @@ test("the winds-aloft profile has an accessible table fallback with a surface ro
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { name: "Winds aloft", exact: true })).toBeVisible();
 
-  // The column's mean wind is surfaced with the drift direction.
+  // The column's mean wind is surfaced with the drift direction and a downrange drift rate.
   await expect(page.locator("#aloft").getByText(/recovery tends to walk/)).toBeVisible();
+  await expect(page.locator("#aloft").getByText(/downrange per minute aloft/)).toBeVisible();
   // The 0°C freezing level is drawn on the profile (fixture: ~11,800 ft AGL, in view).
   await expect(page.locator("#aloft").getByText("0°C", { exact: true })).toBeVisible();
 

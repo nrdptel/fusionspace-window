@@ -53,6 +53,9 @@ export interface HourPoint {
   precipProbPct: number | null;
   precipIn: number;
   cloudCoverPct: number;
+  /** Low-cloud cover, % — the layer that most often forms a launch-blocking ceiling. NaN when
+   *  the model omits it. */
+  cloudCoverLowPct: number;
   weatherCode: number;
   /** Daylight at this hour (Open-Meteo `is_day`). */
   isDay: boolean;

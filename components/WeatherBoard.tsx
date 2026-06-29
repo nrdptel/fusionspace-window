@@ -402,6 +402,7 @@ export default function WeatherBoard() {
               now={now || data.fetchedAt}
               modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
               apogee={apogee}
+              lowCloudHourly={data.forecast.hourly.slice(currentHourIndex(data), currentHourIndex(data) + 48)}
             />
           </Panel>
 

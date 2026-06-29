@@ -17,6 +17,7 @@ function hp(time: string, windMph: number, isDay: boolean, gustMph = windMph * 1
     precipProbPct: 0,
     precipIn: 0,
     cloudCoverPct: 0,
+    cloudCoverLowPct: 0,
     weatherCode: 0,
     isDay,
   };

@@ -14,6 +14,7 @@ function series(pressures: number[]): HourPoint[] {
     precipProbPct: 0,
     precipIn: 0,
     cloudCoverPct: 0,
+    cloudCoverLowPct: 0,
     weatherCode: 0,
     isDay: true,
     capeJkg: 0,

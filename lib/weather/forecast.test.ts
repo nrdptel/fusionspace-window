@@ -52,6 +52,7 @@ describe("parseForecast", () => {
     expect(fc.daily).toHaveLength(raw.daily!.time.length);
     expect(fc.hourly[12].windMph).toBe(raw.hourly!.wind_speed_10m![12]);
     expect(fc.hourly[6].windMph).toBe(7); // the morning calm window
+    expect(fc.hourly[12].cloudCoverLowPct).toBe(raw.hourly!.cloud_cover_low![12]);
     expect(fc.daily[0].tempMaxF).toBe(raw.daily!.temperature_2m_max![0]);
   });
 

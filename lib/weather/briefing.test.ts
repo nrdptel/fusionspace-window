@@ -56,6 +56,12 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Pressure: falling 3\.0 hPa over 3h/);
   });
 
+  it("adds the modeled low-cloud outlook beneath the sky line", () => {
+    // Fixture low cloud is thin at the current hour, building to an 85% overcast deck by
+    // midday tomorrow.
+    expect(text).toMatch(/Low cloud \(modeled\): Thin now, building to overcast \(85%\) by Tomorrow 12 PM/);
+  });
+
   it("includes the observed ceiling, density altitude, and winds aloft", () => {
     expect(text).toMatch(/Sky: Mostly Cloudy, ceiling [\d,]+ ft \(KDAG, observed\)/);
     expect(text).toMatch(/Visibility: 10 mi \(observed\)/);

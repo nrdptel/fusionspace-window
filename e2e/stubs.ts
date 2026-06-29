@@ -24,6 +24,8 @@ export interface StubOptions {
   nws?: "ok" | "down";
   /** Open-Meteo historical archive availability (the seasonal normal). */
   archive?: "ok" | "down";
+  /** Open-Meteo air-quality availability (US AQI + smoke). */
+  airQuality?: "ok" | "down";
   /** Station observations: "mixed" (a RAWS then a real METAR) or "allRaws" — every nearby
    *  station is a no-sky RAWS, the real case at a remote desert field like Black Rock. */
   observations?: "mixed" | "allRaws";
@@ -34,6 +36,7 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
   const forecast = opts.forecast ?? "ok";
   const nws = opts.nws ?? "ok";
   const archive = opts.archive ?? "ok";
+  const airQuality = opts.airQuality ?? "ok";
   const observations = opts.observations ?? "mixed";
 
   await page.route("https://api.open-meteo.com/v1/forecast**", (route) => {
@@ -44,6 +47,11 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
   await page.route("https://archive-api.open-meteo.com/**", (route) => {
     if (archive === "down") return route.abort("failed");
     return json(route, "archive.json");
+  });
+
+  await page.route("https://air-quality-api.open-meteo.com/**", (route) => {
+    if (airQuality === "down") return route.abort("failed");
+    return json(route, "airquality.json");
   });
 
   await page.route("https://geocoding-api.open-meteo.com/**", (route) =>

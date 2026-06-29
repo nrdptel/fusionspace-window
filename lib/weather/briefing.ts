@@ -127,6 +127,13 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
     );
   }
 
+  // Air quality / smoke — called out only when it's worth a mention (worse than Good).
+  const aq = board.airQuality;
+  if (aq && aq.category.band !== "good") {
+    const pm = aq.pm25 != null ? `, PM2.5 ${Math.round(aq.pm25)}` : "";
+    lines.push(`Air quality: AQI ${aq.usAqi} (${aq.category.label})${pm}`);
+  }
+
   // Pressure tendency — called out only when it's actually moving.
   const tend = pressureTendency(forecast.hourly, hourIndex);
   if (tend && tend.trend !== "steady") {

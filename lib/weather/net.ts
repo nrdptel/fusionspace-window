@@ -8,6 +8,7 @@
 import type { BoardData, Sky } from "./model";
 import { parseForecast, PRESSURE_LEVELS, type RawForecast } from "./forecast";
 import { summarizeClimatology, type RawArchive } from "./climatology";
+import { parseAirQuality } from "./airquality";
 import { parseWindPeek, type WindPeek } from "./peek";
 import { parseAlerts } from "./alerts";
 import { parseGeocode, type Place } from "./geocode";
@@ -23,6 +24,7 @@ export const MODEL = "gfs_seamless";
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING = "https://geocoding-api.open-meteo.com/v1/search";
 const ARCHIVE = "https://archive-api.open-meteo.com/v1/archive";
+const AIR_QUALITY = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const NWS = "https://api.weather.gov";
 
 const CURRENT_VARS = [
@@ -122,6 +124,17 @@ export function buildArchiveUrl(lat: number, lon: number, startDate: string, end
     timezone: "auto",
   });
   return `${ARCHIVE}?${p.toString()}`;
+}
+
+/** Current air quality (US AQI + smoke/dust particulate). Best-effort, like the archive. */
+export function buildAirQualityUrl(lat: number, lon: number): string {
+  const p = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    current: "us_aqi,pm2_5,pm10",
+    timezone: "auto",
+  });
+  return `${AIR_QUALITY}?${p.toString()}`;
 }
 
 /** A minimal current-wind request for the saved-fields glance. */
@@ -240,6 +253,10 @@ export async function loadBoard(
   // Seasonal normal — best-effort, like NWS; the board renders fine without it.
   const range = archiveRange();
   const archiveP = fetchJson(buildArchiveUrl(lat, lon, range.start, range.end), 10_000).catch(() => null);
+  // Air quality / smoke — best-effort, the same posture; null on any failure.
+  const airQualityP = fetchJson(buildAirQualityUrl(lat, lon), 8_000)
+    .then((raw) => parseAirQuality(raw))
+    .catch(() => null);
 
   const raw = await forecastP;
   const point = await pointP;
@@ -248,7 +265,12 @@ export async function loadBoard(
     ? fetchStationSky(lat, lon, point.stationsUrl).catch(() => null)
     : Promise.resolve(null);
 
-  const [stationSkyResult, alerts, archiveRaw] = await Promise.all([skyP, alertsP, archiveP]);
+  const [stationSkyResult, alerts, archiveRaw, airQuality] = await Promise.all([
+    skyP,
+    alertsP,
+    archiveP,
+    airQualityP,
+  ]);
 
   const forecast = parseForecast(raw, MODEL, label ?? point.label);
   const sky = stationSkyResult ?? modelSky(forecast.current.cloudCoverPct);
@@ -256,5 +278,5 @@ export async function loadBoard(
     ? summarizeClimatology(archiveRaw as RawArchive, forecast.current.time)
     : null;
 
-  return { forecast, sky, alerts, climatology, fetchedAt: Date.now() };
+  return { forecast, sky, alerts, climatology, airQuality, fetchedAt: Date.now() };
 }

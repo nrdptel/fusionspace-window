@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildArchiveUrl, buildForecastUrl, buildGeocodeUrl, buildWindPeekUrl, MODEL } from "./net";
+import { buildAirQualityUrl, buildArchiveUrl, buildForecastUrl, buildGeocodeUrl, buildWindPeekUrl, MODEL } from "./net";
 
 // Only the pure URL builders are tested — the fetchers are deliberately untested so CI
 // never touches the live providers.
@@ -63,5 +63,15 @@ describe("buildArchiveUrl", () => {
     expect(params.get("end_date")).toBe("2026-06-20");
     expect(params.get("daily")).toContain("wind_speed_10m_max");
     expect(params.get("wind_speed_unit")).toBe("mph");
+  });
+});
+
+describe("buildAirQualityUrl", () => {
+  it("targets the air-quality endpoint for US AQI and particulate", () => {
+    const url = buildAirQualityUrl(34.45, -116.95);
+    const params = new URL(url).searchParams;
+    expect(url.startsWith("https://air-quality-api.open-meteo.com/v1/air-quality?")).toBe(true);
+    expect(params.get("latitude")).toBe("34.45");
+    expect(params.get("current")).toBe("us_aqi,pm2_5,pm10");
   });
 });

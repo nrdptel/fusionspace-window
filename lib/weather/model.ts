@@ -6,6 +6,7 @@
  *  that is how US flyers and waivers talk about altitude. */
 
 import type { ClimatologyNormal } from "./climatology";
+import type { AirQuality } from "./airquality";
 
 export interface Field {
   lat: number;
@@ -155,6 +156,8 @@ export interface BoardData {
   alerts: WxAlert[] | null;
   /** Seasonal wind normal from the archive — null when the best-effort lookup didn't land. */
   climatology: ClimatologyNormal | null;
+  /** Air quality / smoke — null when the best-effort lookup didn't land. */
+  airQuality: AirQuality | null;
   /** Epoch ms the data was fetched (set by the network layer). */
   fetchedAt: number;
 }

@@ -107,6 +107,13 @@ export default function Page() {
               isn&apos;t), with a modelled multi-day cloud picture beside it.
             </li>
             <li>
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">Air quality &amp; smoke</strong>{" "}
+              is the US AQI and the smoke/dust particulate — because haze cuts the visibility you
+              need to track a high flight (and a smoked-out field is a real reason a launch gets
+              scrubbed). It&apos;s a best-effort read; if it can&apos;t be fetched, it&apos;s simply
+              absent.
+            </li>
+            <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Units &amp; sharing</strong>{" "}
               — toggle Imperial/Metric (and knots) any time; it never refetches. The field is in
               the URL, so a link is shareable and reload-proof, and a bare visit comes back to
@@ -267,6 +274,17 @@ export default function Page() {
             reachable it falls back to Open-Meteo&apos;s modelled visibility for the current hour,
             labelled <em>modelled</em>. Observed values top out around the METAR&apos;s 10-mile
             reporting ceiling; the model can read higher in genuinely clear air.
+          </Method>
+          <Method title="Air quality & wildfire smoke">
+            The US Air Quality Index (the standard 0–500 EPA scale, banded Good through Hazardous)
+            plus the fine and coarse particulate — PM2.5 is the wildfire-<em>smoke</em> proxy, PM10
+            the dust — from Open-Meteo&apos;s air-quality model (CAMS). It earns a place here, not
+            just as a health number, because smoke and haze cut the visibility you need to keep a
+            high flight in sight, and a smoked-out field (a regular event in the western US in fire
+            season) is a real reason a launch gets called. Like the seasonal normal and NWS it&apos;s
+            a <strong>best-effort</strong> source on its own request: if it can&apos;t be reached the
+            panel is simply absent and the rest of the board is unaffected. A figure on a standard
+            scale, not a verdict.
           </Method>
           </Disclosure>
 

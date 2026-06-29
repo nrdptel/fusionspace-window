@@ -33,6 +33,7 @@ import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
+import AirQualityPanel from "./AirQuality";
 import Outlook from "./Outlook";
 import { Panel, Pill } from "./ui";
 import { StarIcon } from "./icons";
@@ -387,6 +388,12 @@ export default function WeatherBoard() {
               modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
             />
           </Panel>
+
+          {data.airQuality && (
+            <Panel id="air" title="Air quality &amp; smoke">
+              <AirQualityPanel aq={data.airQuality} />
+            </Panel>
+          )}
 
           <Panel id="outlook" title="The next several days">
             <Outlook

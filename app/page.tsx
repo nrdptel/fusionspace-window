@@ -269,6 +269,16 @@ export default function Page() {
             Open-Meteo&apos;s modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling
             in feet (TAF) is planned for a later version — its source has no browser access today.
           </Method>
+          <Method title="Ceiling vs your apogee">
+            A waiver doesn&apos;t let you fly into or through cloud, so the ceiling is a hard
+            go/no-go gate, not a comfort number. Type your expected apogee in the controls above the
+            board and the sky panel reads the observed ceiling against it: a peak comfortably below
+            the deck is <em>Clear</em>, one within a buffer of it is <em>Tight</em>, and a peak at or
+            above the deck is a <em>No-go</em>. The buffer is the larger of 500&nbsp;ft or 15% of the
+            apogee, because a predicted peak carries real error — motor impulse, mass and drag each
+            move it — so a flight that only just sneaks under isn&apos;t a confident clearance. It&apos;s
+            a read, not a ruling: the altitude you enter and the call you make are yours.
+          </Method>
           <Method title="Visibility">
             Horizontal visibility in statute miles — it matters for keeping a high flight in
             sight and for the cloud-and-visibility rules many waivers carry. Like the ceiling,

@@ -33,6 +33,7 @@ describe("buildBriefing", () => {
     units: DEFAULT_UNITS,
     hourIndex: 12, // the fixture's current hour (12:00)
     windLine: null,
+    apogee: null,
     shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
   });
 
@@ -95,9 +96,27 @@ describe("buildBriefing", () => {
       units: { system: "metric", windKnots: false },
       hourIndex: 12,
       windLine: null,
+      apogee: null,
       shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
     });
     expect(metric).toMatch(/km\/h/);
     expect(metric).toMatch(/°C/);
+  });
+
+  it("adds a ceiling-clearance line when an expected apogee is set", () => {
+    const base = {
+      units: DEFAULT_UNITS,
+      hourIndex: 12,
+      windLine: null,
+      shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
+    };
+    // Fixture ceiling is BKN ~6,496 ft. A 9,000 ft peak flies into it.
+    const nogo = buildBriefing(board(), { ...base, apogee: 9000 });
+    expect(nogo).toMatch(/Ceiling vs 9,000 ft apogee: No-go — [\d,]+ ft into the deck/);
+    // A 2,000 ft peak clears it comfortably.
+    const clear = buildBriefing(board(), { ...base, apogee: 2000 });
+    expect(clear).toMatch(/Ceiling vs 2,000 ft apogee: Clear — [\d,]+ ft of room below your 2,000 ft peak/);
+    // With no apogee set, the line is absent.
+    expect(buildBriefing(board(), { ...base, apogee: null })).not.toMatch(/apogee:/);
   });
 });

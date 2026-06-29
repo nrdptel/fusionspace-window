@@ -11,6 +11,7 @@ import { meanWindAloft, driftFtPerMin } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
 import { gustiness } from "./gust";
+import { ceilingRead } from "./ceiling";
 import { SURFACE_LIMIT_MPH } from "./limits";
 import { findCalmWindows } from "./windows";
 import {
@@ -42,6 +43,8 @@ export interface BriefingOptions {
   hourIndex: number;
   /** Personal wind line (mph), or null. */
   windLine: number | null;
+  /** Expected apogee (feet AGL), or null — adds a ceiling-clearance read to the sky line. */
+  apogee: number | null;
   /** Absolute, shareable URL for this field. */
   shareUrl: string;
 }
@@ -78,7 +81,7 @@ function sampleAloft(
 }
 
 export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
-  const { units, hourIndex, windLine, shareUrl } = opts;
+  const { units, hourIndex, windLine, apogee, shareUrl } = opts;
   const u = resolveUnits(units);
   const { forecast, sky, alerts } = board;
   const c = forecast.current;
@@ -114,6 +117,18 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
         : "no ceiling";
     const station = sky.station ? ` (${sky.station.id}, observed)` : " (observed)";
     lines.push(`Sky: ${sky.description}, ${ceil}${station}`);
+    if (apogee != null) {
+      const apo = `${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]}`;
+      if (sky.ceilingFt != null) {
+        const r = ceilingRead(sky.ceilingFt, apogee);
+        const abs = `${fmtLength(Math.abs(r.marginFt), u.length)} ${LENGTH_LABEL[u.length]}`;
+        const detail =
+          r.marginFt <= 0 ? `${abs} into the deck` : `${abs} of room below your ${apo} peak`;
+        lines.push(`  Ceiling vs ${apo} apogee: ${r.status} — ${detail}`);
+      } else {
+        lines.push(`  Ceiling vs ${apo} apogee: Clear — sky open above your peak`);
+      }
+    }
   } else {
     lines.push(`Sky: ${Math.round(sky.cloudCoverPct ?? 0)}% cloud (modeled)`);
   }

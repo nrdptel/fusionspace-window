@@ -455,6 +455,24 @@ one-line why when it's not steady), the fly-time snapshot carries it for the sel
 briefing notes it on the surface-wind line. It's the figures already on the page, interpreted for
 rocketry — a turbulence heads-up, never a verdict. No new request or dependency.
 
+### Conditions at a glance — the factor grid (post-v1)
+
+Each panel answers one question well, but a flyer hunting for a launch window was left to
+cross-reference four of them — surface wind, gusts, storm potential, rain — across time in their
+head. So a dedicated panel lines those four up as a grid: four rows, one cell per hour for the
+next two days, each cell green/amber/red. The honesty problem this raised is the obvious
+temptation: blend the four into one go/no-go colour. That's exactly what the whole tool refuses
+to do, so it stays four *separate* rows — each coloured against its **own** reference (wind and
+gusts against the 20 mph line and any personal line via `windTone`/`gustiness`, storms by CAPE
+band via `classifyCape`, rain by the hourly probability) — and the user reads the window across
+them. The per-hour, per-factor mapping is a pure, tested helper (`lib/weather/conditions.ts`); the
+component only paints what it returns, as an SVG strip matching the other charts, with a colour
+key, an accessible table fallback, and per-column tooltips. It shares the fly-time selection, so
+tapping a column moves the snapshot and the winds-aloft profile with it. The precip row is the one
+genuinely new band (a chance-of-rain scale, falling back to the modelled amount when the model
+gives no probability) — everything else is the board's existing reads, re-presented in time. No
+new request or dependency; it's a synthesis view, not a new source.
+
 ### Observed wind cross-check & raw METAR (post-v1)
 
 The surface wind on the board is a *model analysis*, not a measurement — the explainer always

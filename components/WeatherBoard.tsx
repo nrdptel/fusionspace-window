@@ -28,6 +28,7 @@ import Now from "./Now";
 import DensityAltitude from "./DensityAltitude";
 import StormPotential from "./StormPotential";
 import CalmWindows from "./CalmWindows";
+import ConditionsTimeline from "./ConditionsTimeline";
 import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
@@ -350,6 +351,18 @@ export default function WeatherBoard() {
               windLine={windLine}
               todayIso={todayIso}
               model={data.forecast.model}
+            />
+          </Panel>
+
+          <Panel id="conditions" title="Conditions at a glance">
+            <ConditionsTimeline
+              hourly={data.forecast.hourly}
+              startIndex={currentHourIndex(data)}
+              selectedIndex={selectedHour}
+              onSelect={setSelectedHour}
+              units={units}
+              windLine={windLine}
+              todayIso={todayIso}
             />
           </Panel>
 

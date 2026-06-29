@@ -334,6 +334,24 @@ the wind units, so it gets its own `VIS_LABEL`/`fmtVisibility`). Observed values
 the METAR's 10-mile reporting ceiling while the model reads higher in clear air — a small
 honest discontinuity the source labels make legible. It rides into the field briefing too.
 
+### Air quality & wildfire smoke (post-v1)
+
+Visibility from the METAR is the *observed* clarity, but it tops out at ten miles and says
+nothing about *why* the air is hazy. In the western US — Black Rock, Lucerne, most of the high
+desert where this hobby lives — that "why" is increasingly wildfire smoke, and a smoked-out field
+is a real reason a launch gets scrubbed (you can't track what you can't see, and it's a health
+call at the pad). So the board now carries air quality as its own best-effort read: the US AQI
+plus PM2.5 (the smoke proxy) and PM10 (dust), from Open-Meteo's free, keyless Air-Quality API
+(CAMS). It's the fourth provider call and the third *best-effort* one — the same posture as NWS
+and the seasonal normal: a parallel fetch in `loadBoard`, a pure tested parser/classifier
+(`airquality.ts`, banding the AQI into the six EPA categories over the board's three tones), and
+on any failure it returns null so the panel is simply absent and the forecast — the only hard
+dependency — is untouched. It renders as its own panel below the sky (only when the lookup landed)
+and rides into the briefing when it's worse than Good. The framing is deliberately rocketry-first:
+the health scale is the headline, but the blurb leads with what it means for *tracking* a flight,
+because that's the part a general AQI widget never tells a flyer. A figure on a standard scale,
+never a verdict.
+
 ### Methodology, collapsed (post-v1)
 
 "How this is derived" had grown — every feature added its own honest write-up — into a long

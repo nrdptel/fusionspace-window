@@ -161,6 +161,23 @@ test("the outlook sets the week against the seasonal normal", async ({ page }) =
   await expect(outlook.getByText("windier than usual")).toBeVisible();
 });
 
+test("the air-quality panel shows the AQI and smoke, and degrades cleanly", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  const air = page.locator("#air");
+  await expect(air.getByRole("heading", { name: /Air quality/ })).toBeVisible();
+  await expect(air.getByText("78")).toBeVisible(); // fixture US AQI
+  await expect(air.getByText("Moderate")).toBeVisible();
+  await expect(air.getByText(/PM2\.5 \(smoke\)/)).toBeVisible();
+});
+
+test("the air-quality panel is simply absent when the source is unreachable", async ({ page }) => {
+  await installStubs(page, { airQuality: "down" });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
+  await expect(page.locator("#air")).toHaveCount(0);
+});
+
 test("the outlook degrades cleanly when the archive is unreachable", async ({ page }) => {
   await installStubs(page, { archive: "down" });
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

@@ -14,7 +14,7 @@ import {
 } from "@/lib/units";
 import { clockShort } from "@/lib/format";
 import { strongestShear } from "@/lib/weather/shear";
-import { meanWindAloft } from "@/lib/weather/drift";
+import { meanWindAloft, driftFtPerMin } from "@/lib/weather/drift";
 import { Segmented, SourceLine } from "./ui";
 
 const W = 580;
@@ -225,10 +225,15 @@ export default function WindsAloft({
               {fmtWind(mean.speedMph, u.wind)} {WIND_LABEL[u.wind]}
             </span>{" "}
             from {degToCompass(mean.fromDeg)} — recovery tends to walk{" "}
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">{degToCompass(mean.towardDeg)}</span>.
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200">{degToCompass(mean.towardDeg)}</span>, about{" "}
+            <span className="font-mono tabular-nums">
+              {fmtLength(driftFtPerMin(mean.speedMph), u.length)} {LENGTH_LABEL[u.length]}
+            </span>{" "}
+            downrange per minute aloft.
           </span>
           <span className="text-zinc-500 dark:text-zinc-400">
-            The column&apos;s average wind, the way drift leans — not a landing prediction.
+            Multiply by your time under chute for the rough downrange distance — the column&apos;s
+            average wind, not a landing prediction.
           </span>
         </div>
       )}

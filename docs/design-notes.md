@@ -318,6 +318,15 @@ descent rate — it leans the drift, it doesn't predict a landing — keeping Wi
 informational, no-verdict posture. No new dependency or request; it's geometry over levels the
 board already plots.
 
+The drift callout originally gave only the *direction*, which left half the recovery question —
+*how far?* — unanswered. The honest completion (post-v1) is a **rate**, not a distance: the mean
+wind is itself a speed, so `driftFtPerMin` (tested, just mph × 5280/60 = ×88) reframes it as how
+far downrange recovery walks for each minute aloft, and the flyer multiplies by their own time
+under chute. That's the trick that keeps it within the no-verdict line — it takes no descent rate
+and no rocket parameter, predicts no landing point, and simply gives the *scale* the existing
+direction was missing. It shows in the Drift callout ("…about 2,900 ft downrange per minute
+aloft") and the briefing, both in the active length unit.
+
 ### Visibility (post-v1)
 
 The Sky panel showed the ceiling but not visibility, which is the other half of a flyer's

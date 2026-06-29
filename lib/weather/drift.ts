@@ -32,6 +32,14 @@ export interface MeanWind {
   count: number;
 }
 
+/** Downrange drift rate at a given mean wind — feet per minute aloft. Total drift ≈ this ×
+ *  the minutes a rocket spends in the air, so the flyer supplies their own hang time: it takes
+ *  no rocket parameter and predicts no landing, it just turns the mean wind into the distance
+ *  scale recovery actually cares about (mph → ft/min is × 5280/60 = × 88). */
+export function driftFtPerMin(meanWindMph: number): number {
+  return meanWindMph * (5280 / 60);
+}
+
 /** Wind velocity components (mph): the wind blows toward (from + 180°); u east, v north. */
 function components(speed: number, fromDeg: number): { u: number; v: number } {
   const r = (fromDeg * Math.PI) / 180;

@@ -60,7 +60,7 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Visibility: 10 mi \(observed\)/);
     expect(text).toMatch(/density altitude ~[\d,]+ ft/);
     expect(text).toMatch(/Winds aloft \(AGL ft\/mph\):/);
-    expect(text).toMatch(/Mean wind to [\d,]+ ft: \d+ mph from [NSEW]+ — drift toward [NSEW]+/);
+    expect(text).toMatch(/Mean wind to [\d,]+ ft: \d+ mph from [NSEW]+ — drift toward [NSEW]+, ~[\d,]+ ft\/min aloft/);
   });
 
   it("surfaces storm potential with the day's CAPE peak", () => {

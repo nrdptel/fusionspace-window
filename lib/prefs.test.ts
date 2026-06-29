@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   addSaved,
+  parseApogee,
   parseLastField,
   parseSaved,
   parseUnits,
@@ -49,6 +50,25 @@ describe("parseWindLine", () => {
     expect(parseWindLine("0")).toBeNull();
     expect(parseWindLine("15")).toBe(15);
     expect(parseWindLine("99")).toBe(20); // a personal line above the published limit is capped
+  });
+});
+
+describe("parseApogee", () => {
+  it("treats empty / non-positive / junk as none", () => {
+    expect(parseApogee(null)).toBeNull();
+    expect(parseApogee("")).toBeNull();
+    expect(parseApogee("0")).toBeNull();
+    expect(parseApogee("-500")).toBeNull();
+    expect(parseApogee("abc")).toBeNull();
+  });
+
+  it("reads a positive whole-foot altitude", () => {
+    expect(parseApogee("4000")).toBe(4000);
+    expect(parseApogee("4000.9")).toBe(4000); // parsed as an integer
+  });
+
+  it("caps at 100,000 ft so a fat-fingered entry can't run away", () => {
+    expect(parseApogee("250000")).toBe(100000);
   });
 });
 

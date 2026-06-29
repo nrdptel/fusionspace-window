@@ -36,7 +36,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   recovery drifts), and the **0°C** level. The thing general weather apps bury or cap low.
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
-  multi-day cloud picture beside it.
+  multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a
+  go/no-go gate — you can't fly into cloud under a waiver, so a peak at the deck is a *No-go*.
 - **Air quality & smoke** — the US AQI and the smoke (PM2.5) / dust (PM10) particulate, because
   haze cuts the visibility you need to track a high flight and a smoked-out field is a real scrub.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.

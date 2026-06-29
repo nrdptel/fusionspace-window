@@ -10,6 +10,8 @@ import {
   type UnitPrefs,
 } from "@/lib/units";
 import { dayLabel, relativeAge } from "@/lib/format";
+import { ceilingRead } from "@/lib/weather/ceiling";
+import { windToneTextClass } from "@/lib/weather/limits";
 import { Card, Pill, SourceLine } from "./ui";
 
 export default function SkyPanel({
@@ -19,6 +21,7 @@ export default function SkyPanel({
   todayIso,
   now,
   modeledVisibilityMi,
+  apogee,
 }: {
   sky: Sky;
   daily: DayOutlook[];
@@ -27,8 +30,11 @@ export default function SkyPanel({
   now: number;
   /** Current-hour modeled visibility (statute miles), the fallback when no station reports it. */
   modeledVisibilityMi: number;
+  /** Expected apogee (feet AGL), or null — turns the ceiling into a go/no-go clearance read. */
+  apogee: number | null;
 }) {
   const u = resolveUnits(units);
+  const apogeeLen = apogee != null ? `${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]}` : "";
 
   // Visibility prefers the station observation; otherwise the model fills in.
   const observedVisMi = sky.source === "station" ? sky.visibilityMi : null;
@@ -58,6 +64,36 @@ export default function SkyPanel({
                 {sky.description}
                 {sky.ceilingFt == null && " — no broken or overcast layer reported"}
               </p>
+
+              {/* Clearance against the expected apogee, when one is set. */}
+              {apogee != null &&
+                (sky.ceilingFt != null ? (
+                  (() => {
+                    const r = ceilingRead(sky.ceilingFt, apogee);
+                    const abs = `${fmtLength(Math.abs(r.marginFt), u.length)} ${LENGTH_LABEL[u.length]}`;
+                    const detail =
+                      r.marginFt <= 0
+                        ? `your ${apogeeLen} peak is ${abs} into the deck`
+                        : r.status === "Tight"
+                          ? `only ${abs} of room below your ${apogeeLen} peak`
+                          : `${abs} of room below your ${apogeeLen} peak`;
+                    return (
+                      <p className="mt-2 text-sm">
+                        <span className={"font-semibold " + windToneTextClass(r.tone)}>{r.status}</span>
+                        <span className="text-zinc-600 dark:text-zinc-400"> · {detail}</span>
+                      </p>
+                    );
+                  })()
+                ) : (
+                  <p className="mt-2 text-sm">
+                    <span className={"font-semibold " + windToneTextClass("emerald")}>Clear</span>
+                    <span className="text-zinc-600 dark:text-zinc-400">
+                      {" "}
+                      · sky is open above your {apogeeLen} peak
+                    </span>
+                  </p>
+                ))}
+
               {sky.layers && sky.layers.length > 0 && (
                 <ul className="mt-2 space-y-0.5 font-mono text-xs text-zinc-500 dark:text-zinc-400">
                   {sky.layers.map((l, i) => (
@@ -149,6 +185,8 @@ export default function SkyPanel({
             {sky.station.time && ` · ${relativeAge(Date.parse(sky.station.time), now)}`} · NWS
             METAR. Visibility {visObserved ? "is the station's observed value" : "is modeled (Open-Meteo); the station reported none"}.
             Daily cloud cover is modeled (Open-Meteo).
+            {apogee != null &&
+              " The clearance read compares the observed ceiling with your expected apogee — you can't fly into cloud under a waiver, so a peak at the deck is a no-go."}
           </>
         ) : (
           <>Cloud cover and visibility modeled by Open-Meteo. A forecast ceiling in feet (TAF) is planned for a later version.</>

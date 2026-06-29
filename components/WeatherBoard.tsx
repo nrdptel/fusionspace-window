@@ -9,11 +9,13 @@ import { pressureTendency } from "@/lib/weather/pressure";
 import { isStale, relativeAge, clock } from "@/lib/format";
 import {
   addSaved,
+  readApogee,
   readLastField,
   readSaved,
   readUnits,
   readWindLine,
   removeSaved,
+  writeApogee,
   writeLastField,
   writeSaved,
   writeUnits,
@@ -54,6 +56,7 @@ export default function WeatherBoard() {
   const [field, setField] = useState<UrlState | null>(null);
   const [units, setUnits] = useState<UnitPrefs>(DEFAULT_UNITS);
   const [windLine, setWindLine] = useState<number | null>(null);
+  const [apogee, setApogee] = useState<number | null>(null);
   const [saved, setSaved] = useState<SavedField[]>([]);
 
   const [data, setData] = useState<BoardData | null>(null);
@@ -103,6 +106,7 @@ export default function WeatherBoard() {
     }
     setUnits(readUnits());
     setWindLine(readWindLine());
+    setApogee(readApogee());
     setSaved(readSaved());
     const onPop = () => setField(decodeState(window.location.search));
     window.addEventListener("popstate", onPop);
@@ -187,6 +191,10 @@ export default function WeatherBoard() {
   const updateWindLine = (v: number | null) => {
     setWindLine(v);
     writeWindLine(v);
+  };
+  const updateApogee = (v: number | null) => {
+    setApogee(v);
+    writeApogee(v);
   };
   const toggleSave = () => {
     if (!data) return;
@@ -289,11 +297,18 @@ export default function WeatherBoard() {
             </Notice>
           )}
 
-          <FieldBriefing board={data} units={units} windLine={windLine} hourIndex={currentHourIndex(data)} />
+          <FieldBriefing board={data} units={units} windLine={windLine} apogee={apogee} hourIndex={currentHourIndex(data)} />
 
           {/* Units / personal line */}
           <div className="mt-4">
-            <UnitsControl units={units} onUnits={updateUnits} windLine={windLine} onWindLine={updateWindLine} />
+            <UnitsControl
+              units={units}
+              onUnits={updateUnits}
+              windLine={windLine}
+              onWindLine={updateWindLine}
+              apogee={apogee}
+              onApogee={updateApogee}
+            />
           </div>
 
           {data.alerts && data.alerts.length > 0 && <Alerts alerts={data.alerts} />}
@@ -386,6 +401,7 @@ export default function WeatherBoard() {
               todayIso={todayIso}
               now={now || data.fetchedAt}
               modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
+              apogee={apogee}
             />
           </Panel>
 

@@ -7,6 +7,7 @@ import { DEFAULT_UNITS, type UnitPrefs } from "./units";
 
 const UNITS_KEY = "window.units";
 const WINDLINE_KEY = "window.windline";
+const APOGEE_KEY = "window.apogee";
 const SAVED_KEY = "window.savedFields";
 const LAST_KEY = "window.lastField";
 const SAVED_LIMIT = 12;
@@ -73,6 +74,33 @@ export function writeWindLine(mph: number | null): void {
   try {
     if (mph == null) localStorage.removeItem(WINDLINE_KEY);
     else localStorage.setItem(WINDLINE_KEY, String(mph));
+  } catch {
+    /* no-op */
+  }
+}
+
+// --- expected apogee (feet AGL) ---
+/** The flight's planned peak altitude, used to read the cloud ceiling as a go/no-go gate, or
+ *  null for none. Kept in feet because that's how US waivers and altimeters talk about altitude
+ *  (see model.ts). Floored above 0 and capped at 100,000 ft — well past any US amateur waiver,
+ *  so a fat-fingered entry can't produce a nonsense margin. */
+export function parseApogee(raw: string | null): number | null {
+  if (raw == null || raw === "") return null;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(100000, n);
+}
+export function readApogee(): number | null {
+  try {
+    return parseApogee(localStorage.getItem(APOGEE_KEY));
+  } catch {
+    return null;
+  }
+}
+export function writeApogee(ft: number | null): void {
+  try {
+    if (ft == null) localStorage.removeItem(APOGEE_KEY);
+    else localStorage.setItem(APOGEE_KEY, String(ft));
   } catch {
     /* no-op */
   }

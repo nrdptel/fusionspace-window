@@ -111,4 +111,24 @@ describe("parseForecast", () => {
     const heights = levels.map((l) => l.aglFt);
     expect(heights).toEqual([...heights].sort((a, b) => a - b));
   });
+
+  it("handles a below-sea-level field (negative elevation) without dropping levels", () => {
+    // Real US desert fields sit below sea level — Death Valley (~-280 ft), the Salton Sea
+    // (~-235 ft). Every pressure level is then ABOVE the field, so none may be dropped, the AGL
+    // (measured up from the negative datum) must stay positive and exceed the MSL height, and the
+    // 0°C level lands higher AGL than its MSL height.
+    const below = { ...raw, elevation: -85 } as RawForecast; // ≈ -279 ft
+    const fcb = parseForecast(below, "gfs_seamless");
+    expect(fcb.field.elevationFt).toBeLessThan(0);
+
+    const levels = fcb.aloftHourly[0].levels;
+    // 925 hPa (2,600 ft MSL) is dropped over a 2,953 ft field but kept over a below-sea-level one.
+    expect(levels.some((l) => l.pressureHpa === 925)).toBe(true);
+    expect(levels.every((l) => l.aglFt >= 0)).toBe(true);
+    const l925 = levels.find((l) => l.pressureHpa === 925)!;
+    expect(l925.aglFt).toBeGreaterThan(l925.mslFt);
+
+    // Freezing level (14,763 ft MSL) measured up from a sub-sea-level field exceeds its MSL height.
+    expect(fcb.aloftHourly[0].freezingLevelAglFt).toBeGreaterThan(14763);
+  });
 });

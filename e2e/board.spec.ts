@@ -202,6 +202,20 @@ test("saved fields show a current-wind glance", async ({ page }) => {
   await expect(chip).toContainText(/\d+ [NSEW]/);
 });
 
+test("popular launch sites are one-tap starting points", async ({ page }) => {
+  await installStubs(page);
+  await page.goto("/", { waitUntil: "networkidle" }); // empty state, no field in the URL
+
+  await page.getByRole("button", { name: "Sites" }).click();
+  await expect(page.getByText(/Popular launch sites/)).toBeVisible();
+  await expect(page.getByText(/approximate/)).toBeVisible(); // honest labelling
+
+  await page.getByRole("button", { name: /Black Rock Desert/ }).click();
+  // The chosen site loads the board and rides into the shareable URL.
+  await expect(page).toHaveURL(/lat=40\.87/);
+  await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
+});
+
 test("a bare visit returns to the last field", async ({ page }) => {
   await installStubs(page);
   await page.addInitScript(() => {

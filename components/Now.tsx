@@ -13,6 +13,7 @@ import {
 } from "@/lib/units";
 import { describeWeather } from "@/lib/weather/wmo";
 import type { PressureTendency } from "@/lib/weather/pressure";
+import { gustiness } from "@/lib/weather/gust";
 import { SURFACE_LIMIT_MPH, windTone, windToneTextClass } from "@/lib/weather/limits";
 import { clock, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
@@ -75,6 +76,7 @@ export default function Now({
   const sky = describeWeather(current.weatherCode, current.isDay);
   const tone = windTone(current.windMph, windLine);
   const gustOverLimit = current.gustMph >= SURFACE_LIMIT_MPH && current.windMph < SURFACE_LIMIT_MPH;
+  const steadiness = gustiness(current.windMph, current.gustMph);
 
   const statusText =
     tone === "red"
@@ -99,8 +101,16 @@ export default function Now({
           </div>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Gusting {fmtWind(current.gustMph, u.wind)} {WIND_LABEL[u.wind]} · from{" "}
-            {degToCompass(current.dirDeg)}
+            {degToCompass(current.dirDeg)} ·{" "}
+            <span className={"font-medium " + windToneTextClass(steadiness.tone)}>
+              {steadiness.label.toLowerCase()}
+            </span>
           </p>
+          {steadiness.band !== "steady" && (
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              {steadiness.blurb.charAt(0).toUpperCase() + steadiness.blurb.slice(1)}.
+            </p>
+          )}
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Pill tone={tone}>{statusText}</Pill>

@@ -439,6 +439,22 @@ storm potential — destabilising air plus dropping pressure is a sharper heads-
 alone — and, like everything here, it states the rate and leaves the call to you. No new request
 or dependency.
 
+### Wind steadiness — gusts (post-v1)
+
+The 20 mph line is a *sustained*-wind limit, and the board always showed the gust alongside the
+sustained wind — but it never *interpreted* the gap, and gusty air is arguably a bigger off-the-rod
+hazard than steady wind: a gust at the wrong instant pushes a rocket off heading right at the rail,
+and rod whip and erratic weathercocking grow with the spread. So a pure, tested helper
+(`lib/weather/gust.ts`) bands the sustained/gust pair into *steady / gusty / very gusty*. The catch
+is that neither the ratio nor the spread alone is right: the gust factor (peak ÷ sustained)
+over-flags a big ratio sitting on a light breeze (3 gusting 9 isn't a hazard), while a fixed mph
+spread misses that the same 8 mph spread means more over a 6 mph mean than a 25 mph one. So it bands
+on *either* a high factor *or* a wide absolute spread, with a light-air floor that keeps weak
+variable wind reading steady. "Right now" shows the band inline on the gust line (toned, with a
+one-line why when it's not steady), the fly-time snapshot carries it for the selected hour, and the
+briefing notes it on the surface-wind line. It's the figures already on the page, interpreted for
+rocketry — a turbulence heads-up, never a verdict. No new request or dependency.
+
 ### Observed wind cross-check & raw METAR (post-v1)
 
 The surface wind on the board is a *model analysis*, not a measurement — the explainer always

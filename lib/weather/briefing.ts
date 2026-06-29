@@ -10,6 +10,7 @@ import { densityAltitudeFt } from "./density";
 import { meanWindAloft } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
+import { gustiness } from "./gust";
 import { SURFACE_LIMIT_MPH } from "./limits";
 import { findCalmWindows } from "./windows";
 import {
@@ -89,9 +90,11 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   lines.push(`${f.lat.toFixed(3)}, ${f.lon.toFixed(3)} · valid ${clock(c.time)} field-local`);
   lines.push("");
 
+  const steadiness = gustiness(c.windMph, c.gustMph);
+  const gustNote = steadiness.band !== "steady" ? `, ${steadiness.label.toLowerCase()}` : "";
   lines.push(
     `Surface wind: ${fmtWind(c.windMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(c.dirDeg)} (${Math.round(c.dirDeg)}°), ` +
-      `gusting ${fmtWind(c.gustMph, u.wind)} — ${surfacePhrase(c.windMph, windLine, u.wind)}`,
+      `gusting ${fmtWind(c.gustMph, u.wind)}${gustNote} — ${surfacePhrase(c.windMph, windLine, u.wind)}`,
   );
 
   // Observed cross-check from the nearest station, where one reported wind.

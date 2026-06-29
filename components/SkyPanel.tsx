@@ -1,6 +1,7 @@
 "use client";
 
-import type { DayOutlook, Sky } from "@/lib/weather/model";
+import { useMemo } from "react";
+import type { DayOutlook, HourPoint, Sky } from "@/lib/weather/model";
 import {
   fmtLength,
   fmtVisibility,
@@ -9,10 +10,17 @@ import {
   VIS_LABEL,
   type UnitPrefs,
 } from "@/lib/units";
-import { dayLabel, relativeAge } from "@/lib/format";
+import { clockShort, dayLabel, relativeAge } from "@/lib/format";
 import { ceilingRead } from "@/lib/weather/ceiling";
-import { windToneTextClass } from "@/lib/weather/limits";
+import { lowCloudOutlook, lowCloudHeadline, lowCloudRead } from "@/lib/weather/lowcloud";
+import { windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { Card, Pill, SourceLine } from "./ui";
+
+const LOW_CLOUD_FILL: Record<WindTone, string> = {
+  emerald: "fill-emerald-400 dark:fill-emerald-500",
+  amber: "fill-amber-400 dark:fill-amber-500",
+  red: "fill-red-400 dark:fill-red-500",
+};
 
 export default function SkyPanel({
   sky,
@@ -22,6 +30,7 @@ export default function SkyPanel({
   now,
   modeledVisibilityMi,
   apogee,
+  lowCloudHourly,
 }: {
   sky: Sky;
   daily: DayOutlook[];
@@ -32,9 +41,13 @@ export default function SkyPanel({
   modeledVisibilityMi: number;
   /** Expected apogee (feet AGL), or null — turns the ceiling into a go/no-go clearance read. */
   apogee: number | null;
+  /** Forward window of hourly points (from the current hour) for the low-cloud outlook. */
+  lowCloudHourly: HourPoint[];
 }) {
   const u = resolveUnits(units);
   const apogeeLen = apogee != null ? `${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]}` : "";
+
+  const lowCloud = useMemo(() => lowCloudOutlook(lowCloudHourly), [lowCloudHourly]);
 
   // Visibility prefers the station observation; otherwise the model fills in.
   const observedVisMi = sky.source === "station" ? sky.visibilityMi : null;
@@ -165,6 +178,82 @@ export default function SkyPanel({
           </div>
         </div>
       </div>
+
+      {/* Low-cloud outlook — the forward-looking companion to the now-only observed ceiling. */}
+      {lowCloud && (
+        <div className="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Low cloud · next 2 days
+            </span>
+            <Pill tone="amber">Modeled</Pill>
+          </div>
+          <p className="mt-1 text-sm">
+            <span className={"font-medium " + windToneTextClass(lowCloud.peak.tone)}>
+              {lowCloudHeadline(
+                lowCloud,
+                (iso) => `${dayLabel(iso, todayIso)} ${clockShort(iso)}`,
+              )}
+            </span>
+          </p>
+          {(() => {
+            const CW = 5;
+            const CH = 16;
+            const BOT = 12;
+            const W = lowCloudHourly.length * CW;
+            const H = CH + BOT;
+            return (
+              <svg
+                viewBox={`0 0 ${W} ${H}`}
+                width={W}
+                height={H}
+                role="img"
+                aria-label={`Modeled low-cloud cover, next ${lowCloudHourly.length} hours. ${lowCloudHeadline(
+                  lowCloud,
+                  (iso) => `${dayLabel(iso, todayIso)} ${clockShort(iso)}`,
+                )}.`}
+                className="mt-2 max-w-full"
+              >
+                <line x1={0} y1={CH} x2={W} y2={CH} className="stroke-zinc-200 dark:stroke-zinc-800" strokeWidth="1" />
+                {lowCloudHourly.map((h, i) => {
+                  const pct = Number.isFinite(h.cloudCoverLowPct) ? h.cloudCoverLowPct : 0;
+                  const barH = Math.max(1, (CH * Math.max(0, Math.min(100, pct))) / 100);
+                  return (
+                    <rect
+                      key={i}
+                      x={i * CW}
+                      y={CH - barH}
+                      width={CW - 1}
+                      height={barH}
+                      rx="0.5"
+                      className={LOW_CLOUD_FILL[lowCloudRead(pct).tone]}
+                    >
+                      <title>{`${dayLabel(h.time, todayIso)} ${clockShort(h.time)} — ${Math.round(pct)}% low cloud`}</title>
+                    </rect>
+                  );
+                })}
+                {lowCloudHourly.map((h, i) => {
+                  if (!h.time.endsWith("T00:00") || i === 0) return null;
+                  return (
+                    <g key={`d${i}`}>
+                      <line x1={i * CW} y1={0} x2={i * CW} y2={CH} className="stroke-zinc-300 dark:stroke-zinc-600" strokeWidth="1" />
+                      <text x={i * CW + 2} y={H - 2} className="fill-zinc-500 dark:fill-zinc-400" fontSize="8">
+                        {dayLabel(h.time, todayIso)}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            );
+          })()}
+          <SourceLine>
+            Modeled low-cloud cover from Open-Meteo — the forward-looking companion to the
+            observed ceiling. Low cloud is the layer that usually forms a launch-blocking ceiling;
+            high cloud doesn&apos;t. It&apos;s cover, not a forecast ceiling height, so treat it as a
+            heads-up — the observed ceiling above keeps the go/no-go.
+          </SourceLine>
+        </div>
+      )}
 
       {sky.source === "station" && sky.raw && (
         <details className="mt-3 text-sm">

@@ -469,6 +469,26 @@ as an unlimited margin rather than feeding it through the comparison. The read l
 panel and the text briefing, both gated on the apogee being set so the default board is unchanged.
 It fits the house style exactly: draw the line, state the margin, leave the call to the flyer.
 
+### Low-cloud outlook — the forecast companion to the ceiling (post-v1)
+
+The ceiling-clearance read was honest but **now-only**: it reads the observed METAR ceiling, which
+can't tell a flyer that low cloud is forecast to build tomorrow afternoon — exactly the thing
+you'd want to know *before* driving two hours to a field. Open-Meteo forecasts `cloud_cover_low`
+hourly (free, already on the same call), so the natural other half is a forward read of that
+series across the planning window. `lib/weather/lowcloud.ts` bands a cover figure thin / broken /
+overcast (the okta convention a METAR uses to *call* a ceiling — broken at ~5–7 oktas is where a
+layer starts being one) and summarises a window into a headline: "Thin now, building to overcast
+(85%) by Tomorrow 12 PM", or "Overcast now, thinning to 20% by …", or "stays thin". Low cloud
+specifically, not total cloud — high cirrus doesn't form a launch-blocking ceiling, so folding it
+in would cry wolf. The honest seam is the important part: this is cover **%**, not a forecast
+ceiling *height*, so it can't be a go/no-go the way the observed ceiling-vs-apogee read is. It's
+deliberately softer — labelled *modelled*, framed as a heads-up, with the observed ceiling keeping
+the actual call. A compact per-hour strip (bar height = cover, colour = band) sits under the
+headline; the SVG carries the headline as its `aria-label` and the bars carry per-hour `<title>`s.
+The forecast ceiling in feet (TAF) is still the deferred-to-v2 item that would make this a true
+forward go/no-go; until a proxy exists for that CORS-less source, the low-cloud band is the honest
+best-effort stand-in.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

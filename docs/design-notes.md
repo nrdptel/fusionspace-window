@@ -421,6 +421,21 @@ and no stray history entry is added. A genuinely new user (nothing stored) still
 onboarding prompt; the URL, when it has coordinates, still wins. It's the same local-prefs
 posture as units and saved fields: a convenience held in the browser, nothing sent anywhere.
 
+### Quick-pick launch sites (post-v1)
+
+v1 deliberately shipped *no curated directory* — the tool is field-agnostic and any coordinates
+work. But the reality is that most flyers launch at a handful of established waivered sites, and
+the empty state's single "try Lucerne Valley" example under-served that. So the location bar now
+has a **Sites** toggle (beside Coordinates) revealing a one-tap chip list of well-known US
+high-power / club sites — Black Rock, Lucerne (ROC), Argonia (Kloudbusters), Brothers (OROC),
+Bong, NEFAR, and a few more, roughly west to east. It's a static list (`lib/launchSites.ts`, with
+a typo-guard test bounding every coordinate to the continental US and forbidding dupes) — no API,
+no new dependency. The honesty caveat is built into the UI and the data comment: these are
+**approximate** launch-area coordinates (~1 km), not surveyed pads or an endorsement or a
+waiver-status claim — a starting point you fine-tune with search or coordinates. That's why it's a
+*small curated quick-pick*, not the full directory v1 ruled out: it lowers the barrier for the
+core audience's first lookup without pretending to be authoritative.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,
@@ -645,10 +660,11 @@ for the field you choose. Geolocation, if you use it, only sets coordinates loca
 
 ### Decisions (resolved)
 
-- **Scope of v1:** location (coords / search / geolocation, no curated directory); alerts;
-  current conditions vs the 20 mph line; hourly timeline; winds-aloft AGL profile;
-  ceiling/sky (observed + modeled); 7-day outlook; the derivation explainer; units toggle
-  incl. knots; personal wind line; saved fields; last-known offline.
+- **Scope of v1:** location (coords / search / geolocation, no curated directory — _revisited
+  post-v1; see "Quick-pick launch sites"_); alerts; current conditions vs the 20 mph line; hourly
+  timeline; winds-aloft AGL profile; ceiling/sky (observed + modeled); 7-day outlook; the
+  derivation explainer; units toggle incl. knots; personal wind line; saved fields; last-known
+  offline.
 - **Winds-aloft viz:** vertical AGL profile, default top 20k ft, presets to 30k/all,
   SVG + table fallback, time tied to the hourly selection.
 - **Charts:** bespoke SVG, no chart library (data is small; keeps deps identical to Charge).

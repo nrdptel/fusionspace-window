@@ -44,10 +44,11 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 - **How this is derived** — source, model, valid time, and limits for every figure.
 
 US-first, imperial defaults (mph, ft, °F) with a units toggle (metric, and knots for wind).
-The field rides in the URL, so any view is a shareable, reload-proof link; units, saved
-fields, and your personal wind line stay in your browser. Each saved field shows its current
-wind at a glance, so a club running more than one site can see which is flyable without
-opening each one.
+Pick a field by place search, your location, coordinates, or a one-tap quick-pick of well-known
+launch sites (Black Rock, Lucerne, Argonia, Bong, NEFAR…). The field rides in the URL, so any
+view is a shareable, reload-proof link; units, saved fields, and your personal wind line stay in
+your browser. Each saved field shows its current wind at a glance, so a club running more than
+one site can see which is flyable without opening each one.
 
 ## The data
 

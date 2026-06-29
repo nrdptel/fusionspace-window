@@ -15,30 +15,34 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 
 ## What it shows
 
-- **Right now** — surface wind, gust, and direction against the 20 mph launch limit, with the
-  model figure cross-checked against the nearest station's *observed* wind; plus temperature,
-  sky, **density altitude** (how thin the air is, which sets thrust and descent), and a
-  **pressure tendency** so you can see the barometer rising or falling. Winds are named for the
-  direction they blow *from*.
+- **Right now** — surface wind, gust, and direction against the 20 mph launch limit, with a
+  **steadiness** read that flags gusty, turbulent air the sustained limit misses, and the model
+  figure cross-checked against the nearest station's *observed* wind; plus temperature, sky,
+  **density altitude** (how thin the air is, which sets thrust and descent), and a **pressure
+  tendency** so you can see the barometer rising or falling. Winds are named for the direction
+  they blow *from*.
 - **Storm potential** — convective instability (CAPE), now and the day's peak, sorted into the
   bands meteorologists use — so a calm morning that towers up by mid-afternoon doesn't catch
   you out.
 - **Today & tomorrow** — an hourly wind timeline with the upcoming **calm windows** surfaced
   above it. Drag the **fly-time** slider (or tap a window) to any hour and a snapshot shows that
   hour's wind, density altitude, and storm potential — and the winds-aloft profile follows it.
+- **Conditions at a glance** — the next two days as four colored rows (wind, gusts, storms,
+  rain), each against its own line, so you can spot a window where everything clears at once. Tap
+  a column to set the fly-time. No blended verdict — the rows stay separate, the call stays yours.
 - **Winds aloft** — the signature panel: wind speed and direction by true height above the
   field, surface up to waiver altitudes, mapped from pressure-level geopotential heights. It
-  flags the strongest **shear** layer, the column's **mean wind** (which way recovery drifts),
-  and the **0°C** level. The thing general weather apps bury or cap low.
+  flags the strongest **shear** layer, the column's **mean wind** (which way *and how far*
+  recovery drifts), and the **0°C** level. The thing general weather apps bury or cap low.
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
   multi-day cloud picture beside it.
 - **Air quality & smoke** — the US AQI and the smoke (PM2.5) / dust (PM10) particulate, because
   haze cuts the visibility you need to track a high flight and a smoked-out field is a real scrub.
 - **Active alerts** — NWS watches, warnings, and advisories for the field.
-- **The next several days** — a ~7-day outlook with sunrise/sunset, set against the field's
-  **seasonal normal** (is this week windier than typical, or about average?): the "is the drive
-  worth it" view.
+- **The next several days** — a ~7-day outlook with each day's **calmest flyable window** and
+  sunrise/sunset, set against the field's **seasonal normal** (is this week windier than typical,
+  or about average?): the "is the drive worth it" view.
 - **Field briefing** — "Copy briefing" assembles a plain-text summary of the conditions for the
   club chat; "Copy link" shares the exact view.
 - **How this is derived** — source, model, valid time, and limits for every figure.

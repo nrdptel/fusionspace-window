@@ -81,6 +81,13 @@ export default function Page() {
               not just now.
             </li>
             <li>
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">Conditions at a glance</strong>{" "}
+              stacks the next two days as four colored rows — wind, gusts, storms, and rain — each
+              against its own line, so you can spot a window where everything clears at once. Tap a
+              column to set the fly-time. There&apos;s no blended go/no-go; the rows stay separate
+              so the call is yours.
+            </li>
+            <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Winds aloft</strong>{" "}
               is wind speed and direction by true height above the field, surface up to waiver
               altitudes — the thing general weather apps bury. Each pressure level is placed at
@@ -284,6 +291,17 @@ export default function Page() {
           </Disclosure>
 
           <Disclosure title="Planning ahead — calm windows, outlook &amp; seasonal normal">
+          <Method title="Conditions at a glance (the grid)">
+            Each panel answers one question; the conditions grid lines four of them up hour by hour
+            for the next two days so you can find a window where they all clear at once without
+            reading four charts. Each row is colored against its <em>own</em> reference — wind and
+            gusts against the {`20 mph`} line (and your personal line), storm potential by CAPE
+            band, the chance of rain by the hourly probability — green/amber/red. It is deliberately
+            <em> not</em> a blended go/no-go score: the rows stay separate, each an honest read, so
+            the decision is still yours. Tapping a column sets the fly-time, moving the snapshot and
+            the winds-aloft profile with it. Plain re-presentation of figures already on the page —
+            no new request or dependency.
+          </Method>
           <Method title="Calm windows">
             The hourly forecast already knows when the wind lays down, so Window surfaces the
             upcoming stretches where the <em>sustained</em> wind stays at or below your line (the

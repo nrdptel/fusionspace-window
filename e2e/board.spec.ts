@@ -76,6 +76,26 @@ test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
   await expect(header).not.toContainText("12 PM");
 });
 
+test("the conditions grid stacks the factor rows and lists them in a table", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  const grid = page.locator("#conditions");
+  await expect(grid.getByRole("heading", { name: "Conditions at a glance" })).toBeVisible();
+
+  // Four factors, stacked as labelled rows (the row labels live in the SVG).
+  const svg = grid.locator("svg");
+  for (const label of ["Wind", "Gusts", "Storms", "Precip"]) {
+    await expect(svg.getByText(label, { exact: true })).toBeVisible();
+  }
+  // The colour key is present; there is deliberately no single blended verdict.
+  await expect(grid.getByText("caution", { exact: true })).toBeVisible();
+
+  // The table fallback carries the underlying per-hour statuses (fixture noon: 21 gusting 29 → gusty).
+  await grid.getByText("Show the conditions grid as a table").click();
+  await expect(grid.getByRole("columnheader", { name: "Storms" })).toBeVisible();
+  await expect(grid.getByRole("cell", { name: "Gusty" }).first()).toBeVisible();
+});
+
 test("calm windows are surfaced and jump the profile when tapped", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

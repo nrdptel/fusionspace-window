@@ -102,8 +102,13 @@ export default function LocationBar({
   }
 
   function useMyLocation() {
-    if (!("geolocation" in navigator)) {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
       setError("This browser can't share your location. Search or enter coordinates instead.");
+      return;
+    }
+    // Geolocation only works over a secure (HTTPS) connection — say so rather than appear to hang.
+    if (typeof window !== "undefined" && window.isSecureContext === false) {
+      setError("Location needs a secure (HTTPS) connection. Search or enter coordinates instead.");
       return;
     }
     setLocating(true);
@@ -113,11 +118,22 @@ export default function LocationBar({
         setLocating(false);
         onPick(pos.coords.latitude, pos.coords.longitude);
       },
-      () => {
+      (err) => {
         setLocating(false);
-        setError("Location permission was denied. Search or enter coordinates instead.");
+        // Tell the cases apart — a timeout or an unavailable fix was being mislabelled as
+        // "permission denied", which sends people (especially on iPhone) to the wrong setting.
+        if (err.code === err.PERMISSION_DENIED) {
+          setError(
+            "Location is blocked. Allow it when prompted — on iPhone, also check Settings → Privacy & Security → Location Services (on, and allowed for Safari). Or search / enter coordinates.",
+          );
+        } else if (err.code === err.TIMEOUT) {
+          setError("Locating took too long. Try again, or search / enter coordinates.");
+        } else {
+          setError("Couldn't get a location fix. Try again, or search / enter coordinates.");
+        }
       },
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 600_000 },
+      // A longer timeout than the old 10 s — an iPhone's first (cold) fix can be slow indoors.
+      { enableHighAccuracy: false, timeout: 20_000, maximumAge: 600_000 },
     );
   }
 

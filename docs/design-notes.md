@@ -544,7 +544,11 @@ Lat/long (and a human label when we have one) live in the URL query string — t
 URL-as-state convention — so any view is a shareable, reload-proof link. Units, the personal
 wind line, saved fields, and theme live in `localStorage` under a `window.*` namespace.
 Geolocation, when used, only sets the coordinates locally; it's never sent anywhere but
-Open-Meteo/NWS as the lat/long of the forecast request.
+Open-Meteo/NWS as the lat/long of the forecast request. The "My location" button is a
+user-gesture `getCurrentPosition` (secure-context only) that distinguishes its failures —
+a blocked permission, a timeout, an unavailable fix — and says which, instead of blaming
+permissions for everything; the permission message names the iOS Settings path, since a
+disabled Location Service (not the site) is the usual reason it "doesn't work" on an iPhone.
 
 ### Privacy, stated truthfully for a live-fetch tool
 

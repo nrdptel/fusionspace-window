@@ -143,6 +143,17 @@ export default function Page() {
             not a station observation, so a gusty or terrain-affected field can differ from what
             you feel at the pad. Winds are the direction the air comes <em>from</em>.
           </Method>
+          <Method title="Wind steadiness (gusts)">
+            The 20 mph line is a <em>sustained</em>-wind limit, but gusty, variable air is its
+            own hazard — a gust at the wrong moment pushes a rocket off heading right at the rail,
+            and rod whip and erratic weathercocking get worse as the spread grows. So
+            &ldquo;Right now&rdquo; (and the fly-time snapshot) read the gust against the sustained
+            wind and call it <em>steady</em>, <em>gusty</em>, or <em>very gusty</em> — banded by
+            both the gust factor (peak ÷ sustained) and the absolute spread, so a big ratio over a
+            light breeze isn&apos;t over-flagged and a wide spread over a strong wind isn&apos;t
+            missed. It&apos;s the same figures already shown (sustained and gust), just interpreted
+            — a heads-up about turbulence, never a verdict.
+          </Method>
           <Method title="Observed wind cross-check">
             Because the surface wind above is a model analysis, &ldquo;Right now&rdquo; also
             shows the <em>observed</em> wind from the nearest NWS reporting station — the same

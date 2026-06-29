@@ -12,6 +12,10 @@ test("the units toggle converts in place and never refetches", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();
   expect(forecastRequests).toBe(1);
 
+  // The wind steadiness read interprets the gust spread (fixture: 21 gusting 29 → gusty).
+  await expect(page.locator("#now").getByText("gusty", { exact: true })).toBeVisible();
+  await expect(page.locator("#now").getByText(/off heading at the rail/)).toBeVisible();
+
   // Switch to metric — the wind unit becomes km/h, with no new forecast request.
   await page.getByRole("button", { name: "Metric" }).click();
   await expect(page.locator("#now").getByText(/km\/h/).first()).toBeVisible();

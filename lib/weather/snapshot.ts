@@ -8,6 +8,7 @@
 import type { HourPoint } from "./model";
 import { densityAltitudeFt } from "./density";
 import { classifyCape, type Instability } from "./instability";
+import { gustiness, type Gustiness } from "./gust";
 
 export interface FlySnapshot {
   time: string;
@@ -19,6 +20,8 @@ export interface FlySnapshot {
   densityAltitudeFt: number;
   capeJkg: number;
   instability: Instability;
+  /** Wind steadiness (gust-vs-sustained) at this hour. */
+  gustiness: Gustiness;
 }
 
 export function hourSnapshot(h: HourPoint): FlySnapshot {
@@ -35,5 +38,6 @@ export function hourSnapshot(h: HourPoint): FlySnapshot {
     }),
     capeJkg: h.capeJkg,
     instability: classifyCape(h.capeJkg),
+    gustiness: gustiness(h.windMph, h.gustMph),
   };
 }

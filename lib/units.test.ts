@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   degToCompass,
+  fmtLength,
+  fmtTemp,
   fmtVisibility,
   fmtWind,
   lengthFromFt,
@@ -83,5 +85,16 @@ describe("fmtWind", () => {
   it("formats a converted value with trimmed precision", () => {
     expect(fmtWind(21, "mph")).toBe("21");
     expect(fmtWind(21, "kn", 1)).toBe("18.2");
+  });
+});
+
+describe("no negative zero", () => {
+  it("renders a value that rounds to zero from below as 0, not -0", () => {
+    // A dew point of 31.5°F is -0.28°C — rounds to -0, which would render "-0 °C".
+    expect(fmtTemp(31.5, "C")).toBe("0");
+    // A freezing level a hair below the field shouldn't show "-0 ft" either.
+    expect(fmtLength(-0.1, "ft")).toBe("0");
+    // Genuine non-zero values are untouched.
+    expect(fmtTemp(30, "F")).toBe("30");
   });
 });

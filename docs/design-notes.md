@@ -554,6 +554,23 @@ reuses the apogee input the board already took, so it&apos;s one new field compl
 was already two-thirds built. The drift block stays useful with no inputs (the per-minute rate, plus
 a nudge to set a descent rate), so the default board is unchanged.
 
+### Dew point & the spread — finishing the checklist (post-v1)
+
+Came from fetching the authoritative hobby-rocketry "what to measure" guide and mapping it against
+the board, item by item: wind (surface + aloft), temperature, **humidity *and dew point***,
+barometric pressure, cloud ceiling + visibility, precipitation. Five were covered; the one
+half-covered was moisture — Window showed `% RH` but not the **dew point**, the standard way that
+variable is actually read. So it&apos;s computed from the temperature and relative humidity already
+in hand (Magnus–Tetens, pure and tested, no extra fetch) and shown in &ldquo;Right now.&rdquo;
+
+The point isn&apos;t the number, it&apos;s the **temperature–dew-point spread**: as it closes the
+air nears saturation, so fog, dew and condensation on a cold altimeter or harness become likely; a
+wide spread is dry air. A spread within ~4°F is the fog / low-stratus band — the same morning fog
+that delays launches and cuts the tracking and visibility the rest of the board already cares about,
+so it ties the moisture read back into the sky story. The spread carries the tone; the dew point is
+just stated. Shown in the panel and the briefing. With it, every variable the hobby checklist names
+now has a read on the board — a clean place for the feature work to rest.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

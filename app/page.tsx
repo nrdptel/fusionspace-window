@@ -199,6 +199,17 @@ export default function Page() {
             the pressure drops is a sharper heads-up than either alone. The rate is shown, not a
             verdict.
           </Method>
+          <Method title="Dew point & the spread">
+            Beside the humidity, &ldquo;Right now&rdquo; gives the <strong>dew point</strong> — the
+            temperature the air would have to cool to for its moisture to condense — derived from
+            the temperature and relative humidity by the Magnus formula. The number that earns its
+            place is the <em>spread</em> between the temperature and the dew point: as it closes
+            toward zero the air is near saturation, so fog and dew (and condensation on a cold
+            altimeter or recovery harness) become likely; a wide spread is dry air. A spread within
+            about 4°F is fog and low-stratus territory — the same morning fog that delays a launch
+            and cuts the visibility you need to track and recover. It&apos;s the standard moisture
+            read the hobby-rocketry checklists ask for, shown as a figure, not a verdict.
+          </Method>
           </Disclosure>
 
           <Disclosure title="The 20 mph launch line">

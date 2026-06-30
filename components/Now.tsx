@@ -14,6 +14,7 @@ import {
 import { describeWeather } from "@/lib/weather/wmo";
 import type { PressureTendency } from "@/lib/weather/pressure";
 import { gustiness } from "@/lib/weather/gust";
+import { dewPointF, spreadRead } from "@/lib/weather/dewpoint";
 import { SURFACE_LIMIT_MPH, windTone, windToneTextClass } from "@/lib/weather/limits";
 import { clock, relativeAge } from "@/lib/format";
 import { Card, Pill, SourceLine, Stat } from "./ui";
@@ -176,6 +177,27 @@ export default function Now({
               {Math.round(current.cloudCoverPct)}% · {Math.round(current.humidityPct)}% RH
             </div>
           </div>
+          {(() => {
+            const dewF = dewPointF(current.tempF, current.humidityPct);
+            if (!Number.isFinite(dewF)) return null;
+            const sp = spreadRead(current.tempF, dewF);
+            const spreadDisplay = sp ? Math.round(u.temp === "C" ? (sp.spreadF * 5) / 9 : sp.spreadF) : null;
+            return (
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Dew point</div>
+                <div className="mt-0.5 font-mono text-sm tabular-nums text-zinc-800 dark:text-zinc-200">
+                  {fmtTemp(dewF, u.temp)}
+                  {TEMP_LABEL[u.temp]}
+                </div>
+                {sp && (
+                  <div className={"text-[10px] " + windToneTextClass(sp.tone)}>
+                    {spreadDisplay}
+                    {TEMP_LABEL[u.temp]} spread — {sp.label}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {pressure && (
             <div>
               <div className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Pressure</div>

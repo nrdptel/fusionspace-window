@@ -7,6 +7,8 @@
 
 # generated at build by scripts/gen-og.mjs (prebuild)
 /public/og/
+# generated at build by scripts/gen-favicon.mjs (prebuild)
+/public/favicon.ico
 
 # production
 /build

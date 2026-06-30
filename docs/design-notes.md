@@ -511,6 +511,27 @@ real find worth noting in passing — `rawMessage` came back empty on every stat
 structured path carries the load and the raw-METAR recovery only fires when `cloudLayers` is empty,
 exactly as designed.
 
+### Observed present weather — the fourth safety-code factor (post-v1)
+
+Came out of actually *reading* the Tripoli/NAR Unified Safety Code rather than guessing what to
+build. It gates a launch on exactly four weather items: sustained wind ≤ 20 mph, no flight into or
+through cloud, visibility to watch the whole flight, and no launch with a thunderstorm/lightning
+nearby. Window already read three. The fourth was the gap — and the telling part is *why* it was a
+gap: the whole storm story was **CAPE potential** (`StormPotential`, the conditions-grid storms
+row), which says the atmosphere *could* build storms, not that one is overhead. The safety code and
+the community (radar apps) gate on the storm actually being *there*.
+
+The board already fetched the nearest station's METAR for the observed wind/ceiling/visibility
+cross-check but ignored its **present-weather group** — the observed counterpart to CAPE. So
+`parsePresentWeather` now reads the NWS `presentWeather` array (confirmed live, e.g. KFLG reporting
+`HZ`/`FU` haze+smoke): a thunderstorm (`TS`/`VCTS`) or precipitation flags **red** as a launch
+no-go, an obscuration (fog/haze/smoke/dust) **amber** because it cuts the sight the code's
+observe-the-whole-flight rule needs. It lands in the sky panel and the briefing, framed honestly as
+the *nearest station* (a heads-up that convection/precip is in the area, not a literal ten-mile
+ruling) — the same honesty the observed wind cross-check carries. This is the observed half of a
+story the board only had the modelled half of; with it, all four safety-code weather factors now
+have a read.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

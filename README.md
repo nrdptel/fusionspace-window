@@ -18,9 +18,10 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 - **Right now** — surface wind, gust, and direction against the 20 mph launch limit, with a
   **steadiness** read that flags gusty, turbulent air the sustained limit misses, and the model
   figure cross-checked against the nearest station's *observed* wind; plus temperature, sky,
-  **density altitude** (how thin the air is, which sets thrust and descent), and a **pressure
-  tendency** so you can see the barometer rising or falling. Winds are named for the direction
-  they blow *from*.
+  **density altitude** (how thin the air is, which sets thrust and descent), a **pressure
+  tendency** so you can see the barometer rising or falling, and the **dew point** with its
+  temperature spread — a tight spread warns of fog and condensation on cold gear. Winds are named
+  for the direction they blow *from*.
 - **Storm potential** — convective instability (CAPE), now and the day's peak, sorted into the
   bands meteorologists use — so a calm morning that towers up by mid-afternoon doesn't catch
   you out.

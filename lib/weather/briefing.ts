@@ -7,6 +7,7 @@
 
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
+import { dewPointF, spreadRead } from "./dewpoint";
 import { meanWindAloft, driftFtPerMin, driftLandingFt } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
@@ -184,6 +185,14 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   lines.push(
     `Temp: ${fmtTemp(c.tempF, u.temp)}${TEMP_LABEL[u.temp]} (feels ${fmtTemp(c.apparentF, u.temp)}${TEMP_LABEL[u.temp]})${daStr}`,
   );
+  const dewF = dewPointF(c.tempF, c.humidityPct);
+  const sp = spreadRead(c.tempF, dewF);
+  if (Number.isFinite(dewF) && sp) {
+    const spread = Math.round(u.temp === "C" ? (sp.spreadF * 5) / 9 : sp.spreadF);
+    lines.push(
+      `Dew point: ${fmtTemp(dewF, u.temp)}${TEMP_LABEL[u.temp]} (${spread}${TEMP_LABEL[u.temp]} spread — ${sp.label})`,
+    );
+  }
 
   // Storm potential — the convective (CAPE) read the board surfaces, with the day's peak so a
   // calm morning that towers up by afternoon makes it into the briefing.

@@ -65,6 +65,10 @@ test("shows the active NWS alert and the observed ceiling", async ({ page }) => 
   // The barometer is falling in the fixture, surfaced as a pressure tendency.
   await expect(nowPanel.getByText("Pressure", { exact: true })).toBeVisible();
   await expect(nowPanel.getByText(/Falling .* hPa\/3h/)).toBeVisible();
+
+  // Dew point and the temperature spread are derived and shown.
+  await expect(nowPanel.getByText("Dew point", { exact: true })).toBeVisible();
+  await expect(nowPanel.getByText(/spread — (dry air|humid|near saturation)/)).toBeVisible();
 });
 
 test("shows the modeled low-cloud outlook as the forward-looking companion to the ceiling", async ({ page }) => {

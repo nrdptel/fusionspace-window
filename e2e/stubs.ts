@@ -26,9 +26,10 @@ export interface StubOptions {
   archive?: "ok" | "down";
   /** Open-Meteo air-quality availability (US AQI + smoke). */
   airQuality?: "ok" | "down";
-  /** Station observations: "mixed" (a RAWS then a real METAR) or "allRaws" — every nearby
-   *  station is a no-sky RAWS, the real case at a remote desert field like Black Rock. */
-  observations?: "mixed" | "allRaws";
+  /** Station observations: "mixed" (a RAWS then a real METAR), "allRaws" — every nearby station
+   *  is a no-sky RAWS (the real case at a remote desert field like Black Rock), or "thunderstorm"
+   *  — KDAG reporting observed TSRA (present-weather no-go). */
+  observations?: "mixed" | "allRaws" | "thunderstorm";
 }
 
 /** Install all provider stubs. Call BEFORE page.goto — the board fetches on mount. */
@@ -65,7 +66,8 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
     if (url.includes("/observations/latest")) {
       if (observations === "allRaws") return json(route, "nws-observation-raws.json");
       if (url.includes("/stations/BPFC1/")) return json(route, "nws-observation-raws.json");
-      if (url.includes("/stations/KDAG/")) return json(route, "nws-observation.json");
+      if (url.includes("/stations/KDAG/"))
+        return json(route, observations === "thunderstorm" ? "nws-observation-wx.json" : "nws-observation.json");
       return json(route, "nws-observation-clear.json");
     }
     if (url.includes("/stations")) return json(route, "nws-stations.json");

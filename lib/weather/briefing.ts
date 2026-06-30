@@ -118,6 +118,11 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
         : "no ceiling";
     const station = sky.station ? ` (${sky.station.id}, observed)` : " (observed)";
     lines.push(`Sky: ${sky.description}, ${ceil}${station}`);
+    if (sky.presentWeather && sky.presentWeather.labels.length > 0) {
+      const flag =
+        sky.presentWeather.thunderstorm || sky.presentWeather.precip ? " — launch no-go" : "";
+      lines.push(`  Observed now: ${sky.presentWeather.labels.join(", ")}${flag}`);
+    }
     if (apogee != null) {
       const apo = `${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]}`;
       if (sky.ceilingFt != null) {

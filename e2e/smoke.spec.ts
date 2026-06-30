@@ -147,13 +147,14 @@ test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
   await expect(eyebrow).toHaveAttribute("href", "https://fusionspace.co");
 });
 
-test("footer cross-links to the sibling Fusion Space tools", async ({ page }) => {
+test("footer cross-links to the live sibling tools (inline, no Debrief)", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);
-  await expect(page.getByText("More from Fusion Space:")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Motor Finder" })).toHaveAttribute("href", "https://motor.fusionspace.co");
-  await expect(page.getByRole("link", { name: "Charge" })).toHaveAttribute("href", "https://charge.fusionspace.co");
-  await expect(page.getByRole("link", { name: "Debrief" })).toHaveAttribute("href", "https://debrief.fusionspace.co");
+  const footer = page.locator("footer");
+  await expect(footer.getByRole("link", { name: "Motor Finder" })).toHaveAttribute("href", "https://motor.fusionspace.co");
+  await expect(footer.getByRole("link", { name: "Charge" })).toHaveAttribute("href", "https://charge.fusionspace.co");
+  // Debrief is still in development — a launch-ready tool doesn't link it.
+  await expect(footer.getByRole("link", { name: "Debrief" })).toHaveCount(0);
 });
 
 test("privacy page is reachable from the footer", async ({ page }) => {

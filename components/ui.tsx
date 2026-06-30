@@ -118,7 +118,7 @@ export function Card({ className = "", children }: { className?: string; childre
   );
 }
 
-/** A small labelled read-out (value + caption), monospace value. */
+/** A small labeled read-out (value + caption), monospace value. */
 export function Stat({
   label,
   value,

@@ -52,7 +52,7 @@ html.light {
 /* Visible keyboard focus for interactive controls (WCAG 2.4.7), in the app's
    indigo accent so it's one consistent indicator everywhere. Buttons, links,
    summaries, etc. get this outline on keyboard focus. Text inputs/selects opt
-   out with Tailwind `focus:outline-none` and show a border-colour change
+   out with Tailwind `focus:outline-none` and show a border-color change
    instead, for a cleaner field on click. */
 a:focus-visible,
 button:focus-visible,

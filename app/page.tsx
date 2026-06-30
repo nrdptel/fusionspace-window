@@ -103,8 +103,8 @@ export default function Page() {
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Sky &amp; ceiling</strong>{" "}
               is the observed ceiling and <strong>visibility</strong> from the nearest reporting
-              station where there is one, labelled <em>observed</em> (modelled where there
-              isn&apos;t), with a modelled multi-day cloud picture beside it.
+              station where there is one, labeled <em>observed</em> (modeled where there
+              isn&apos;t), with a modeled multi-day cloud picture beside it.
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Air quality &amp; smoke</strong>{" "}
@@ -151,7 +151,7 @@ export default function Page() {
         <div className="mt-6 space-y-3">
           <Disclosure title="Surface conditions — wind, density altitude & pressure">
           <Method title="Surface wind, temperature & precip">
-            From the Open-Meteo Forecast API, using a US-optimised GFS/HRRR blend
+            From the Open-Meteo Forecast API, using a US-optimized GFS/HRRR blend
             (<code className="font-mono text-xs">gfs_seamless</code>), requested in imperial
             units. The current reading carries its own valid time; it&apos;s a model analysis,
             not a station observation, so a gusty or terrain-affected field can differ from what
@@ -182,7 +182,7 @@ export default function Page() {
             The altitude in the standard atmosphere where the air has the same density as the
             air at the field right now — the honest way to say how thin the air is. It&apos;s
             computed from the field&apos;s actual (station) pressure, temperature, and humidity:
-            the moist-air density (dry and water-vapour partial pressures over the gas
+            the moist-air density (dry and water-vapor partial pressures over the gas
             constants) inverted through the ISA density profile. Field elevation is shown only
             for context — it isn&apos;t an input, a common misconception. It matters because
             thinner air means a motor makes less thrust, descent under chute runs a little
@@ -215,7 +215,7 @@ export default function Page() {
           <Disclosure title="The 20 mph launch line">
             <p className="max-w-3xl">
               NFPA 1127 and the NAR/Tripoli safety codes set 20 mph as the surface-wind ceiling
-              for launching. Window draws it as a reference and colours the current wind as it
+              for launching. Window draws it as a reference and colors the current wind as it
               approaches and crosses it — but it never says no-go. The call is yours, with your
               field&apos;s rules and your own judgment. A personal, lower line can be set and is
               stored only in your browser.
@@ -269,7 +269,7 @@ export default function Page() {
           <Method title="Freezing level (0°C)">
             The profile also draws the <strong>0°C level</strong> — the height where the air
             turns sub-freezing on the way up — as a blue reference line. It&apos;s Open-Meteo&apos;s
-            modelled freezing-level height (reported above sea level) expressed as height above
+            modeled freezing-level height (reported above sea level) expressed as height above
             the field, and it moves with the fly-time hour like the rest of the profile. A high
             flight that punches well past it climbs into real cold, which is worth knowing for
             altimeter batteries and recovery electronics; it&apos;s hidden when the shown column
@@ -284,9 +284,9 @@ export default function Page() {
             counts: when a station reports <em>clear</em> (or a layer the structured feed happens
             to drop), the raw METAR is read directly so the nearest station is used rather than one
             tens of miles out — only a station that says nothing about the sky at all is skipped.
-            It&apos;s labelled <em>observed</em> and stamped with the station and how long ago it
+            It&apos;s labeled <em>observed</em> and stamped with the station and how long ago it
             reported. The multi-day sky picture and the fallback when no station is reachable are
-            Open-Meteo&apos;s modelled cloud cover, labelled <em>modelled</em>. A forecast ceiling
+            Open-Meteo&apos;s modeled cloud cover, labeled <em>modeled</em>. A forecast ceiling
             in feet (TAF) is planned for a later version — its source has no browser access today.
           </Method>
           <Method title="Ceiling vs your apogee">
@@ -302,7 +302,7 @@ export default function Page() {
           <Method title="Low-cloud outlook">
             The observed ceiling is honest but <em>now</em> only — it can&apos;t tell you low cloud
             is forecast to build tomorrow afternoon, which is exactly what you&apos;d want to know
-            before driving out. So beside it is Open-Meteo&apos;s modelled <em>low-cloud</em> cover
+            before driving out. So beside it is Open-Meteo&apos;s modeled <em>low-cloud</em> cover
             across the next two days, banded thin / broken / overcast. Low cloud is the layer that
             usually forms a launch-blocking ceiling; high cirrus doesn&apos;t, so it&apos;s left out.
             It&apos;s cover, not a forecast ceiling height — deliberately softer than the observed
@@ -324,9 +324,9 @@ export default function Page() {
             Horizontal visibility in statute miles — it matters for keeping a high flight in
             sight and for the cloud-and-visibility rules many waivers carry. Like the ceiling,
             it prefers the nearest station&apos;s observed value (the METAR visibility, in
-            metres, converted to miles) and is labelled <em>observed</em>; when no station is
-            reachable it falls back to Open-Meteo&apos;s modelled visibility for the current hour,
-            labelled <em>modelled</em>. Observed values top out around the METAR&apos;s 10-mile
+            meters, converted to miles) and is labeled <em>observed</em>; when no station is
+            reachable it falls back to Open-Meteo&apos;s modeled visibility for the current hour,
+            labeled <em>modeled</em>. Observed values top out around the METAR&apos;s 10-mile
             reporting ceiling; the model can read higher in genuinely clear air.
           </Method>
           <Method title="Air quality & wildfire smoke">
@@ -357,7 +357,7 @@ export default function Page() {
             (<code className="font-mono text-xs">/alerts/active</code>), most severe first.
             NWS is a best-effort enhancement: if it can&apos;t be reached, alerts and the observed
             ceiling are simply absent rather than shown as an error, and the sky falls back to the
-            modelled cloud cover. The seasonal normal (above) and the observed station readings are
+            modeled cloud cover. The seasonal normal (above) and the observed station readings are
             best-effort in the same way — the forecast itself is the only hard dependency.
           </Method>
           </Disclosure>

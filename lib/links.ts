@@ -6,13 +6,13 @@ export const HUB_URL = "https://fusionspace.co";
 export const REPO_URL = "https://github.com/nrdptel/fusionspace-window";
 export const KOFI_URL = "https://ko-fi.com/nrdptel";
 
-// Sibling Fusion Space tools, for the footer's "more tools" cross-links — the same family
-// nav the other projects carry. Window is omitted (you're already here); order is most- to
-// least-related for a launch-day flyer.
+// Sibling Fusion Space tools, linked inline in the footer the way the live siblings do
+// (Charge's footer carries a Motor Finder link, no "more tools" heading). The LIVE tools only
+// — Debrief is still in development, so it isn't linked from a launch-ready tool. Window is
+// omitted (you're already here).
 export const SIBLING_TOOLS = [
   { name: "Motor Finder", href: "https://motor.fusionspace.co", blurb: "Live motor stock & pricing" },
   { name: "Charge", href: "https://charge.fusionspace.co", blurb: "Ejection-charge calculator" },
-  { name: "Debrief", href: "https://debrief.fusionspace.co", blurb: "Altimeter flight-log analyzer" },
 ] as const;
 
 // Data providers — credited in the footer and the explainer.

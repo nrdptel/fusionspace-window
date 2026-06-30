@@ -19,7 +19,7 @@ import { hourSnapshot } from "@/lib/weather/snapshot";
 import { SURFACE_LIMIT_MPH, windTone, windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { SourceLine } from "./ui";
 
-/** A compact labelled figure in the fly-time snapshot. */
+/** A compact labeled figure in the fly-time snapshot. */
 function Metric({
   label,
   value,
@@ -152,7 +152,7 @@ export default function HourlyTimeline({
 
       {/* fly-time scrubber */}
       <label className="mt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-        <span className="shrink-0">Fly time</span>
+        <span className="shrink-0">Fly-time</span>
         <input
           type="range"
           min={0}

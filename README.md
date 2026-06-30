@@ -38,7 +38,7 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   Give a **descent rate** (and your apogee) and the mean wind becomes an actual **landing-drift
   distance** — the rule of thumb (wind ÷ descent rate = drift per foot of altitude) made exact.
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
-  where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
+  where there is one (labeled *observed*, with the raw METAR a click away), with a modeled
   multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a
   go/no-go gate — you can't fly into cloud under a waiver, so a peak at the deck is a *No-go*.
   A **low-cloud outlook** (modeled) sits alongside as the forward-looking companion: the observed
@@ -70,13 +70,13 @@ there is no backend.
 
 - **[Open-Meteo](https://open-meteo.com)** Forecast API — the backbone, and the one hard
   dependency: current, hourly, and daily surface variables plus pressure-level winds for the
-  aloft profile, in a single request using a US-optimised GFS/HRRR blend (`gfs_seamless`). Its
+  aloft profile, in a single request using a US-optimized GFS/HRRR blend (`gfs_seamless`). Its
   Geocoding API powers place search. (CC BY 4.0.)
 - **[NOAA / National Weather Service](https://www.weather.gov)** — active alerts and the
   nearest station's latest observation (a METAR): the observed ceiling, visibility, and surface
   wind, plus the raw report. A graceful-degradation enhancement, not a dependency: if it can't be
   reached, alerts are absent, the observed cross-checks drop out, and the sky falls back to
-  modelled cloud cover and visibility.
+  modeled cloud cover and visibility.
 - **Open-Meteo Historical Archive** — about five years of the field's daily max wind for the
   "vs typical" seasonal normal in the outlook. Best-effort in the same way: absent if the lookup
   doesn't land, and the forecast stays the only hard dependency.

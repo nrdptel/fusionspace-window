@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   addSaved,
   parseApogee,
+  parseDescentRate,
   parseLastField,
   parseSaved,
   parseUnits,
@@ -69,6 +70,25 @@ describe("parseApogee", () => {
 
   it("caps at 100,000 ft so a fat-fingered entry can't run away", () => {
     expect(parseApogee("250000")).toBe(100000);
+  });
+});
+
+describe("parseDescentRate", () => {
+  it("treats empty / non-positive / junk as none", () => {
+    expect(parseDescentRate(null)).toBeNull();
+    expect(parseDescentRate("")).toBeNull();
+    expect(parseDescentRate("0")).toBeNull();
+    expect(parseDescentRate("-15")).toBeNull();
+    expect(parseDescentRate("fast")).toBeNull();
+  });
+
+  it("reads a positive ft/s rate, fractions allowed", () => {
+    expect(parseDescentRate("18")).toBe(18);
+    expect(parseDescentRate("17.5")).toBe(17.5);
+  });
+
+  it("caps at 200 ft/s", () => {
+    expect(parseDescentRate("500")).toBe(200);
   });
 });
 

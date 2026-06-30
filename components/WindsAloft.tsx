@@ -5,16 +5,18 @@ import type { AloftProfile, Field } from "@/lib/weather/model";
 import {
   degToCompass,
   fmtLength,
+  fmtVisibility,
   fmtWind,
   LENGTH_LABEL,
   resolveUnits,
+  VIS_LABEL,
   WIND_LABEL,
   windFromMph,
   type UnitPrefs,
 } from "@/lib/units";
 import { clockShort } from "@/lib/format";
 import { strongestShear } from "@/lib/weather/shear";
-import { meanWindAloft, driftFtPerMin } from "@/lib/weather/drift";
+import { meanWindAloft, driftFtPerMin, driftPerFoot, driftLandingFt } from "@/lib/weather/drift";
 import { Segmented, SourceLine } from "./ui";
 
 const W = 580;
@@ -48,6 +50,8 @@ export default function WindsAloft({
   field,
   units,
   model,
+  apogee,
+  descentRate,
 }: {
   profile: AloftProfile;
   surfaceWindMph: number;
@@ -55,6 +59,10 @@ export default function WindsAloft({
   field: Field;
   units: UnitPrefs;
   model: string;
+  /** Expected apogee (ft AGL), or null — the altitude drift is integrated over for a landing. */
+  apogee: number | null;
+  /** Recovery descent rate (ft/s), or null — turns the mean wind into a landing-drift distance. */
+  descentRate: number | null;
 }) {
   const u = resolveUnits(units);
   const [top, setTop] = useState<TopKey>("20000");
@@ -231,10 +239,39 @@ export default function WindsAloft({
             </span>{" "}
             downrange per minute aloft.
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400">
-            Multiply by your time under chute for the rough downrange distance — the column&apos;s
-            average wind, not a landing prediction.
-          </span>
+          {descentRate != null ? (
+            <span className="text-zinc-600 dark:text-zinc-400">
+              At {descentRate} ft/s that&apos;s ~
+              <span className="font-mono tabular-nums">
+                {fmtLength(driftPerFoot(mean.speedMph, descentRate) * 1000, u.length)} {LENGTH_LABEL[u.length]}
+              </span>{" "}
+              of drift per 1,000 ft of descent
+              {apogee != null && (
+                <>
+                  {" "}— from your{" "}
+                  <span className="font-mono tabular-nums">
+                    {fmtLength(apogee, u.length)} {LENGTH_LABEL[u.length]}
+                  </span>{" "}
+                  apogee, about{" "}
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                    {fmtLength(driftLandingFt(mean.speedMph, descentRate, apogee), u.length)} {LENGTH_LABEL[u.length]}
+                    {" ("}
+                    {fmtVisibility(driftLandingFt(mean.speedMph, descentRate, apogee) / 5280, u.length)}{" "}
+                    {VIS_LABEL[u.length]}
+                    {")"}
+                  </span>{" "}
+                  toward {degToCompass(mean.towardDeg)}
+                </>
+              )}
+              . A single-rate estimate — a dual-deploy drogue lands it closer.
+            </span>
+          ) : (
+            <span className="text-zinc-500 dark:text-zinc-400">
+              Multiply by your time under chute for the rough downrange distance — or set a descent
+              rate above for a landing-drift estimate. The column&apos;s average wind, not a landing
+              prediction.
+            </span>
+          )}
         </div>
       )}
 

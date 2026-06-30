@@ -532,6 +532,28 @@ ruling) — the same honesty the observed wind cross-check carries. This is the 
 story the board only had the modelled half of; with it, all four safety-code weather factors now
 have a read.
 
+### Landing drift from a descent rate (post-v1)
+
+Came from researching what experienced flyers actually fuss over past the go/no-go: recovery drift
+and landing prediction, the thing whole community tools exist for (drift calculators, "simulate
+drift with live wind"). Window already did the hard half — the thickness-weighted **mean wind
+aloft** vector — but the read stopped at a *rate* (feet per minute aloft), which makes the flyer do
+the hang-time arithmetic. The research surfaced the missing piece as a one-liner: *"descend at 15
+fps in a 10 mph wind and you drift 1 ft sideways for every foot of altitude lost."* That&apos;s
+just `wind ÷ descent_rate` — and Window already had the other input it needs, the **expected
+apogee** from the ceiling feature.
+
+So an optional **descent rate** (ft/s — the unit rocketry quotes it in, kept unit-toggle-independent
+like the apogee) turns the existing drift read into a landing distance: `driftPerFoot = mean_wind_fps
+/ descent_fps`, and `driftLandingFt = driftPerFoot × apogee`. With the rate alone you get the
+per-1,000-ft ratio; with the apogee too, an actual distance and the compass point it walks toward,
+in the sky panel&apos;s sibling drift block and the briefing. Framed honestly to the end: a
+**single-rate** estimate (a dual-deploy drogue lands it much closer), still the column&apos;s
+average wind and not a trajectory sim — it leans the drift, it doesn&apos;t promise the spot. It
+reuses the apogee input the board already took, so it&apos;s one new field completing a feature that
+was already two-thirds built. The drift block stays useful with no inputs (the per-minute rate, plus
+a nudge to set a descent rate), so the default board is unchanged.
+
 ### Remember the last field (post-v1)
 
 The field lives in the URL — great for sharing, but it meant a flyer who just typed

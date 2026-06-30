@@ -10,12 +10,14 @@ import { isStale, relativeAge, clock } from "@/lib/format";
 import {
   addSaved,
   readApogee,
+  readDescentRate,
   readLastField,
   readSaved,
   readUnits,
   readWindLine,
   removeSaved,
   writeApogee,
+  writeDescentRate,
   writeLastField,
   writeSaved,
   writeUnits,
@@ -57,6 +59,7 @@ export default function WeatherBoard() {
   const [units, setUnits] = useState<UnitPrefs>(DEFAULT_UNITS);
   const [windLine, setWindLine] = useState<number | null>(null);
   const [apogee, setApogee] = useState<number | null>(null);
+  const [descentRate, setDescentRate] = useState<number | null>(null);
   const [saved, setSaved] = useState<SavedField[]>([]);
 
   const [data, setData] = useState<BoardData | null>(null);
@@ -107,6 +110,7 @@ export default function WeatherBoard() {
     setUnits(readUnits());
     setWindLine(readWindLine());
     setApogee(readApogee());
+    setDescentRate(readDescentRate());
     setSaved(readSaved());
     const onPop = () => setField(decodeState(window.location.search));
     window.addEventListener("popstate", onPop);
@@ -195,6 +199,10 @@ export default function WeatherBoard() {
   const updateApogee = (v: number | null) => {
     setApogee(v);
     writeApogee(v);
+  };
+  const updateDescentRate = (v: number | null) => {
+    setDescentRate(v);
+    writeDescentRate(v);
   };
   const toggleSave = () => {
     if (!data) return;
@@ -297,7 +305,7 @@ export default function WeatherBoard() {
             </Notice>
           )}
 
-          <FieldBriefing board={data} units={units} windLine={windLine} apogee={apogee} hourIndex={currentHourIndex(data)} />
+          <FieldBriefing board={data} units={units} windLine={windLine} apogee={apogee} descentRate={descentRate} hourIndex={currentHourIndex(data)} />
 
           {/* Units / personal line */}
           <div className="mt-4">
@@ -308,6 +316,8 @@ export default function WeatherBoard() {
               onWindLine={updateWindLine}
               apogee={apogee}
               onApogee={updateApogee}
+              descentRate={descentRate}
+              onDescentRate={updateDescentRate}
             />
           </div>
 
@@ -390,6 +400,8 @@ export default function WeatherBoard() {
               field={f}
               units={units}
               model={data.forecast.model}
+              apogee={apogee}
+              descentRate={descentRate}
             />
           </Panel>
 

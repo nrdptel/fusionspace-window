@@ -8,6 +8,7 @@ import { DEFAULT_UNITS, type UnitPrefs } from "./units";
 const UNITS_KEY = "window.units";
 const WINDLINE_KEY = "window.windline";
 const APOGEE_KEY = "window.apogee";
+const DESCENT_KEY = "window.descent";
 const SAVED_KEY = "window.savedFields";
 const LAST_KEY = "window.lastField";
 const SAVED_LIMIT = 12;
@@ -101,6 +102,33 @@ export function writeApogee(ft: number | null): void {
   try {
     if (ft == null) localStorage.removeItem(APOGEE_KEY);
     else localStorage.setItem(APOGEE_KEY, String(ft));
+  } catch {
+    /* no-op */
+  }
+}
+
+// --- recovery descent rate (feet per second) ---
+/** The main-parachute descent rate, ft/s, used to turn the mean wind aloft into a landing-drift
+ *  distance — or null for none. Kept in ft/s because that's the unit rocketry descent rates are
+ *  quoted in. Floored above 0 and capped at 200 ft/s (a streamer/ballistic recovery; past that
+ *  there's no meaningful drift to read). */
+export function parseDescentRate(raw: string | null): number | null {
+  if (raw == null || raw === "") return null;
+  const n = Number.parseFloat(raw);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(200, n);
+}
+export function readDescentRate(): number | null {
+  try {
+    return parseDescentRate(localStorage.getItem(DESCENT_KEY));
+  } catch {
+    return null;
+  }
+}
+export function writeDescentRate(fps: number | null): void {
+  try {
+    if (fps == null) localStorage.removeItem(DESCENT_KEY);
+    else localStorage.setItem(DESCENT_KEY, String(fps));
   } catch {
     /* no-op */
   }

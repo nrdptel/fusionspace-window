@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Privacy — Window",
   description:
     "What Window collects (nothing), the only third parties it talks to (the weather providers), and how geolocation and your saved fields work.",
-  alternates: { canonical: `${SITE_URL}/privacy/` },
+  alternates: { canonical: `${SITE_URL}/privacy` },
 };
 
 export default function PrivacyPage() {

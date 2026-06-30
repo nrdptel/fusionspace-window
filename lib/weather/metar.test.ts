@@ -213,6 +213,21 @@ describe("parseMetarSky", () => {
     expect(sky.layers).toHaveLength(0);
     expect(sky.clear).toBe(false);
   });
+
+  it("keeps layers carrying a CB / TCU convective suffix (the lowest, most hazardous decks)", () => {
+    // A thunderstorm report tags its cloud groups CB (cumulonimbus) / TCU (towering cumulus).
+    // The suffix must be consumed, or the group is dropped and a low storm ceiling vanishes.
+    const sky = parseMetarSky("KXYZ 281953Z 25018G30KT 6SM TSRA BKN040CB OVC070 26/22 A2980 RMK AO2");
+    expect(sky.clear).toBe(false);
+    expect(sky.layers).toEqual([
+      { amount: "BKN", baseFt: 4000 },
+      { amount: "OVC", baseFt: 7000 },
+    ]);
+    // A lone convective overcast must not collapse to "no sky data".
+    expect(parseMetarSky("KXYZ 281953Z 25018KT 6SM TS OVC025CB 26/22 A2980").layers).toEqual([
+      { amount: "OVC", baseFt: 2500 },
+    ]);
+  });
 });
 
 describe("parseStations", () => {

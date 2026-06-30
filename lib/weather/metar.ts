@@ -172,8 +172,11 @@ export function parsePresentWeather(entries: NwsPresentWeather[] | undefined | n
   return { labels, thunderstorm, precip, obscuration, tone };
 }
 
-/** Cloud groups (FEW/SCT/BKN/OVC/VV + height in hundreds of feet AGL) from a raw METAR. */
-const SKY_GROUP = /\b(VV|FEW|SCT|BKN|OVC)(\d{3})\b/g;
+/** Cloud groups (FEW/SCT/BKN/OVC/VV + height in hundreds of feet AGL) from a raw METAR.
+ *  An optional CB (cumulonimbus) or TCU (towering cumulus) suffix rides on the group in real
+ *  reports — e.g. BKN040CB — and must be consumed, or the trailing \b never matches and the
+ *  whole layer (often the lowest, most hazardous one) is silently dropped. */
+const SKY_GROUP = /\b(VV|FEW|SCT|BKN|OVC)(\d{3})(?:CB|TCU)?\b/g;
 /** Explicit clear-sky tokens: clear, sky clear, no significant/detected cloud, CAVOK. */
 const CLEAR_SKY = /\b(CLR|SKC|NSC|NCD|CAVOK)\b/;
 

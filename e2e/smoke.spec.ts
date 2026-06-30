@@ -147,6 +147,15 @@ test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
   await expect(eyebrow).toHaveAttribute("href", "https://fusionspace.co");
 });
 
+test("footer cross-links to the sibling Fusion Space tools", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL);
+  await expect(page.getByText("More from Fusion Space:")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Motor Finder" })).toHaveAttribute("href", "https://motor.fusionspace.co");
+  await expect(page.getByRole("link", { name: "Charge" })).toHaveAttribute("href", "https://charge.fusionspace.co");
+  await expect(page.getByRole("link", { name: "Debrief" })).toHaveAttribute("href", "https://debrief.fusionspace.co");
+});
+
 test("privacy page is reachable from the footer", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);

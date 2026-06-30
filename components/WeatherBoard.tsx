@@ -37,7 +37,7 @@ import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
-import AirQualityPanel from "./AirQuality";
+import AirQualityPanel from "./AirQualityPanel";
 import Outlook from "./Outlook";
 import { Panel, Pill } from "./ui";
 import { StarIcon } from "./icons";

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { observancesForDate } from "@/lib/observances";
-import { HUB_URL, REPO_URL, OPEN_METEO_URL, NWS_URL } from "@/lib/links";
+import { HUB_URL, REPO_URL, OPEN_METEO_URL, NWS_URL, SIBLING_TOOLS } from "@/lib/links";
 import { GitHubIcon } from "./icons";
 
 function Dot() {
@@ -73,6 +73,24 @@ export default function Footer() {
           </span>
         </a>
       </div>
+
+      <p className="mt-5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+        <span className="font-medium text-zinc-600 dark:text-zinc-300">More from Fusion Space:</span>
+        {SIBLING_TOOLS.map((tool, i) => (
+          <span key={tool.href} className="inline-flex items-center gap-1.5">
+            <a
+              href={tool.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={tool.blurb}
+              className="hover:text-zinc-800 dark:hover:text-zinc-200"
+            >
+              {tool.name}
+            </a>
+            {i < SIBLING_TOOLS.length - 1 && <Dot />}
+          </span>
+        ))}
+      </p>
 
       <p className="mt-5 max-w-3xl leading-relaxed text-zinc-500 dark:text-zinc-400">
         <strong className="font-medium text-zinc-600 dark:text-zinc-300">

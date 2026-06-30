@@ -79,7 +79,7 @@ export default function ConditionsTimeline({
           width={width}
           height={H}
           role="img"
-          aria-label={`Conditions for the next ${window.length} hours, four rows — wind, gusts, storm potential, and chance of rain — each coloured green, amber, or red against its own reference. Full values are in the table below.`}
+          aria-label={`Conditions for the next ${window.length} hours, four rows — wind, gusts, storm potential, and chance of rain — each colored green, amber, or red against its own reference. Full values are in the table below.`}
         >
           {/* row labels */}
           {ROWS.map((row, r) => (
@@ -187,7 +187,7 @@ export default function ConditionsTimeline({
         </svg>
       </div>
 
-      {/* colour key */}
+      {/* color key */}
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 dark:text-zinc-400">
         <span className="flex items-center gap-1">
           <span className="inline-block h-2.5 w-3 rounded-sm bg-emerald-400 dark:bg-emerald-500" /> clear
@@ -201,7 +201,7 @@ export default function ConditionsTimeline({
       </div>
 
       <SourceLine>
-        Each row is coloured against its own reference — wind and gusts against the{" "}
+        Each row is colored against its own reference — wind and gusts against the{" "}
         {limitLabel(u.wind)} line{windLine != null ? " (and your personal line)" : ""}, storm
         potential by CAPE band, and precip by the chance of rain. There&apos;s deliberately no
         single blended score: four honest reads, stacked, so the call stays yours.

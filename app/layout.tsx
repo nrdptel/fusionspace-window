@@ -38,7 +38,12 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: "/" },
   icons: {
-    icon: { url: "/icon.svg", type: "image/svg+xml" },
+    // Evergreen browsers pick the scalable SVG; the .ico is the universal fallback and
+    // the one bare /favicon.ico probers (feed readers, link unfurlers) actually request.
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+    ],
     apple: { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
   },
   openGraph: {

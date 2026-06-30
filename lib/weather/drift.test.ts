@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { driftFtPerMin, meanWindAloft, type DriftInput } from "./drift";
+import { driftFtPerMin, driftPerFoot, driftLandingFt, meanWindAloft, type DriftInput } from "./drift";
 
 function lvl(aglFt: number, windMph: number, dirDeg: number): DriftInput {
   return { aglFt, windMph, dirDeg };
@@ -59,5 +59,37 @@ describe("driftFtPerMin", () => {
     expect(driftFtPerMin(15)).toBeCloseTo(1320, 6); // 15 mph = 0.25 mi/min = 1,320 ft/min
     expect(driftFtPerMin(0)).toBe(0);
     expect(driftFtPerMin(60)).toBeCloseTo(5280, 6); // 60 mph = 1 mi/min
+  });
+});
+
+describe("driftPerFoot", () => {
+  it("matches the flyers' rule of thumb (≈1 ft per ft for ~10 mph over 15 fps)", () => {
+    // 10 mph = 14.667 fps; / 15 fps ≈ 0.978 ft of drift per ft of descent.
+    expect(driftPerFoot(10, 15)).toBeCloseTo(0.978, 3);
+  });
+
+  it("scales with wind and inversely with descent rate", () => {
+    expect(driftPerFoot(20, 15)).toBeCloseTo(driftPerFoot(10, 15) * 2, 6);
+    expect(driftPerFoot(10, 30)).toBeCloseTo(driftPerFoot(10, 15) / 2, 6);
+  });
+
+  it("is 0 for a non-positive or non-finite descent rate", () => {
+    expect(driftPerFoot(10, 0)).toBe(0);
+    expect(driftPerFoot(10, -5)).toBe(0);
+    expect(driftPerFoot(10, NaN)).toBe(0);
+  });
+});
+
+describe("driftLandingFt", () => {
+  it("multiplies the per-foot drift by the descent altitude (apogee)", () => {
+    // 10 mph (14.667 fps) over 15 fps × 5000 ft ≈ 4,889 ft of drift.
+    expect(driftLandingFt(10, 15, 5000)).toBeCloseTo(4888.9, 0);
+    expect(driftLandingFt(10, 15, 5000)).toBe(driftPerFoot(10, 15) * 5000);
+  });
+
+  it("is 0 when the descent rate or apogee can't produce drift", () => {
+    expect(driftLandingFt(10, 0, 5000)).toBe(0);
+    expect(driftLandingFt(10, 15, 0)).toBe(0);
+    expect(driftLandingFt(10, 15, -1000)).toBe(0);
   });
 });

@@ -243,8 +243,17 @@ export default function Page() {
             whole column. The drift also carries a <em>rate</em> — how far downrange recovery
             walks for each minute aloft (just the mean wind as distance-over-time, ×88 from mph to
             ft/min) — so you multiply by your own time under chute for a rough downrange distance.
-            It assumes nothing about your rocket or descent rate — you supply the hang time — so it
-            leans the drift and gives its scale, it doesn&apos;t predict the landing.
+          </Method>
+          <Method title="Landing drift from a descent rate">
+            Give a <strong>descent rate</strong> (ft/s, the figure your main comes down at) and the
+            drift turns into a distance. It&apos;s the flyers&apos; rule of thumb made exact: the
+            mean wind divided by the descent rate is how far the rocket walks sideways for every foot
+            it falls — descend at 15 ft/s in a 10 mph (≈ 14.7 ft/s) wind and it&apos;s about a foot
+            of drift per foot of altitude. Multiply by your <strong>expected apogee</strong> and you
+            get the actual landing distance and the compass point it walks toward. It&apos;s a
+            single-rate estimate — a dual-deploy drogue covers most of the altitude fast and lands
+            the rocket much closer — and it&apos;s still the column&apos;s average wind, not a
+            trajectory simulation; it leans the drift, it doesn&apos;t promise the spot.
           </Method>
           <Method title="Freezing level (0°C)">
             The profile also draws the <strong>0°C level</strong> — the height where the air

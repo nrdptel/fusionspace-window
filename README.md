@@ -34,6 +34,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   field, surface up to waiver altitudes, mapped from pressure-level geopotential heights. It
   flags the strongest **shear** layer, the column's **mean wind** (which way *and how far*
   recovery drifts), and the **0°C** level. The thing general weather apps bury or cap low.
+  Give a **descent rate** (and your apogee) and the mean wind becomes an actual **landing-drift
+  distance** — the rule of thumb (wind ÷ descent rate = drift per foot of altitude) made exact.
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
   where there is one (labelled *observed*, with the raw METAR a click away), with a modelled
   multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a

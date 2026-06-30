@@ -12,12 +12,14 @@ export default function FieldBriefing({
   units,
   windLine,
   apogee,
+  descentRate,
   hourIndex,
 }: {
   board: BoardData;
   units: UnitPrefs;
   windLine: number | null;
   apogee: number | null;
+  descentRate: number | null;
   hourIndex: number;
 }) {
   const [href, setHref] = useState("");
@@ -38,6 +40,7 @@ export default function FieldBriefing({
     hourIndex,
     windLine,
     apogee,
+    descentRate,
     shareUrl: href || "https://window.fusionspace.co",
   });
 

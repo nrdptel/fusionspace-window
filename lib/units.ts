@@ -126,6 +126,8 @@ function trim(n: number, decimals: number): string {
   if (!Number.isFinite(n)) return "—";
   const f = 10 ** decimals;
   const r = Math.round(n * f) / f;
+  // Normalize -0 → 0 so a value that rounds to zero from below (e.g. a dew point of -0.2 °C, or a
+  // freezing level a hair under the field) doesn't render with a stray leading minus.
   // Pin the locale so server and client first paint match (no hydration mismatch).
-  return r.toLocaleString("en-US", { maximumFractionDigits: decimals });
+  return (Object.is(r, -0) ? 0 : r).toLocaleString("en-US", { maximumFractionDigits: decimals });
 }

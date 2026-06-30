@@ -1,3 +1,5 @@
+import { HUB_URL } from "@/lib/links";
+
 /** Parent-brand eyebrow. Window is one of several Fusion Space tools; this small
  * linked lockup sits above the product name to place it under the Fusion Space
  * brand and let people discover the other tools at fusionspace.co. Uses the
@@ -6,7 +8,7 @@
 export default function FusionSpaceBadge({ className = "" }: { className?: string }) {
   return (
     <a
-      href="https://fusionspace.co"
+      href={HUB_URL}
       target="_blank"
       rel="noopener noreferrer"
       title="Fusion Space — free, polished tools for high-power rocketry"

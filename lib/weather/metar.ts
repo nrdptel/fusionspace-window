@@ -14,7 +14,7 @@
  *  at all) still reads unusable. */
 
 import { FT_PER_M, KMH_PER_MPH, M_PER_MILE, MS_PER_MPH } from "../units";
-import type { CloudLayer, Sky } from "./model";
+import type { CloudLayer, PresentWeather, Sky } from "./model";
 
 export interface RawStation {
   id: string;
@@ -37,6 +37,19 @@ interface RawObservation {
   windGust?: NwsValue;
   rawMessage?: string;
   cloudLayers?: { base?: NwsValue; amount?: string }[];
+  presentWeather?: NwsPresentWeather[];
+}
+
+/** One entry in the NWS observation `presentWeather` array (the structured METAR weather group). */
+interface NwsPresentWeather {
+  /** "light" | "heavy" — null/absent means moderate. */
+  intensity?: string | null;
+  /** e.g. "vicinity" | "showers" | "freezing" | "blowing" | "patches". */
+  modifier?: string | null;
+  /** The phenomenon, lowercase: "rain" | "thunderstorms" | "haze" | "smoke" | "fog" | … */
+  weather?: string | null;
+  /** The raw METAR token, e.g. "TSRA" | "-RA" | "VCTS" | "HZ". */
+  rawString?: string | null;
 }
 
 /** NWS reports visibility in metres; convert to statute miles, or null when absent. */
@@ -98,6 +111,67 @@ export function haversineMiles(
 
 const CEILING_AMOUNTS = new Set(["BKN", "OVC", "VV"]);
 
+// --- present weather (the observed METAR weather group) ---
+// Falling water/ice — a launch no-go under the safety code. NWS `weather` enum values.
+const PRECIP = new Set([
+  "rain", "drizzle", "snow", "snow_grains", "snow_pellets", "ice_pellets",
+  "ice_crystals", "hail", "small_hail",
+]);
+// Visibility obscurations — they don't stop a launch but cut the sight you need to track it.
+const OBSCURE = new Set([
+  "fog", "fog_mist", "mist", "haze", "smoke", "dust", "sand", "dust_storm",
+  "sand_storm", "dust_whirls", "volcanic_ash", "spray",
+]);
+// A nicer word for the phenomenon than the raw enum value, where it helps.
+const WX_WORD: Record<string, string> = {
+  thunderstorms: "thunderstorm", thunderstorm: "thunderstorm", fog_mist: "mist",
+  ice_pellets: "ice pellets", ice_crystals: "ice crystals", snow_grains: "snow grains",
+  snow_pellets: "snow pellets", dust_storm: "dust storm", sand_storm: "sandstorm",
+  dust_whirls: "dust whirls", volcanic_ash: "volcanic ash", funnel_cloud: "funnel cloud",
+};
+
+const titleCase = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+/** A human label for one present-weather entry, e.g. "Light rain", "Nearby thunderstorm". */
+function phenomenonLabel(e: NwsPresentWeather): string {
+  const raw = (e.weather ?? "").toLowerCase();
+  const word = WX_WORD[raw] ?? (raw ? raw.replace(/_/g, " ") : (e.rawString ?? "").trim());
+  if (!word) return "";
+  const parts: string[] = [];
+  if (e.modifier === "vicinity") parts.push("nearby");
+  if (e.intensity === "light") parts.push("light");
+  else if (e.intensity === "heavy") parts.push("heavy");
+  if (e.modifier === "freezing") parts.push("freezing");
+  if (e.modifier === "blowing") parts.push("blowing");
+  let label = (parts.length ? parts.join(" ") + " " : "") + word;
+  if (e.modifier === "showers") label += " showers";
+  return titleCase(label.trim());
+}
+
+/** Turn the NWS `presentWeather` array into a toned, flagged read — or null when nothing is
+ *  reported. Thunderstorm and precipitation are launch no-go items under the Tripoli/NAR code;
+ *  obscurations cut the visibility the same code's "observe the whole flight" rule needs. */
+export function parsePresentWeather(entries: NwsPresentWeather[] | undefined | null): PresentWeather | null {
+  const list = (entries ?? []).filter((e) => (e?.weather ?? "").trim() || (e?.rawString ?? "").trim());
+  if (list.length === 0) return null;
+  let thunderstorm = false;
+  let precip = false;
+  let obscuration = false;
+  const labels: string[] = [];
+  for (const e of list) {
+    const w = (e.weather ?? "").toLowerCase();
+    const rawTok = (e.rawString ?? "").toUpperCase();
+    if (w.startsWith("thunder") || rawTok.includes("TS")) thunderstorm = true;
+    if (PRECIP.has(w)) precip = true;
+    if (OBSCURE.has(w)) obscuration = true;
+    const label = phenomenonLabel(e);
+    if (label) labels.push(label);
+  }
+  if (labels.length === 0) return null;
+  const tone = thunderstorm || precip ? "red" : obscuration ? "amber" : "emerald";
+  return { labels, thunderstorm, precip, obscuration, tone };
+}
+
 /** Cloud groups (FEW/SCT/BKN/OVC/VV + height in hundreds of feet AGL) from a raw METAR. */
 const SKY_GROUP = /\b(VV|FEW|SCT|BKN|OVC)(\d{3})\b/g;
 /** Explicit clear-sky tokens: clear, sky clear, no significant/detected cloud, CAVOK. */
@@ -136,6 +210,8 @@ export interface ParsedObservation {
   /** The raw METAR string, when the station reports one. */
   raw: string | null;
   description: string;
+  /** Observed present-weather phenomena (thunderstorm / precip / obscuration), or null. */
+  presentWeather: PresentWeather | null;
   /** True when the observation actually carries sky data we can show. */
   usable: boolean;
 }
@@ -171,9 +247,10 @@ export function parseObservation(raw: unknown): ParsedObservation {
 
   const text = (p.textDescription ?? "").trim();
   const description = text || (layers.length ? summarizeLayers(layers) : clear ? "Clear" : "—");
-  // Usable for the sky panel when it carries cloud layers, a text summary, or an explicit
-  // clear-sky report — but not a bare station that says nothing about the sky at all.
-  const usable = layers.length > 0 || Boolean(text) || clear;
+  const presentWeather = parsePresentWeather(p.presentWeather);
+  // Usable for the sky panel when it carries cloud layers, a text summary, an explicit
+  // clear-sky report, or reported present weather — but not a bare station that says nothing.
+  const usable = layers.length > 0 || Boolean(text) || clear || presentWeather != null;
   return {
     time: p.timestamp ?? "",
     layers,
@@ -184,6 +261,7 @@ export function parseObservation(raw: unknown): ParsedObservation {
     windDirDeg: dirDeg(p.windDirection),
     raw: rawMsg,
     description,
+    presentWeather,
     usable,
   };
 }
@@ -239,6 +317,7 @@ export function stationSky(
     raw: obs.raw,
     layers: obs.layers,
     description: obs.description,
+    presentWeather: obs.presentWeather,
   };
 }
 

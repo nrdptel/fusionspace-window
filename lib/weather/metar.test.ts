@@ -8,6 +8,7 @@ import {
   modelSky,
   parseMetarSky,
   parseObservation,
+  parsePresentWeather,
   parseStations,
   stationSky,
   summarizeLayers,
@@ -123,6 +124,68 @@ describe("parseObservation", () => {
     const p = parseObservation(obs); // KDAG: 3 structured layers + a raw METAR
     expect(p.layers).toHaveLength(3);
     expect(p.ceilingFt).toBeGreaterThan(6000);
+  });
+
+  it("carries observed present weather through to the parsed observation", () => {
+    const p = parseObservation({
+      properties: {
+        timestamp: "2026-06-28T18:50:00Z",
+        textDescription: "Thunderstorm",
+        cloudLayers: [{ amount: "BKN", base: { unitCode: "wmoUnit:m", value: 600 } }],
+        presentWeather: [{ intensity: "light", weather: "rain", rawString: "-RA" }, { weather: "thunderstorms", rawString: "TS" }],
+      },
+    });
+    expect(p.presentWeather?.thunderstorm).toBe(true);
+    expect(p.presentWeather?.precip).toBe(true);
+    expect(p.presentWeather?.labels).toEqual(["Light rain", "Thunderstorm"]);
+  });
+});
+
+describe("parsePresentWeather", () => {
+  it("returns null when nothing is reported", () => {
+    expect(parsePresentWeather(undefined)).toBeNull();
+    expect(parsePresentWeather([])).toBeNull();
+    expect(parsePresentWeather([{}])).toBeNull();
+  });
+
+  it("flags a thunderstorm as a red no-go", () => {
+    const pw = parsePresentWeather([{ weather: "thunderstorms", rawString: "TS" }])!;
+    expect(pw.thunderstorm).toBe(true);
+    expect(pw.tone).toBe("red");
+    expect(pw.labels).toEqual(["Thunderstorm"]);
+  });
+
+  it("reads a thunderstorm in the vicinity (VCTS) as 'nearby'", () => {
+    const pw = parsePresentWeather([{ modifier: "vicinity", weather: "thunderstorms", rawString: "VCTS" }])!;
+    expect(pw.thunderstorm).toBe(true);
+    expect(pw.labels).toEqual(["Nearby thunderstorm"]);
+  });
+
+  it("flags precipitation as a red no-go and labels intensity / showers", () => {
+    expect(parsePresentWeather([{ intensity: "light", weather: "rain", rawString: "-RA" }])!.labels).toEqual(["Light rain"]);
+    expect(parsePresentWeather([{ modifier: "showers", weather: "rain", rawString: "SHRA" }])!.labels).toEqual(["Rain showers"]);
+    const snow = parsePresentWeather([{ intensity: "heavy", weather: "snow", rawString: "+SN" }])!;
+    expect(snow.precip).toBe(true);
+    expect(snow.tone).toBe("red");
+    expect(snow.labels).toEqual(["Heavy snow"]);
+  });
+
+  it("reads obscurations (the live KFLG haze + smoke) as an amber visibility cut, not a no-go", () => {
+    const pw = parsePresentWeather([
+      { weather: "haze", rawString: "HZ" },
+      { weather: "smoke", rawString: "FU" },
+    ])!;
+    expect(pw.obscuration).toBe(true);
+    expect(pw.thunderstorm).toBe(false);
+    expect(pw.precip).toBe(false);
+    expect(pw.tone).toBe("amber");
+    expect(pw.labels).toEqual(["Haze", "Smoke"]);
+  });
+
+  it("detects a thunderstorm from the raw token even if the weather field is blank", () => {
+    const pw = parsePresentWeather([{ rawString: "TSRA" }])!;
+    expect(pw.thunderstorm).toBe(true);
+    expect(pw.labels).toEqual(["TSRA"]);
   });
 });
 

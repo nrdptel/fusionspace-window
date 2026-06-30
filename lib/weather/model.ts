@@ -7,6 +7,7 @@
 
 import type { ClimatologyNormal } from "./climatology";
 import type { AirQuality } from "./airquality";
+import type { WindTone } from "./limits";
 
 export interface Field {
   lat: number;
@@ -119,6 +120,23 @@ export interface CloudLayer {
   baseFt: number | null;
 }
 
+/** Observed present-weather phenomena from a station's METAR — thunderstorm, precipitation,
+ *  and visibility obscurations (fog / haze / smoke). The observed counterpart to the modelled
+ *  CAPE storm potential, and the direct read on the Tripoli/NAR no-go items (no launch into
+ *  precipitation or with a thunderstorm nearby). */
+export interface PresentWeather {
+  /** One label per reported phenomenon, e.g. ["Thunderstorm", "Light rain"]. */
+  labels: string[];
+  /** A thunderstorm (TS / VCTS) is being reported — a safety-code launch no-go. */
+  thunderstorm: boolean;
+  /** Precipitation is falling — a safety-code launch no-go. */
+  precip: boolean;
+  /** An obscuration (fog / haze / smoke / dust) is cutting the visibility. */
+  obscuration: boolean;
+  /** Overall tone: red for thunderstorm or precip, amber for an obscuration. */
+  tone: WindTone;
+}
+
 export interface Sky {
   /** "station" = observed at a nearby reporting station; "model" = Open-Meteo cloud cover. */
   source: "station" | "model";
@@ -136,6 +154,8 @@ export interface Sky {
   raw?: string | null;
   layers?: CloudLayer[];
   description?: string;
+  /** Observed present-weather phenomena, when the station reports any (null/absent otherwise). */
+  presentWeather?: PresentWeather | null;
   // Model fallback:
   cloudCoverPct?: number;
 }

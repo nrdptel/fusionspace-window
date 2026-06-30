@@ -288,6 +288,18 @@ export default function Page() {
             It&apos;s cover, not a forecast ceiling height — deliberately softer than the observed
             read — so treat it as a heads-up while the observed ceiling keeps the go/no-go.
           </Method>
+          <Method title="Observed weather (present-weather)">
+            The Tripoli/NAR safety code names four weather no-go items; three — wind over the limit,
+            flight into cloud, and losing sight of the rocket — Window already reads. The fourth is a
+            thunderstorm or precipitation, and that&apos;s an <em>observed</em> question, not a CAPE
+            one: storm potential says the atmosphere <em>could</em> build storms, but it can&apos;t
+            tell you one is overhead. So the nearest station&apos;s METAR present-weather group is
+            read directly — a reported thunderstorm (TS, or VCTS in the vicinity) or precipitation is
+            flagged red as a launch no-go, and an obscuration (fog, haze, smoke) amber, since it cuts
+            the visibility the code&apos;s &ldquo;observe the whole flight&rdquo; rule depends on. Like
+            the wind cross-check it&apos;s the nearest station, so read it as a heads-up that
+            convection or precip is in the area, not a literal ten-mile ruling.
+          </Method>
           <Method title="Visibility">
             Horizontal visibility in statute miles — it matters for keeping a high flight in
             sight and for the cloud-and-visibility rules many waivers carry. Like the ceiling,

@@ -78,6 +78,22 @@ export default function SkyPanel({
                 {sky.ceilingFt == null && " — no broken or overcast layer reported"}
               </p>
 
+              {/* Observed present weather — thunderstorm / precip / obscuration at the station. */}
+              {sky.presentWeather && sky.presentWeather.labels.length > 0 && (
+                <p className="mt-2 text-sm">
+                  <span className={"font-semibold " + windToneTextClass(sky.presentWeather.tone)}>
+                    {sky.presentWeather.labels.join(", ")}
+                  </span>
+                  <span className="text-zinc-600 dark:text-zinc-400">
+                    {" "}
+                    · observed now
+                    {sky.presentWeather.thunderstorm || sky.presentWeather.precip
+                      ? " — a launch no-go"
+                      : " — cutting visibility"}
+                  </span>
+                </p>
+              )}
+
               {/* Clearance against the expected apogee, when one is set. */}
               {apogee != null &&
                 (sky.ceilingFt != null ? (

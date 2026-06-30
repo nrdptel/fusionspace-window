@@ -79,6 +79,19 @@ test("shows the modeled low-cloud outlook as the forward-looking companion to th
   await expect(sky.getByText(/Modeled low-cloud cover from Open-Meteo/)).toBeVisible();
 });
 
+test("surfaces observed present weather (a thunderstorm) from the nearest METAR as a no-go", async ({ page }) => {
+  await installStubs(page, { observations: "thunderstorm" });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  const sky = page.locator("#sky");
+  await expect(sky.getByText("Thunderstorm, Light rain")).toBeVisible();
+  await expect(sky.getByText(/observed now — a launch no-go/)).toBeVisible();
+
+  // It rides into the shareable briefing too.
+  await page.getByText("Preview the text briefing").click();
+  await expect(page.getByText(/Observed now: Thunderstorm, Light rain — launch no-go/)).toBeVisible();
+});
+
 test("reads the observed ceiling against an expected apogee as a go/no-go gate", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

@@ -411,9 +411,10 @@ export default function Page() {
             <p className="max-w-3xl">
               &ldquo;Copy briefing&rdquo; assembles a plain-text summary of the field — surface
               wind against the limit with the observed cross-check, sky, ceiling and visibility,
-              the pressure trend, density altitude, storm potential, a few winds-aloft levels with
-              the mean wind and the 0°C level, any alerts, the next calm window, and a short
-              outlook — to paste into a club chat. It&apos;s exactly the figures shown on the page,
+              any observed present-weather no-go, the pressure trend, density altitude and the
+              dew-point spread, storm potential, a few winds-aloft levels with the mean wind and
+              the 0°C level, any alerts, the next calm window, and a short outlook — to paste into
+              a club chat. It&apos;s exactly the figures shown on the page,
               with the share link and the not-authoritative disclaimer baked in, so a briefing
               carries the same honesty as the board. Nothing is sent anywhere; the text is built
               in your browser and copied to your clipboard.

@@ -63,6 +63,10 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Low cloud \(modeled\): Thin now, building to overcast \(85%\) by Tomorrow 12 PM/);
   });
 
+  it("reports the dew point and the temperature spread", () => {
+    expect(text).toMatch(/Dew point: -?\d+°F \(\d+°F spread — (dry air|humid|near saturation)[^)]*\)/);
+  });
+
   it("includes the observed ceiling, density altitude, and winds aloft", () => {
     expect(text).toMatch(/Sky: Mostly Cloudy, ceiling [\d,]+ ft \(KDAG, observed\)/);
     expect(text).toMatch(/Visibility: 10 mi \(observed\)/);

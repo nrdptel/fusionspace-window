@@ -7,3 +7,11 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+# Everything under /_next/static/ has a content hash in its filename, so a new
+# build always emits a new URL — the bytes at a given URL never change. Cache them
+# for a year and skip revalidation, instead of Cloudflare's 4-hour default that
+# re-checks ~220 KB of JS on every field reload. The HTML that references these
+# names stays max-age=0/must-revalidate, so a deploy is still picked up instantly.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

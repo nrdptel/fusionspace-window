@@ -75,9 +75,11 @@ describe("buildBriefing", () => {
     expect(text).toMatch(/Mean wind to [\d,]+ ft: \d+ mph from [NSEW]+ — drift toward [NSEW]+, ~[\d,]+ ft\/min aloft/);
   });
 
-  it("surfaces storm potential with the day's CAPE peak", () => {
-    // Fixture: current CAPE 900 (marginal), towering to 1,700 by mid-afternoon.
-    expect(text).toMatch(/Storm potential: Marginally unstable \(CAPE 900 J\/kg now, peaking ~1700 by 2 PM\)/);
+  it("surfaces storm potential headlined on the day's CAPE peak, matching the on-screen panel", () => {
+    // Fixture: current CAPE 900 (marginal), towering to 1,700 (moderate) by mid-afternoon. The
+    // headline follows the worse of now/peak — same as the StormPotential card — so the board and
+    // the copied briefing never disagree on the label. The "now" value still rides in the detail.
+    expect(text).toMatch(/Storm potential: Moderately unstable \(CAPE 900 J\/kg now, peaking ~1700 by 2 PM\)/);
   });
 
   it("includes the 0°C freezing level alongside the winds aloft", () => {

@@ -197,13 +197,18 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   // Storm potential — the convective (CAPE) read the board surfaces, with the day's peak so a
   // calm morning that towers up by afternoon makes it into the briefing.
   if (Number.isFinite(c.capeJkg)) {
-    const inst = classifyCape(c.capeJkg);
+    const now = classifyCape(c.capeJkg);
     const peak = peakCape(forecast.hourly, hourIndex, 24);
+    // Headline the worse of now / the day's peak, exactly as the on-screen storm panel does —
+    // otherwise a field reading "Moderately unstable" on the board copies a briefing that says
+    // "Marginally unstable". The "now" number still rides along in the detail.
+    const peakBand = peak ? classifyCape(peak.valueJkg) : now;
+    const head = peakBand.band === "none" ? now : peakBand;
     const peakStr =
       peak && peak.valueJkg > c.capeJkg + 50
         ? `, peaking ~${Math.round(peak.valueJkg)} by ${clockShort(peak.time)}`
         : "";
-    lines.push(`Storm potential: ${inst.label} (CAPE ${Math.round(c.capeJkg)} J/kg now${peakStr})`);
+    lines.push(`Storm potential: ${head.label} (CAPE ${Math.round(c.capeJkg)} J/kg now${peakStr})`);
   }
 
   // Winds aloft

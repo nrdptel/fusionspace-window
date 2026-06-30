@@ -7,7 +7,7 @@
 
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
-import { meanWindAloft, driftFtPerMin } from "./drift";
+import { meanWindAloft, driftFtPerMin, driftLandingFt } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
 import { gustiness } from "./gust";
@@ -46,6 +46,8 @@ export interface BriefingOptions {
   windLine: number | null;
   /** Expected apogee (feet AGL), or null — adds a ceiling-clearance read to the sky line. */
   apogee: number | null;
+  /** Recovery descent rate (ft/s), or null — with the apogee, adds a landing-drift line. */
+  descentRate: number | null;
   /** Absolute, shareable URL for this field. */
   shareUrl: string;
 }
@@ -82,7 +84,7 @@ function sampleAloft(
 }
 
 export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
-  const { units, hourIndex, windLine, apogee, shareUrl } = opts;
+  const { units, hourIndex, windLine, apogee, descentRate, shareUrl } = opts;
   const u = resolveUnits(units);
   const { forecast, sky, alerts } = board;
   const c = forecast.current;
@@ -211,6 +213,13 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
           `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}, ` +
           `~${fmtLength(driftFtPerMin(mean.speedMph), u.length)} ${LENGTH_LABEL[u.length]}/min aloft`,
       );
+      if (descentRate != null && apogee != null) {
+        const landFt = driftLandingFt(mean.speedMph, descentRate, apogee);
+        lines.push(
+          `  Landing drift: from ${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]} at ${descentRate} ft/s, ` +
+            `~${fmtLength(landFt, u.length)} ${LENGTH_LABEL[u.length]} (${fmtVisibility(landFt / 5280, u.length)} ${VIS_LABEL[u.length]}) toward ${degToCompass(mean.towardDeg)} — single-rate estimate`,
+        );
+      }
     }
 
     // 0°C level — the same reference line the chart draws, for cold recovery electronics.

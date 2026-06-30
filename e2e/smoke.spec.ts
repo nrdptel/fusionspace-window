@@ -117,6 +117,25 @@ test("reads the observed ceiling against an expected apogee as a go/no-go gate",
   await expect(sky.getByText(/of room below your/)).toHaveCount(0);
 });
 
+test("turns the mean wind aloft into a landing-drift distance from a descent rate", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  const aloft = page.locator("#aloft");
+  // Default: the per-minute drift rate and a prompt to set a descent rate.
+  await expect(aloft.getByText(/per minute aloft/)).toBeVisible();
+  await expect(aloft.getByText(/set a descent rate/)).toBeVisible();
+
+  // A descent rate alone gives the per-1,000-ft ratio.
+  await page.getByLabel(/descent rate/i).fill("18");
+  await expect(aloft.getByText(/of drift per 1,000 ft of descent/)).toBeVisible();
+
+  // Add an apogee and it becomes an actual landing distance toward a compass point.
+  await page.getByLabel(/Expected apogee/).fill("9000");
+  await expect(aloft.getByText(/from your .* apogee, about/)).toBeVisible();
+  await expect(aloft.getByText(/single-rate estimate/)).toBeVisible();
+});
+
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);

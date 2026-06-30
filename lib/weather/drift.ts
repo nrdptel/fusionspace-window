@@ -40,6 +40,24 @@ export function driftFtPerMin(meanWindMph: number): number {
   return meanWindMph * (5280 / 60);
 }
 
+const FPS_PER_MPH = 5280 / 3600; // 1.46667
+
+/** Down-wind drift per foot of altitude lost: the mean wind divided by the descent rate, both
+ *  as speeds (wind_fps / descent_fps). The rule of thumb flyers cite — descend at 15 fps in a
+ *  10 mph (≈14.7 fps) wind and the rocket walks ~1 ft sideways for every foot it falls. Returns
+ *  0 for a non-positive descent rate. */
+export function driftPerFoot(meanWindMph: number, descentRateFps: number): number {
+  if (!(descentRateFps > 0)) return 0;
+  return (meanWindMph * FPS_PER_MPH) / descentRateFps;
+}
+
+/** Total down-wind drift (feet) for a rocket falling from `apogeeFt` at `descentRateFps` in this
+ *  mean wind — driftPerFoot × the altitude it descends through. A single-rate estimate: a
+ *  dual-deploy drogue covers most of the altitude fast and lands the rocket much closer. */
+export function driftLandingFt(meanWindMph: number, descentRateFps: number, apogeeFt: number): number {
+  return driftPerFoot(meanWindMph, descentRateFps) * Math.max(0, apogeeFt);
+}
+
 /** Wind velocity components (mph): the wind blows toward (from + 180°); u east, v north. */
 function components(speed: number, fromDeg: number): { u: number; v: number } {
   const r = (fromDeg * Math.PI) / 180;

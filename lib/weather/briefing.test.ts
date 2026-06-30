@@ -34,6 +34,7 @@ describe("buildBriefing", () => {
     hourIndex: 12, // the fixture's current hour (12:00)
     windLine: null,
     apogee: null,
+    descentRate: null,
     shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
   });
 
@@ -103,6 +104,7 @@ describe("buildBriefing", () => {
       hourIndex: 12,
       windLine: null,
       apogee: null,
+      descentRate: null,
       shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
     });
     expect(metric).toMatch(/km\/h/);
@@ -114,6 +116,8 @@ describe("buildBriefing", () => {
       units: DEFAULT_UNITS,
       hourIndex: 12,
       windLine: null,
+      apogee: null,
+      descentRate: null,
       shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
     };
     // Fixture ceiling is BKN ~6,496 ft. A 9,000 ft peak flies into it.
@@ -124,5 +128,21 @@ describe("buildBriefing", () => {
     expect(clear).toMatch(/Ceiling vs 2,000 ft apogee: Clear — [\d,]+ ft of room below your 2,000 ft peak/);
     // With no apogee set, the line is absent.
     expect(buildBriefing(board(), { ...base, apogee: null })).not.toMatch(/apogee:/);
+  });
+
+  it("adds a landing-drift line when a descent rate and apogee are both set", () => {
+    const base = {
+      units: DEFAULT_UNITS,
+      hourIndex: 12,
+      windLine: null,
+      apogee: 5000,
+      shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
+    };
+    const txt = buildBriefing(board(), { ...base, descentRate: 18 });
+    expect(txt).toMatch(
+      /Landing drift: from 5,000 ft at 18 ft\/s, ~[\d,]+ ft \([\d.]+ mi\) toward [NSEW]+ — single-rate estimate/,
+    );
+    // Absent without a descent rate, even with an apogee.
+    expect(buildBriefing(board(), { ...base, descentRate: null })).not.toMatch(/Landing drift/);
   });
 });

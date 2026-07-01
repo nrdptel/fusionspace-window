@@ -54,6 +54,16 @@ describe("visibility conversion", () => {
     expect(fmtVisibility(10, "ft")).toBe("10");
     expect(fmtVisibility(10, "m")).toBe("16");
   });
+
+  it("shows sub-unit visibility with precision instead of rounding fog down to 0", () => {
+    // A 1/4-mile fog observation must not read "0 mi".
+    expect(fmtVisibility(0.25, "ft")).toBe("0.25");
+    expect(fmtVisibility(0.5, "ft")).toBe("0.5");
+    // Metric: 0.25 mi ≈ 0.4 km — still shown, not zeroed.
+    expect(fmtVisibility(0.25, "m")).toBe("0.4");
+    // The clean 2–60 range stays whole.
+    expect(fmtVisibility(10, "ft")).toBe("10");
+  });
 });
 
 describe("degToCompass", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { HourPoint } from "@/lib/weather/model";
 import {
   degToCompass,
@@ -18,6 +18,8 @@ import { clockShort, dayLabel } from "@/lib/format";
 import { hourSnapshot } from "@/lib/weather/snapshot";
 import { SURFACE_LIMIT_MPH, windTone, windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { SourceLine } from "./ui";
+import FlyTimeSlider from "./FlyTimeSlider";
+import { useScrollFollowX } from "./useScrollFollow";
 
 /** A compact labeled figure in the fly-time snapshot. */
 function Metric({
@@ -92,9 +94,14 @@ export default function HourlyTimeline({
 
   const sel = window[selLocal];
 
+  // Follow the fly-time selection: scroll the chart so the selected hour stays in view on
+  // narrow screens where the 48 h timeline overflows.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useScrollFollowX(scrollRef, x(selLocal) - STEP / 2, x(selLocal) + STEP / 2);
+
   return (
     <div>
-      <div className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           width={width}
@@ -161,18 +168,14 @@ export default function HourlyTimeline({
       </div>
 
       {/* fly-time scrubber */}
-      <label className="mt-2 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-        <span className="shrink-0">Fly-time</span>
-        <input
-          type="range"
-          min={0}
-          max={Math.max(0, window.length - 1)}
-          value={selLocal}
-          onChange={(e) => onSelect(startIndex + Number(e.target.value))}
-          aria-label="Pick a launch time — sets the conditions snapshot and the winds-aloft profile"
-          className="w-full accent-indigo-600"
-        />
-      </label>
+      <FlyTimeSlider
+        hourly={hourly}
+        startIndex={startIndex}
+        selectedIndex={selectedIndex}
+        onSelect={onSelect}
+        todayIso={todayIso}
+        windowHours={window.length}
+      />
 
       {/* fly-time snapshot: conditions at the selected hour */}
       {sel && (

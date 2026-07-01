@@ -36,6 +36,7 @@ import CalmWindows from "./CalmWindows";
 import ConditionsTimeline from "./ConditionsTimeline";
 import FieldBriefing from "./FieldBriefing";
 import HourlyTimeline from "./HourlyTimeline";
+import FlyTimeSlider from "./FlyTimeSlider";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
 import AirQualityPanel from "./AirQualityPanel";
@@ -409,6 +410,15 @@ export default function WeatherBoard() {
               model={data.forecast.model}
               apogee={apogee}
               descentRate={descentRate}
+              flyTimeSlider={
+                <FlyTimeSlider
+                  hourly={data.forecast.hourly}
+                  startIndex={currentHourIndex(data)}
+                  selectedIndex={selectedHour}
+                  onSelect={setSelectedHour}
+                  todayIso={todayIso}
+                />
+              }
             />
           </Panel>
 

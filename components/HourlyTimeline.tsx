@@ -71,13 +71,23 @@ export default function HourlyTimeline({
 
   const innerH = H - TOP - BOT;
   const width = PAD_X * 2 + window.length * STEP;
-  const yMax = Math.max(25, Math.ceil(Math.max(...window.map((h) => h.gustMph)) / 5) * 5);
+  // Filter to finite gusts before the spread: a single missing gust (some models omit them at
+  // some hours) would otherwise make yMax NaN and blank every coordinate in the chart.
+  const finiteGusts = window.map((h) => h.gustMph).filter(Number.isFinite);
+  const yMax = Math.max(25, Math.ceil((finiteGusts.length ? Math.max(...finiteGusts) : 0) / 5) * 5);
 
   const x = (i: number) => PAD_X + i * STEP + STEP / 2;
   const y = (mph: number) => TOP + innerH * (1 - Math.max(0, Math.min(yMax, mph)) / yMax);
 
-  const windPath = window.map((h, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(h.windMph).toFixed(1)}`).join(" ");
-  const gustPath = window.map((h, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(h.gustMph).toFixed(1)}`).join(" ");
+  // Drop any hour whose value is missing so one NaN can't poison the whole line with NaN coords.
+  const linePath = (value: (h: (typeof window)[number]) => number) =>
+    window
+      .map((h, i) => ({ i, v: value(h) }))
+      .filter((p) => Number.isFinite(p.v))
+      .map((p, k) => `${k === 0 ? "M" : "L"}${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`)
+      .join(" ");
+  const windPath = linePath((h) => h.windMph);
+  const gustPath = linePath((h) => h.gustMph);
   const areaPath = `${windPath} L${x(window.length - 1).toFixed(1)},${y(0)} L${x(0).toFixed(1)},${y(0)} Z`;
 
   const sel = window[selLocal];
@@ -228,7 +238,10 @@ export default function HourlyTimeline({
                     {fmtWind(h.windMph, u.wind)}
                   </td>
                   <td className="px-3 py-1">{fmtWind(h.gustMph, u.wind)}</td>
-                  <td className="px-3 py-1">{degToCompass(h.dirDeg)} {Math.round(h.dirDeg)}°</td>
+                  <td className="px-3 py-1">
+                    {degToCompass(h.dirDeg)}
+                    {Number.isFinite(h.dirDeg) ? ` ${Math.round(h.dirDeg)}°` : ""}
+                  </td>
                 </tr>
               ))}
             </tbody>

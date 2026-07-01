@@ -110,8 +110,12 @@ export function fmtLength(ft: number, unit: LengthUnit, decimals = 0): string {
 export function fmtPrecip(inches: number, unit: PrecipUnit, decimals = 2): string {
   return trim(precipFromIn(inches, unit), decimals);
 }
-export function fmtVisibility(mi: number, unit: LengthUnit, decimals = 0): string {
-  return trim(visFromMiles(mi, unit), decimals);
+export function fmtVisibility(mi: number, unit: LengthUnit, decimals?: number): string {
+  const v = visFromMiles(mi, unit);
+  // Whole miles/km read cleanest across the 2–60 range the board usually shows, but sub-unit
+  // visibility is exactly the fog/smoke case that matters most — don't round 0.25 mi down to "0".
+  const d = decimals ?? (Number.isFinite(v) && v > 0 && v < 2 ? 2 : 0);
+  return trim(v, d);
 }
 
 /** The launch wind limit, shown in the active wind unit. The published NFPA/NAR/Tripoli rule is

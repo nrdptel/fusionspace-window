@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { AloftProfile, Field } from "@/lib/weather/model";
 import {
   degToCompass,
@@ -52,6 +52,7 @@ export default function WindsAloft({
   model,
   apogee,
   descentRate,
+  flyTimeSlider,
 }: {
   profile: AloftProfile;
   surfaceWindMph: number;
@@ -63,6 +64,9 @@ export default function WindsAloft({
   apogee: number | null;
   /** Recovery descent rate (ft/s), or null — turns the mean wind into a landing-drift distance. */
   descentRate: number | null;
+  /** The shared fly-time scrubber, rendered under the plot so you can retime the profile in
+   *  place instead of scrolling back up to the hourly timeline. */
+  flyTimeSlider?: ReactNode;
 }) {
   const u = resolveUnits(units);
   const [top, setTop] = useState<TopKey>("20000");
@@ -213,6 +217,10 @@ export default function WindsAloft({
           </svg>
         </div>
       )}
+
+      {/* Retime the profile from right here — synced with the hourly timeline and conditions grid.
+          Rendered even when this hour has no data, so you can scrub to an hour that does. */}
+      {flyTimeSlider}
 
       {!empty && !showFreezing && (freezingBelowField || freezingAboveShown) && (
         <p className="mt-2 text-xs text-sky-700 dark:text-sky-400">

@@ -70,8 +70,9 @@ test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
   await expect(hourly.getByText("Density altitude")).toBeVisible();
   await expect(hourly.getByText("Storm", { exact: true })).toBeVisible();
 
-  // Scrubbing the slider moves the snapshot to another hour.
-  const slider = page.getByRole("slider", { name: /Pick a launch time/ });
+  // Scrubbing the slider moves the snapshot to another hour. Each scrub panel now has its own
+  // synced fly-time slider, so scope to the hourly panel's.
+  const slider = hourly.getByRole("slider", { name: /Pick a launch time/ });
   await slider.focus();
   await slider.press("End");
   await expect(header).not.toContainText("12 PM");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { HourPoint } from "@/lib/weather/model";
 import { hourConditions, type FactorCell } from "@/lib/weather/conditions";
 import {
@@ -13,6 +13,8 @@ import {
 import { windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { clockShort, dayLabel } from "@/lib/format";
 import { SourceLine } from "./ui";
+import FlyTimeSlider from "./FlyTimeSlider";
+import { useScrollFollowX } from "./useScrollFollow";
 
 const GUTTER = 54; // left column for the row labels
 const CW = 14; // px per hour
@@ -66,6 +68,10 @@ export default function ConditionsTimeline({
   const cellOf = (c: ReturnType<typeof hourConditions>, key: (typeof ROWS)[number]["key"]): FactorCell =>
     c[key];
 
+  // Follow the fly-time selection so the selected column stays in view when the grid overflows.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useScrollFollowX(scrollRef, x(selLocal), x(selLocal) + CW);
+
   return (
     <div>
       <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
@@ -73,7 +79,7 @@ export default function ConditionsTimeline({
         across a row for when a factor clears. Tap a column to set the fly-time.
       </p>
 
-      <div className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           width={width}
@@ -186,6 +192,16 @@ export default function ConditionsTimeline({
           })}
         </svg>
       </div>
+
+      {/* fly-time scrubber — synced with the other panels, and it scrolls the grid to the hour */}
+      <FlyTimeSlider
+        hourly={hourly}
+        startIndex={startIndex}
+        selectedIndex={selectedIndex}
+        onSelect={onSelect}
+        todayIso={todayIso}
+        windowHours={window.length}
+      />
 
       {/* color key */}
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 dark:text-zinc-400">

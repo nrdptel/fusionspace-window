@@ -96,7 +96,7 @@ export default function PrivacyPage() {
           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Hosting</h2>
           <p className="mt-2">
             The site itself is served as static files by{" "}
-            <a href="https://www.cloudflare.com/application-services/products/pages/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100">
+            <a href="https://pages.cloudflare.com/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100">
               Cloudflare Pages
             </a>
             . Like any web host, Cloudflare may keep standard, short-lived request logs (such as IP

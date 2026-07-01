@@ -202,7 +202,7 @@ const OBSERVANCES: Record<number, Observance[]> = {
     {
       id: "world-aids-day",
       message: "World AIDS Day — remember, support, and end HIV stigma.",
-      href: "https://www.hiv.gov/world-aids-day",
+      href: "https://www.hiv.gov/events/awareness-days/world-aids-day",
       hrefLabel: "HIV.gov",
       bar: { background: AIDS_RED, title: "World AIDS Day" },
     },

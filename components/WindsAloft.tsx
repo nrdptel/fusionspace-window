@@ -336,7 +336,10 @@ export default function WindsAloft({
                     <td className="px-3 py-1">{fmtLength(l.aglFt, u.length)}</td>
                     <td className="px-3 py-1">{l.label}</td>
                     <td className="px-3 py-1">{fmtWind(l.windMph, u.wind)}</td>
-                    <td className="px-3 py-1">{degToCompass(l.dirDeg)} {Math.round(l.dirDeg)}°</td>
+                    <td className="px-3 py-1">
+                      {degToCompass(l.dirDeg)}
+                      {Number.isFinite(l.dirDeg) ? ` ${Math.round(l.dirDeg)}°` : ""}
+                    </td>
                   </tr>
                 ))}
               </tbody>

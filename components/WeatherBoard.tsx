@@ -25,6 +25,7 @@ import {
   type SavedField,
 } from "@/lib/prefs";
 import { DEFAULT_UNITS, type UnitPrefs } from "@/lib/units";
+import { LAUNCH_SITES } from "@/lib/launchSites";
 import LocationBar from "./LocationBar";
 import UnitsControl from "./UnitsControl";
 import Alerts from "./Alerts";
@@ -41,6 +42,12 @@ import AirQualityPanel from "./AirQualityPanel";
 import Outlook from "./Outlook";
 import { Panel, Pill } from "./ui";
 import { StarIcon } from "./icons";
+
+/** The empty-state "try an example" field. Drawn from the curated Sites list (Lucerne Valley,
+ *  ROC — a long-running Southern California high-power field) so the example link and the Sites
+ *  picker never disagree on where the same field is. Falls back to the first curated site. */
+const EXAMPLE_SITE =
+  LAUNCH_SITES.find((s) => s.name.startsWith("Lucerne Valley")) ?? LAUNCH_SITES[0];
 
 /** The hourly index for the field's current hour. */
 function currentHourIndex(data: BoardData): number {
@@ -234,7 +241,7 @@ export default function WeatherBoard() {
     <div id="location" className="scroll-mt-4">
       <LocationBar onPick={pick} saved={saved} onRemoveSaved={removeSavedField} units={units} />
 
-      {!field?.lat && (
+      {field?.lat == null && (
         <div className="mt-8 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/30">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Pick a launch field above — search a place, use your location, enter coordinates, or
@@ -243,10 +250,10 @@ export default function WeatherBoard() {
           </p>
           <button
             type="button"
-            onClick={() => pick(34.45, -116.95, "Lucerne Valley, CA")}
+            onClick={() => pick(EXAMPLE_SITE.lat, EXAMPLE_SITE.lon, EXAMPLE_SITE.name)}
             className="mt-3 text-sm font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-500 dark:text-indigo-400"
           >
-            Try an example — Lucerne Valley, CA
+            Try an example — {EXAMPLE_SITE.name}
           </button>
         </div>
       )}

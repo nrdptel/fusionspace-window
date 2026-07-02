@@ -366,7 +366,7 @@ export default function WeatherBoard() {
             />
           </Panel>
 
-          <Panel id="hourly" title="Today & tomorrow">
+          <Panel id="hourly" title="The next 3 days">
             <CalmWindows
               hourly={data.forecast.hourly}
               fromIndex={currentHourIndex(data)}

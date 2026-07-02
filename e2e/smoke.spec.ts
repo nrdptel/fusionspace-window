@@ -76,7 +76,7 @@ test("shows the modeled low-cloud outlook as the forward-looking companion to th
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
 
   const sky = page.locator("#sky");
-  await expect(sky.getByText("Low cloud · next 2 days")).toBeVisible();
+  await expect(sky.getByText("Low cloud · next 3 days")).toBeVisible();
   // The fixture is thin now and builds to an 85% overcast deck by midday tomorrow.
   await expect(sky.getByText(/Thin now, building to overcast \(85%\) by Tomorrow 12 PM/)).toBeVisible();
   // It's labeled modeled — the observed ceiling keeps the go/no-go, this is a heads-up.

@@ -143,7 +143,7 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   }
 
   // Low-cloud outlook — the forward-looking companion to the now-only observed ceiling.
-  const lowCloud = lowCloudOutlook(forecast.hourly.slice(hourIndex, hourIndex + 48));
+  const lowCloud = lowCloudOutlook(forecast.hourly.slice(hourIndex, hourIndex + FLY_WINDOW_HOURS));
   if (lowCloud) {
     lines.push(
       `  Low cloud (modeled): ${lowCloudHeadline(

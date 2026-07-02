@@ -66,7 +66,7 @@ function summarizeWindow(hourly: HourPoint[], i: number, jExclusive: number): Ca
 /** Upcoming stretches where sustained wind stays at or below `limitMph`, in time order. */
 export function findCalmWindows(hourly: HourPoint[], opts: CalmWindowOptions): CalmWindow[] {
   const { limitMph, fromIndex } = opts;
-  const horizon = opts.horizonHours ?? 48;
+  const horizon = opts.horizonHours ?? FLY_WINDOW_HOURS;
   const minHours = opts.minHours ?? 1;
   const start = Math.max(0, fromIndex);
   const end = Math.min(hourly.length, start + horizon);

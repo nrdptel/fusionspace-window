@@ -49,7 +49,7 @@ export default function FlyTimeSlider({
         max={count - 1}
         value={selLocal}
         onChange={(e) => onSelect(startIndex + Number(e.target.value))}
-        aria-label="Pick a launch time — sets the conditions snapshot and the winds-aloft profile"
+        aria-label="Pick a launch time — sets the hourly snapshot, the conditions grid, and the winds-aloft profile"
         className="block w-full accent-indigo-600"
       />
     </div>

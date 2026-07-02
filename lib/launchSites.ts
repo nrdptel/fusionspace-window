@@ -36,12 +36,12 @@ export const US_STATE_NAMES: Record<string, string> = {
 export const LAUNCH_SITES: LaunchSite[] = [
   // Alabama
   { name: "SEARS — Samson", state: "AL", lat: 31.13, lon: -86.07 },
-  { name: "HARA — Woodville", state: "AL", lat: 34.63, lon: -86.28 },
-  { name: "SoAR — Centre", state: "AL", lat: 34.1, lon: -85.75 },
+  { name: "HARA — Woodville", state: "AL", lat: 34.63, lon: -86.32 },
+  { name: "SoAR — Centre", state: "AL", lat: 34.16, lon: -85.73 },
   // Arkansas
-  { name: "CAR — Little Rock", state: "AR", lat: 34.79, lon: -92.4 },
+  { name: "CAR — Little Rock", state: "AR", lat: 34.81, lon: -92.4 },
   // Arizona
-  { name: "Tripoli Phoenix — Aguila", state: "AZ", lat: 33.9, lon: -113.2 },
+  { name: "Tripoli Phoenix — Aguila", state: "AZ", lat: 33.9, lon: -113.18 },
   { name: "SARA — Tucson (TIMPA)", state: "AZ", lat: 32.28, lon: -111.27 },
   // California
   { name: "ROC — Lucerne Valley", state: "CA", lat: 34.5, lon: -116.96 },
@@ -58,14 +58,14 @@ export const LAUNCH_SITES: LaunchSite[] = [
   { name: "CATO — Durham", state: "CT", lat: 41.47, lon: -72.69 },
   // Florida
   { name: "SRA — Palm Bay", state: "FL", lat: 27.93, lon: -80.71 },
-  { name: "Tripoli Tampa — Plant City", state: "FL", lat: 28.1, lon: -82.17 },
+  { name: "Tripoli Tampa — Plant City", state: "FL", lat: 28.08, lon: -82.18 },
   // Georgia
   { name: "GRITS — Nashville", state: "GA", lat: 31.28, lon: -83.35 },
   // Idaho
   { name: "Tripoli Idaho — Swan Falls", state: "ID", lat: 43.24, lon: -116.32 },
   // Illinois
   { name: "QCRS — Ohio, IL", state: "IL", lat: 41.49, lon: -89.5 },
-  { name: "CIA — Rantoul", state: "IL", lat: 40.3, lon: -88.14 },
+  { name: "CIA — Rantoul", state: "IL", lat: 40.29, lon: -88.14 },
   // Indiana
   { name: "Indiana Rocketry — Pence", state: "IN", lat: 40.39, lon: -87.51 },
   // Kansas
@@ -74,9 +74,9 @@ export const LAUNCH_SITES: LaunchSite[] = [
   // Kentucky
   { name: "MC2 — Olmstead", state: "KY", lat: 36.71, lon: -87.0 },
   // Louisiana
-  { name: "SOLAR — Winnsboro", state: "LA", lat: 32.16, lon: -91.72 },
+  { name: "SOLAR — Winnsboro", state: "LA", lat: 32.21, lon: -91.86 },
   // Maine
-  { name: "MMMSC — Berwick", state: "ME", lat: 43.3, lon: -70.86 },
+  { name: "MMMSC — Berwick", state: "ME", lat: 43.32, lon: -70.9 },
   // Maryland
   { name: "MDRA — Higgs Farm", state: "MD", lat: 39.08, lon: -75.87 },
   { name: "MDRA — Central Sod Farm", state: "MD", lat: 39.0, lon: -76.11 },
@@ -84,58 +84,58 @@ export const LAUNCH_SITES: LaunchSite[] = [
   // Massachusetts
   { name: "CMASS — Amesbury", state: "MA", lat: 42.86, lon: -70.96 },
   // Michigan
-  { name: "Michigan Team 1 — Birch Run", state: "MI", lat: 43.29, lon: -84.19 },
-  { name: "Michiana Rocketry — Three Oaks", state: "MI", lat: 41.8, lon: -86.55 },
+  { name: "Michigan Team 1 — St. Charles", state: "MI", lat: 43.28, lon: -84.04 },
+  { name: "Michiana Rocketry — Three Oaks", state: "MI", lat: 41.78, lon: -86.57 },
   // Minnesota
-  { name: "Tripoli MN — North Branch", state: "MN", lat: 45.55, lon: -92.96 },
+  { name: "Tripoli MN — North Branch", state: "MN", lat: 45.56, lon: -92.93 },
   // Missouri
   { name: "Tripoli Mo-Kan — South Greenfield", state: "MO", lat: 37.29, lon: -93.85 },
   { name: "SLRA — Elsberry", state: "MO", lat: 39.16, lon: -90.76 },
   // Montana
-  { name: "BSRA — Twin Bridges", state: "MT", lat: 45.54, lon: -112.5 },
+  { name: "BSRA — Twin Bridges", state: "MT", lat: 45.55, lon: -112.51 },
   // Nebraska
   { name: "THOR — Omaha", state: "NE", lat: 41.17, lon: -96.97 },
   // Nevada
-  { name: "Black Rock Desert — Gerlach", state: "NV", lat: 40.87, lon: -119.34 },
-  { name: "Tripoli Vegas — Jean", state: "NV", lat: 35.78, lon: -115.33 },
+  { name: "Black Rock Desert — Gerlach", state: "NV", lat: 40.87, lon: -119.11 },
+  { name: "Tripoli Vegas — Jean", state: "NV", lat: 35.79, lon: -115.25 },
   // New Mexico
   { name: "Tripoli NM — Alamogordo", state: "NM", lat: 32.92, lon: -106.05 },
   // New York
   { name: "URRG — Potter", state: "NY", lat: 42.7, lon: -77.19 },
   { name: "METRA — Pine Island", state: "NY", lat: 41.34, lon: -74.48 },
   // North Carolina
-  { name: "Tripoli East NC — Bayboro", state: "NC", lat: 35.15, lon: -76.8 },
+  { name: "Tripoli East NC — Bayboro", state: "NC", lat: 35.17, lon: -76.83 },
   { name: "ROCC — Midland", state: "NC", lat: 35.2, lon: -80.45 },
   // Ohio
-  { name: "Wright Stuff — Cedarville", state: "OH", lat: 39.78, lon: -83.83 },
-  { name: "Tripoli Mid-Ohio — South Charleston", state: "OH", lat: 39.86, lon: -83.6 },
+  { name: "Wright Stuff — Cedarville", state: "OH", lat: 39.73, lon: -83.7 },
+  { name: "Tripoli Mid-Ohio — South Charleston", state: "OH", lat: 39.86, lon: -83.66 },
   // Oklahoma
   { name: "Tripoli OK — Burns Flat", state: "OK", lat: 35.34, lon: -99.2 },
-  { name: "Tulsa Rocketry — Leonard", state: "OK", lat: 35.9, lon: -95.83 },
+  { name: "Tulsa Rocketry — Leonard", state: "OK", lat: 35.93, lon: -95.79 },
   // Oregon
   { name: "OROC — Brothers", state: "OR", lat: 43.8, lon: -120.65 },
-  { name: "SOR — Williams", state: "OR", lat: 42.22, lon: -123.29 },
+  { name: "SOR — Eagle Point", state: "OR", lat: 42.42, lon: -122.77 },
   // Pennsylvania
-  { name: "Tripoli Pittsburgh — Isabella", state: "PA", lat: 39.87, lon: -79.85 },
-  { name: "PSC — Grove City", state: "PA", lat: 41.16, lon: -80.0 },
+  { name: "Tripoli Pittsburgh — Isabella", state: "PA", lat: 39.94, lon: -79.92 },
+  { name: "PSC — Grove City", state: "PA", lat: 41.19, lon: -80.04 },
   // South Carolina
-  { name: "Rocketry SC — Rembert", state: "SC", lat: 34.05, lon: -80.53 },
+  { name: "Rocketry SC — Dalzell", state: "SC", lat: 34.06, lon: -80.43 },
   // Tennessee
   { name: "MC2 — Columbia", state: "TN", lat: 35.67, lon: -87.09 },
   // Texas
   { name: "Tripoli Houston — Hearne", state: "TX", lat: 30.87, lon: -96.62 },
-  { name: "DARS — Gunter", state: "TX", lat: 33.43, lon: -96.78 },
-  { name: "TNT — Seymour", state: "TX", lat: 33.6, lon: -99.26 },
+  { name: "DARS — Gunter", state: "TX", lat: 33.44, lon: -96.8 },
+  { name: "TNT — Seymour", state: "TX", lat: 33.5, lon: -99.34 },
   { name: "AARG — Rockdale", state: "TX", lat: 30.68, lon: -97.14 },
   { name: "POTROCS — Boys Ranch", state: "TX", lat: 35.54, lon: -102.29 },
-  { name: "WTSV — Wall", state: "TX", lat: 31.3, lon: -100.3 },
+  { name: "WTSV — Wall", state: "TX", lat: 31.33, lon: -100.3 },
   { name: "NHRC — Houston (JSC)", state: "TX", lat: 29.55, lon: -95.09 },
   // Utah
-  { name: "UROC — Fairfield", state: "UT", lat: 40.22, lon: -112.26 },
+  { name: "UROC — Fairfield", state: "UT", lat: 40.22, lon: -112.25 },
   // Virginia
   { name: "NOVAAR — The Plains", state: "VA", lat: 38.83, lon: -77.81 },
-  { name: "BattlePark — Rapidan", state: "VA", lat: 38.31, lon: -78.06 },
-  { name: "VAST — Monterey", state: "VA", lat: 38.37, lon: -79.6 },
+  { name: "BattlePark — Rapidan", state: "VA", lat: 38.4, lon: -78.07 },
+  { name: "VAST — Monterey", state: "VA", lat: 38.38, lon: -79.61 },
   // Washington
   { name: "Tri-Cities Rocketeers — Pasco", state: "WA", lat: 46.4, lon: -119.02 },
   { name: "WAC — Redmond (60 Acres)", state: "WA", lat: 47.7, lon: -122.14 },

@@ -140,6 +140,33 @@ test("turns the mean wind aloft into a landing-drift distance from a descent rat
   await expect(aloft.getByText(/single-rate estimate/)).toBeVisible();
 });
 
+test("splits the landing drift between drogue and main in dual-deploy mode", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  const aloft = page.locator("#aloft");
+
+  // Set an apogee and the (drogue) descent rate, then switch to dual deploy.
+  await page.getByLabel(/Expected apogee/).fill("9000");
+  await page.getByLabel(/descent rate/i).fill("50");
+  await page.getByRole("group", { name: "Recovery mode" }).getByRole("button", { name: "Dual" }).click();
+
+  // Until the main-deploy altitude and main rate are set, the panel prompts for them.
+  await expect(aloft.getByText(/dual-deploy landing-drift estimate/)).toBeVisible();
+
+  await page.getByLabel(/Main-chute deploy altitude/).fill("700");
+  await page.getByLabel(/Main-parachute descent rate/).fill("18");
+
+  // Now the two-phase estimate renders, with the drogue and main legs broken out.
+  await expect(aloft.getByText(/Dual deploy — drogue at 50 ft\/s/)).toBeVisible();
+  await expect(aloft.getByText(/drogue leg ~/)).toBeVisible();
+  await expect(aloft.getByText(/main leg ~/)).toBeVisible();
+
+  // It rides into the shareable briefing as a dual-deploy landing-drift line.
+  await page.getByText("Preview the text briefing").click();
+  await expect(page.getByText(/Landing drift \(dual\):/)).toBeVisible();
+});
+
 test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);

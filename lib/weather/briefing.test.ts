@@ -151,4 +151,29 @@ describe("buildBriefing", () => {
     // Absent without a descent rate, even with an apogee.
     expect(buildBriefing(board(), { ...base, descentRate: null })).not.toMatch(/Landing drift/);
   });
+
+  it("switches to a two-phase landing-drift line in dual-deploy mode", () => {
+    const base = {
+      units: DEFAULT_UNITS,
+      hourIndex: 12,
+      windLine: null,
+      apogee: 9000,
+      descentRate: 50, // drogue rate
+      shareUrl: "https://window.fusionspace.co/?lat=34.45&lon=-116.95",
+    };
+    const dual = buildBriefing(board(), {
+      ...base,
+      recoveryMode: "dual" as const,
+      mainDeploy: 700,
+      mainDescentRate: 18,
+    });
+    expect(dual).toMatch(
+      /Landing drift \(dual\): from 9,000 ft, drogue 50 ft\/s to 700 ft then main 18 ft\/s — ~[\d,]+ ft \([\d.]+ mi\) toward [NSEW]+ \(drogue ~[\d,]+, main ~[\d,]+ ft\) — band-wind estimate/,
+    );
+    // It replaces the single-rate line, not stacks on it.
+    expect(dual).not.toMatch(/single-rate estimate/);
+    // Falls back to the single-rate line when the dual inputs are incomplete.
+    const incomplete = buildBriefing(board(), { ...base, recoveryMode: "dual" as const, mainDeploy: null, mainDescentRate: 18 });
+    expect(incomplete).toMatch(/single-rate estimate/);
+  });
 });

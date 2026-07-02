@@ -4,6 +4,9 @@ import {
   parseApogee,
   parseDescentRate,
   parseLastField,
+  parseMainDeploy,
+  parseMainDescentRate,
+  parseRecoveryMode,
   parseSaved,
   parseUnits,
   parseWindLine,
@@ -89,6 +92,51 @@ describe("parseDescentRate", () => {
 
   it("caps at 200 ft/s", () => {
     expect(parseDescentRate("500")).toBe(200);
+  });
+});
+
+describe("parseRecoveryMode", () => {
+  it("defaults to single for anything but an explicit dual", () => {
+    expect(parseRecoveryMode(null)).toBe("single");
+    expect(parseRecoveryMode("")).toBe("single");
+    expect(parseRecoveryMode("single")).toBe("single");
+    expect(parseRecoveryMode("junk")).toBe("single");
+  });
+
+  it("reads an explicit dual", () => {
+    expect(parseRecoveryMode("dual")).toBe("dual");
+  });
+});
+
+describe("parseMainDeploy", () => {
+  it("treats empty / non-positive / junk as none", () => {
+    expect(parseMainDeploy(null)).toBeNull();
+    expect(parseMainDeploy("")).toBeNull();
+    expect(parseMainDeploy("0")).toBeNull();
+    expect(parseMainDeploy("-500")).toBeNull();
+    expect(parseMainDeploy("abc")).toBeNull();
+  });
+
+  it("reads a positive ft AGL integer and caps at 100,000", () => {
+    expect(parseMainDeploy("700")).toBe(700);
+    expect(parseMainDeploy("700.9")).toBe(700);
+    expect(parseMainDeploy("250000")).toBe(100000);
+  });
+});
+
+describe("parseMainDescentRate", () => {
+  it("treats empty / non-positive / junk as none", () => {
+    expect(parseMainDescentRate(null)).toBeNull();
+    expect(parseMainDescentRate("")).toBeNull();
+    expect(parseMainDescentRate("0")).toBeNull();
+    expect(parseMainDescentRate("-15")).toBeNull();
+    expect(parseMainDescentRate("slow")).toBeNull();
+  });
+
+  it("reads a positive ft/s rate (fractions allowed) and caps at 200", () => {
+    expect(parseMainDescentRate("18")).toBe(18);
+    expect(parseMainDescentRate("17.5")).toBe(17.5);
+    expect(parseMainDescentRate("500")).toBe(200);
   });
 });
 

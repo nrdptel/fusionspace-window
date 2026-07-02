@@ -554,6 +554,24 @@ reuses the apogee input the board already took, so it&apos;s one new field compl
 was already two-thirds built. The drift block stays useful with no inputs (the per-minute rate, plus
 a nudge to set a descent rate), so the default board is unchanged.
 
+### Dual deploy — drogue and main on their own band winds (post-v1)
+
+The single-rate estimate always carried the caveat "a dual-deploy drogue lands it much closer,"
+which is exactly the flight profile most high-power flyers actually fly: a fast drogue from apogee
+down to a few hundred feet, then a slow main the rest of the way. So the drift honours it. A
+**Recovery** toggle (Single / Dual, default single, stored only when set) reveals two more optional
+fields — a **main-deploy altitude** and a slower **main rate** — and relabels the existing descent
+rate as the **drogue rate**. The key modelling choice: each phase drifts on the *actual* mean wind
+in its **own altitude band**, not one column mean. `dualDeployDrift` (pure, tested) takes the same
+plotted levels and averages a thickness-weighted velocity vector over `[mainDeploy, apogee]` for the
+drogue and `[0, mainDeploy]` for the main, scales each by `wind_fps / rate_fps × band_thickness`,
+and **vector-sums** the two — because the bands can blow different directions, opposing legs partly
+cancel, which is the honest answer a scalar sum would hide. The read gives the total landing
+distance, its compass point, and the drogue and main legs broken out, in the drift block and the
+briefing. It stays inside the no-verdict line for the same reason the single-rate one does: band-
+averaged winds, a lean on the drift, not a trajectory sim. Default board unchanged — dual is opt-in,
+and until all four inputs are set it just prompts for the missing ones.
+
 ### Dew point & the spread — finishing the checklist (post-v1)
 
 Came from fetching the authoritative hobby-rocketry "what to measure" guide and mapping it against

@@ -266,6 +266,17 @@ export default function Page() {
             the rocket much closer — and it&apos;s still the column&apos;s average wind, not a
             trajectory simulation; it leans the drift, it doesn&apos;t promise the spot.
           </Method>
+          <Method title="Dual deploy — drogue and main">
+            Switch recovery to <strong>dual</strong> and add a <strong>main-deploy altitude</strong>{" "}
+            and a slower <strong>main rate</strong> (the descent rate above becomes the fast drogue
+            rate). The drift is then figured in two phases, each on the <em>actual</em> mean wind in
+            its own altitude band: the fast drogue from apogee down to the main-deploy altitude, then
+            the slow main the rest of the way. Because the two bands can blow in different directions,
+            the phases are added as vectors — so an upper drogue leg and a lower main leg that oppose
+            each other partly cancel, which is the truth a flyer wants. You get the total landing
+            distance, its compass point, and each leg broken out. Same caveat: band-averaged winds, a
+            lean on the drift, not a trajectory sim.
+          </Method>
           <Method title="Freezing level (0°C)">
             The profile also draws the <strong>0°C level</strong> — the height where the air
             turns sub-freezing on the way up — as a blue reference line. It&apos;s Open-Meteo&apos;s

@@ -16,7 +16,8 @@ import {
 } from "@/lib/units";
 import { clockShort } from "@/lib/format";
 import { strongestShear } from "@/lib/weather/shear";
-import { meanWindAloft, driftFtPerMin, driftPerFoot, driftLandingFt } from "@/lib/weather/drift";
+import { meanWindAloft, driftFtPerMin, driftPerFoot, driftLandingFt, dualDeployDrift } from "@/lib/weather/drift";
+import type { RecoveryMode } from "@/lib/prefs";
 import { Segmented, SourceLine } from "./ui";
 
 const W = 580;
@@ -52,6 +53,9 @@ export default function WindsAloft({
   model,
   apogee,
   descentRate,
+  recoveryMode,
+  mainDeploy,
+  mainDescentRate,
   flyTimeSlider,
 }: {
   profile: AloftProfile;
@@ -62,8 +66,15 @@ export default function WindsAloft({
   model: string;
   /** Expected apogee (ft AGL), or null — the altitude drift is integrated over for a landing. */
   apogee: number | null;
-  /** Recovery descent rate (ft/s), or null — turns the mean wind into a landing-drift distance. */
+  /** Recovery descent rate (ft/s), or null — turns the mean wind into a landing-drift distance.
+   *  In dual mode this is the fast drogue rate. */
   descentRate: number | null;
+  /** Single or dual deployment — dual splits the drift between a fast drogue and the slow main. */
+  recoveryMode: RecoveryMode;
+  /** Main-chute deploy altitude (ft AGL), dual mode only — where drogue hands off to the main. */
+  mainDeploy: number | null;
+  /** Main-parachute descent rate (ft/s), dual mode only — the slow rate it lands under. */
+  mainDescentRate: number | null;
   /** The shared fly-time scrubber, rendered under the plot so you can retime the profile in
    *  place instead of scrolling back up to the hourly timeline. */
   flyTimeSlider?: ReactNode;
@@ -107,6 +118,23 @@ export default function WindsAloft({
   const empty = profile.levels.length === 0;
   const shear = strongestShear(shown);
   const mean = meanWindAloft(shown, topFt);
+
+  // Dual-deploy landing drift, when the flyer's in dual mode with all four inputs set. Computed
+  // over the full profile (`all`, not the top-capped `shown`) since the bands are bounded by the
+  // apogee and main-deploy altitude, not the chart's zoom.
+  const dual =
+    recoveryMode === "dual" &&
+    apogee != null &&
+    descentRate != null &&
+    mainDeploy != null &&
+    mainDescentRate != null
+      ? dualDeployDrift(all, {
+          apogeeFt: apogee,
+          mainDeployFt: mainDeploy,
+          drogueRateFps: descentRate,
+          mainRateFps: mainDescentRate,
+        })
+      : null;
 
   // 0°C level, drawn as a reference line when it falls inside the shown column. When it
   // doesn't, the blank is ambiguous between two opposite cases, so we caption which: below the
@@ -247,7 +275,42 @@ export default function WindsAloft({
             </span>{" "}
             downrange per minute aloft.
           </span>
-          {descentRate != null ? (
+          {recoveryMode === "dual" ? (
+            dual ? (
+              <span className="text-zinc-600 dark:text-zinc-400">
+                Dual deploy — drogue at {descentRate} ft/s down to your{" "}
+                <span className="font-mono tabular-nums">
+                  {fmtLength(mainDeploy!, u.length)} {LENGTH_LABEL[u.length]}
+                </span>{" "}
+                main, then main at {mainDescentRate} ft/s. From your{" "}
+                <span className="font-mono tabular-nums">
+                  {fmtLength(apogee!, u.length)} {LENGTH_LABEL[u.length]}
+                </span>{" "}
+                apogee it should land about{" "}
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  {fmtLength(dual.distanceFt, u.length)} {LENGTH_LABEL[u.length]}
+                  {" ("}
+                  {fmtVisibility(dual.distanceFt / 5280, u.length)} {VIS_LABEL[u.length]}
+                  {")"}
+                </span>{" "}
+                toward {degToCompass(dual.towardDeg)} — drogue leg ~
+                <span className="font-mono tabular-nums">
+                  {fmtLength(dual.drogueFt, u.length)} {LENGTH_LABEL[u.length]}
+                </span>
+                , main leg ~
+                <span className="font-mono tabular-nums">
+                  {fmtLength(dual.mainFt, u.length)} {LENGTH_LABEL[u.length]}
+                </span>
+                . A rough estimate over each band&apos;s mean wind, not a trajectory sim.
+              </span>
+            ) : (
+              <span className="text-zinc-500 dark:text-zinc-400">
+                Set your apogee, drogue rate, main-deploy altitude (below the apogee), and main rate
+                above for a dual-deploy landing-drift estimate — the drogue and main phases drift on
+                their own band winds.
+              </span>
+            )
+          ) : descentRate != null ? (
             <span className="text-zinc-600 dark:text-zinc-400">
               At {descentRate} ft/s that&apos;s ~
               <span className="font-mono tabular-nums">

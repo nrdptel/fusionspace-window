@@ -8,7 +8,7 @@
 import type { BoardData } from "./model";
 import { densityAltitudeFt } from "./density";
 import { dewPointF, spreadRead } from "./dewpoint";
-import { meanWindAloft, driftFtPerMin, driftLandingFt } from "./drift";
+import { meanWindAloft, driftFtPerMin, driftLandingFt, dualDeployDrift } from "./drift";
 import { pressureTendency } from "./pressure";
 import { classifyCape, peakCape } from "./instability";
 import { gustiness } from "./gust";
@@ -32,6 +32,7 @@ import {
   type WindUnit,
 } from "../units";
 import { clock, clockShort, dayLabel } from "../format";
+import type { RecoveryMode } from "../prefs";
 
 // Representative AGL heights to sample the winds-aloft profile for the briefing.
 const ALOFT_TARGETS_FT = [3000, 6000, 12000, 20000];
@@ -47,8 +48,15 @@ export interface BriefingOptions {
   windLine: number | null;
   /** Expected apogee (feet AGL), or null — adds a ceiling-clearance read to the sky line. */
   apogee: number | null;
-  /** Recovery descent rate (ft/s), or null — with the apogee, adds a landing-drift line. */
+  /** Recovery descent rate (ft/s), or null — with the apogee, adds a landing-drift line. In dual
+   *  mode this is the drogue rate. */
   descentRate: number | null;
+  /** Recovery mode — dual splits the landing drift between a fast drogue and the slow main. */
+  recoveryMode?: RecoveryMode;
+  /** Main-chute deploy altitude (ft AGL), dual mode only. */
+  mainDeploy?: number | null;
+  /** Main-parachute descent rate (ft/s), dual mode only. */
+  mainDescentRate?: number | null;
   /** Absolute, shareable URL for this field. */
   shareUrl: string;
 }
@@ -85,7 +93,7 @@ function sampleAloft(
 }
 
 export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
-  const { units, hourIndex, windLine, apogee, descentRate, shareUrl } = opts;
+  const { units, hourIndex, windLine, apogee, descentRate, recoveryMode, mainDeploy, mainDescentRate, shareUrl } = opts;
   const u = resolveUnits(units);
   const { forecast, sky, alerts } = board;
   const c = forecast.current;
@@ -227,7 +235,27 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
           `${fmtWind(mean.speedMph, u.wind)} ${WIND_LABEL[u.wind]} from ${degToCompass(mean.fromDeg)} — drift toward ${degToCompass(mean.towardDeg)}, ` +
           `~${fmtLength(driftFtPerMin(mean.speedMph), u.length)} ${LENGTH_LABEL[u.length]}/min aloft`,
       );
-      if (descentRate != null && apogee != null) {
+      const dd =
+        recoveryMode === "dual" &&
+        apogee != null &&
+        descentRate != null &&
+        mainDeploy != null &&
+        mainDescentRate != null
+          ? dualDeployDrift(profile.levels, {
+              apogeeFt: apogee,
+              mainDeployFt: mainDeploy,
+              drogueRateFps: descentRate,
+              mainRateFps: mainDescentRate,
+            })
+          : null;
+      if (dd) {
+        lines.push(
+          `  Landing drift (dual): from ${fmtLength(apogee!, u.length)} ${LENGTH_LABEL[u.length]}, ` +
+            `drogue ${descentRate} ft/s to ${fmtLength(mainDeploy!, u.length)} ${LENGTH_LABEL[u.length]} then main ${mainDescentRate} ft/s — ` +
+            `~${fmtLength(dd.distanceFt, u.length)} ${LENGTH_LABEL[u.length]} (${fmtVisibility(dd.distanceFt / 5280, u.length)} ${VIS_LABEL[u.length]}) toward ${degToCompass(dd.towardDeg)} ` +
+            `(drogue ~${fmtLength(dd.drogueFt, u.length)}, main ~${fmtLength(dd.mainFt, u.length)} ${LENGTH_LABEL[u.length]}) — band-wind estimate`,
+        );
+      } else if (descentRate != null && apogee != null) {
         const landFt = driftLandingFt(mean.speedMph, descentRate, apogee);
         lines.push(
           `  Landing drift: from ${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]} at ${descentRate} ft/s, ` +

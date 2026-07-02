@@ -37,6 +37,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   recovery drifts), and the **0°C** level. The thing general weather apps bury or cap low.
   Give a **descent rate** (and your apogee) and the mean wind becomes an actual **landing-drift
   distance** — the rule of thumb (wind ÷ descent rate = drift per foot of altitude) made exact.
+  Switch to **dual deploy** and it splits into a fast drogue and a slow main, each drifting on its
+  own band's wind and vector-summed, with the drogue and main legs broken out.
 - **Sky & ceiling** — the observed ceiling and **visibility** from the nearest reporting station
   where there is one (labeled *observed*, with the raw METAR a click away), with a modeled
   multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a

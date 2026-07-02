@@ -13,6 +13,9 @@ import {
   readApogee,
   readDescentRate,
   readLastField,
+  readMainDeploy,
+  readMainDescentRate,
+  readRecoveryMode,
   readSaved,
   readUnits,
   readWindLine,
@@ -20,9 +23,13 @@ import {
   writeApogee,
   writeDescentRate,
   writeLastField,
+  writeMainDeploy,
+  writeMainDescentRate,
+  writeRecoveryMode,
   writeSaved,
   writeUnits,
   writeWindLine,
+  type RecoveryMode,
   type SavedField,
 } from "@/lib/prefs";
 import { DEFAULT_UNITS, type UnitPrefs } from "@/lib/units";
@@ -69,6 +76,9 @@ export default function WeatherBoard() {
   const [windLine, setWindLine] = useState<number | null>(null);
   const [apogee, setApogee] = useState<number | null>(null);
   const [descentRate, setDescentRate] = useState<number | null>(null);
+  const [recoveryMode, setRecoveryMode] = useState<RecoveryMode>("single");
+  const [mainDeploy, setMainDeploy] = useState<number | null>(null);
+  const [mainDescentRate, setMainDescentRate] = useState<number | null>(null);
   const [saved, setSaved] = useState<SavedField[]>([]);
 
   const [data, setData] = useState<BoardData | null>(null);
@@ -120,6 +130,9 @@ export default function WeatherBoard() {
     setWindLine(readWindLine());
     setApogee(readApogee());
     setDescentRate(readDescentRate());
+    setRecoveryMode(readRecoveryMode());
+    setMainDeploy(readMainDeploy());
+    setMainDescentRate(readMainDescentRate());
     setSaved(readSaved());
     const onPop = () => setField(decodeState(window.location.search));
     window.addEventListener("popstate", onPop);
@@ -212,6 +225,18 @@ export default function WeatherBoard() {
   const updateDescentRate = (v: number | null) => {
     setDescentRate(v);
     writeDescentRate(v);
+  };
+  const updateRecoveryMode = (v: RecoveryMode) => {
+    setRecoveryMode(v);
+    writeRecoveryMode(v);
+  };
+  const updateMainDeploy = (v: number | null) => {
+    setMainDeploy(v);
+    writeMainDeploy(v);
+  };
+  const updateMainDescentRate = (v: number | null) => {
+    setMainDescentRate(v);
+    writeMainDescentRate(v);
   };
   const toggleSave = () => {
     if (!data) return;
@@ -314,7 +339,7 @@ export default function WeatherBoard() {
             </Notice>
           )}
 
-          <FieldBriefing board={data} units={units} windLine={windLine} apogee={apogee} descentRate={descentRate} hourIndex={currentHourIndex(data)} />
+          <FieldBriefing board={data} units={units} windLine={windLine} apogee={apogee} descentRate={descentRate} recoveryMode={recoveryMode} mainDeploy={mainDeploy} mainDescentRate={mainDescentRate} hourIndex={currentHourIndex(data)} />
 
           {/* Units / personal line */}
           <div className="mt-4">
@@ -327,6 +352,12 @@ export default function WeatherBoard() {
               onApogee={updateApogee}
               descentRate={descentRate}
               onDescentRate={updateDescentRate}
+              recoveryMode={recoveryMode}
+              onRecoveryMode={updateRecoveryMode}
+              mainDeploy={mainDeploy}
+              onMainDeploy={updateMainDeploy}
+              mainDescentRate={mainDescentRate}
+              onMainDescentRate={updateMainDescentRate}
             />
           </div>
 
@@ -411,6 +442,9 @@ export default function WeatherBoard() {
               model={data.forecast.model}
               apogee={apogee}
               descentRate={descentRate}
+              recoveryMode={recoveryMode}
+              mainDeploy={mainDeploy}
+              mainDescentRate={mainDescentRate}
               flyTimeSlider={
                 <FlyTimeSlider
                   hourly={data.forecast.hourly}

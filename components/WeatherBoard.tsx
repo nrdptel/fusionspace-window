@@ -363,7 +363,13 @@ export default function WeatherBoard() {
 
           {data.alerts && data.alerts.length > 0 && <Alerts alerts={data.alerts} />}
 
-          <Panel id="now" title="Right now">
+          {/* Desktop dashboard: a two-column grid on lg+. The hero ("Right now") and the wide
+              time-series panels (hourly, conditions, outlook) span both columns; the compact
+              panels pair up into rows — [storms | air] and [winds aloft | sky] — via lg:order so
+              the desktop reading order groups them without changing the DOM (mobile) order. On
+              mobile it stays the single-column stack (grid is inactive, each Panel a full row). */}
+          <div className="lg:mt-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8 lg:gap-y-10">
+          <Panel id="now" title="Right now" wide className="lg:order-1">
             <Now
               current={data.forecast.current}
               field={f}
@@ -388,7 +394,7 @@ export default function WeatherBoard() {
             <DensityAltitude current={data.forecast.current} field={f} units={units} model={data.forecast.model} />
           </Panel>
 
-          <Panel id="storms" title="Storm potential">
+          <Panel id="storms" title="Storm potential" className="lg:order-2">
             <StormPotential
               current={data.forecast.current}
               hourly={data.forecast.hourly}
@@ -398,7 +404,7 @@ export default function WeatherBoard() {
             />
           </Panel>
 
-          <Panel id="hourly" title="The next 3 days">
+          <Panel id="hourly" title="The next 3 days" wide className="lg:order-4">
             <CalmWindows
               hourly={data.forecast.hourly}
               fromIndex={currentHourIndex(data)}
@@ -420,7 +426,7 @@ export default function WeatherBoard() {
             />
           </Panel>
 
-          <Panel id="conditions" title="Conditions at a glance">
+          <Panel id="conditions" title="Conditions at a glance" wide className="lg:order-5">
             <ConditionsTimeline
               hourly={data.forecast.hourly}
               startIndex={currentHourIndex(data)}
@@ -432,7 +438,7 @@ export default function WeatherBoard() {
             />
           </Panel>
 
-          <Panel id="aloft" title="Winds aloft">
+          <Panel id="aloft" title="Winds aloft" className="lg:order-6">
             <WindsAloft
               profile={data.forecast.aloftHourly[selectedHour] ?? data.forecast.aloftHourly[currentHourIndex(data)] ?? { time: todayIso, levels: [], freezingLevelAglFt: NaN }}
               surfaceWindMph={data.forecast.hourly[selectedHour]?.windMph ?? data.forecast.current.windMph}
@@ -457,7 +463,7 @@ export default function WeatherBoard() {
             />
           </Panel>
 
-          <Panel id="sky" title="Sky & ceiling">
+          <Panel id="sky" title="Sky & ceiling" className="lg:order-7">
             <SkyPanel
               sky={data.sky}
               daily={data.forecast.daily}
@@ -471,12 +477,12 @@ export default function WeatherBoard() {
           </Panel>
 
           {data.airQuality && (
-            <Panel id="air" title="Air quality &amp; smoke">
+            <Panel id="air" title="Air quality &amp; smoke" className="lg:order-3">
               <AirQualityPanel aq={data.airQuality} />
             </Panel>
           )}
 
-          <Panel id="outlook" title="The next several days">
+          <Panel id="outlook" title="The next several days" wide className="lg:order-8">
             <Outlook
               daily={data.forecast.daily}
               hourly={data.forecast.hourly}
@@ -488,6 +494,7 @@ export default function WeatherBoard() {
               climatology={data.climatology}
             />
           </Panel>
+          </div>
         </>
       )}
     </div>

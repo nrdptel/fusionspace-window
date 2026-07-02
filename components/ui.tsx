@@ -81,15 +81,27 @@ export function Panel({
   id,
   title,
   aside,
+  wide = false,
+  className = "",
   children,
 }: {
   id: string;
   title: string;
   aside?: ReactNode;
+  /** On lg+ the board becomes a two-column dashboard; `wide` panels span both columns.
+   *  Ignored on mobile, where every panel is a full-width row in the single-column stack. */
+  wide?: boolean;
+  /** Extra classes (e.g. `lg:order-*` to place the panel in the desktop grid). */
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="mt-10 scroll-mt-4">
+    <section
+      id={id}
+      className={
+        "mt-10 scroll-mt-4 lg:mt-0" + (wide ? " lg:col-span-2" : "") + (className ? " " + className : "")
+      }
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
         {aside}

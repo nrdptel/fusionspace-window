@@ -25,10 +25,10 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 - **Storm potential** — convective instability (CAPE), now and the day's peak, sorted into the
   bands meteorologists use — so a calm morning that towers up by mid-afternoon doesn't catch
   you out.
-- **Today & tomorrow** — an hourly wind timeline with the upcoming **calm windows** surfaced
+- **The next 3 days** — an hourly wind timeline with the upcoming **calm windows** surfaced
   above it. Drag the **fly-time** slider (or tap a window) to any hour and a snapshot shows that
   hour's wind, density altitude, and storm potential — and the winds-aloft profile follows it.
-- **Conditions at a glance** — the next two days as four colored rows (wind, gusts, storms,
+- **Conditions at a glance** — the next 3 days as four colored rows (wind, gusts, storms,
   rain), each against its own line, so you can spot a window where everything clears at once. Tap
   a column to set the fly-time. No blended verdict — the rows stay separate, the call stays yours.
 - **Winds aloft** — the signature panel: wind speed and direction by true height above the

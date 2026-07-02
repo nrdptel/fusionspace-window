@@ -73,7 +73,7 @@ export default function Page() {
               blow <em>from</em>.
             </li>
             <li>
-              <strong className="font-medium text-zinc-800 dark:text-zinc-200">Today &amp; tomorrow</strong>{" "}
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">The next 3 days</strong>{" "}
               is the hourly wind, with the upcoming <strong>calm windows</strong> surfaced above
               it. Drag the <strong>fly-time</strong> slider (or tap a window) to any hour and the
               snapshot shows that hour&apos;s wind, density altitude, and storm potential — and the
@@ -82,7 +82,7 @@ export default function Page() {
             </li>
             <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Conditions at a glance</strong>{" "}
-              stacks the next two days as four colored rows — wind, gusts, storms, and rain — each
+              stacks the next 3 days as four colored rows — wind, gusts, storms, and rain — each
               against its own line, so you can spot a window where everything clears at once. Tap a
               column to set the fly-time. There&apos;s no blended go/no-go; the rows stay separate
               so the call is yours.
@@ -365,7 +365,7 @@ export default function Page() {
           <Disclosure title="Planning ahead — calm windows, outlook &amp; seasonal normal">
           <Method title="Conditions at a glance (the grid)">
             Each panel answers one question; the conditions grid lines four of them up hour by hour
-            for the next two days so you can find a window where they all clear at once without
+            for the next 3 days so you can find a window where they all clear at once without
             reading four charts. Each row is colored against its <em>own</em> reference — wind and
             gusts against the {`20 mph`} line (and your personal line), storm potential by CAPE
             band, the chance of rain by the hourly probability — green/amber/red. It is deliberately
@@ -377,7 +377,7 @@ export default function Page() {
           <Method title="Calm windows">
             The hourly forecast already knows when the wind lays down, so Window surfaces the
             upcoming stretches where the <em>sustained</em> wind stays at or below your line (the
-            20 mph reference, or a lower personal one), scanning the next two days from now. Each
+            20 mph reference, or a lower personal one), scanning the next 3 days from now. Each
             window shows its peak wind and gust and whether it falls in daylight (Open-Meteo&apos;s
             day/night flag). It is plain aggregation of the hourly numbers against a line you
             chose — it highlights low-wind daylight stretches, it doesn&apos;t tell you to fly.

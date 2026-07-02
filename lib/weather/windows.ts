@@ -8,6 +8,12 @@
 
 import type { HourPoint } from "./model";
 
+/** How far ahead the hourly detail looks — the wind timeline, the conditions grid, the calm
+ *  windows (on the board and in the briefing), and the fly-time scrubber all share this horizon.
+ *  72 h: past ~3 days, hourly wind / gust / CAPE skill drops off, so the daily Outlook carries
+ *  days 3–7 at the honest, coarser resolution instead. */
+export const FLY_WINDOW_HOURS = 72;
+
 export interface CalmWindow {
   startIndex: number;
   endIndex: number;

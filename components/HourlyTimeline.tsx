@@ -19,6 +19,7 @@ import { hourSnapshot } from "@/lib/weather/snapshot";
 import { SURFACE_LIMIT_MPH, windTone, windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
+import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { useScrollFollowX } from "./useScrollFollow";
 
 /** A compact labeled figure in the fly-time snapshot. */
@@ -68,7 +69,7 @@ export default function HourlyTimeline({
   model: string;
 }) {
   const u = resolveUnits(units);
-  const window = useMemo(() => hourly.slice(startIndex, startIndex + 48), [hourly, startIndex]);
+  const window = useMemo(() => hourly.slice(startIndex, startIndex + FLY_WINDOW_HOURS), [hourly, startIndex]);
   const selLocal = Math.max(0, Math.min(window.length - 1, selectedIndex - startIndex));
 
   const innerH = H - TOP - BOT;
@@ -95,7 +96,7 @@ export default function HourlyTimeline({
   const sel = window[selLocal];
 
   // Follow the fly-time selection: scroll the chart so the selected hour stays in view on
-  // narrow screens where the 48 h timeline overflows.
+  // narrow screens where the 72 h timeline overflows.
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollFollowX(scrollRef, x(selLocal) - STEP / 2, x(selLocal) + STEP / 2);
 

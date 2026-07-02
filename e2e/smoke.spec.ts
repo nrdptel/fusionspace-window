@@ -130,8 +130,9 @@ test("turns the mean wind aloft into a landing-drift distance from a descent rat
   await expect(aloft.getByText(/per minute aloft/)).toBeVisible();
   await expect(aloft.getByText(/set a descent rate/)).toBeVisible();
 
-  // A descent rate alone gives the per-1,000-ft ratio.
-  await page.getByLabel(/descent rate/i).fill("18");
+  // A descent rate alone gives the per-1,000-ft ratio. Scope to the drogue field's unique
+  // aria-label — in dual mode the Main-rate field also matches a bare /descent rate/.
+  await page.getByLabel(/Recovery descent rate/i).fill("18");
   await expect(aloft.getByText(/of drift per 1,000 ft of descent/)).toBeVisible();
 
   // Add an apogee and it becomes an actual landing distance toward a compass point.
@@ -146,9 +147,10 @@ test("splits the landing drift between drogue and main in dual-deploy mode", asy
 
   const aloft = page.locator("#aloft");
 
-  // Set an apogee and the (drogue) descent rate, then switch to dual deploy.
+  // Set an apogee and the (drogue) descent rate, then switch to dual deploy. Scope the rate
+  // selector to the drogue field's unique aria-label so it stays unambiguous after the toggle.
   await page.getByLabel(/Expected apogee/).fill("9000");
-  await page.getByLabel(/descent rate/i).fill("50");
+  await page.getByLabel(/Recovery descent rate/i).fill("50");
   await page.getByRole("group", { name: "Recovery mode" }).getByRole("button", { name: "Dual" }).click();
 
   // Until the main-deploy altitude and main rate are set, the panel prompts for them.

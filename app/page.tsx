@@ -29,7 +29,7 @@ function Disclosure({ title, children }: { title: string; children: React.ReactN
 
 export default function Page() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 md:py-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
       {/* First tab stop: jump past the header/controls straight to the location bar. */}
       <a
         href="#location"

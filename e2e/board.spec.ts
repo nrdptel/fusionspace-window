@@ -204,15 +204,19 @@ test("saved fields show a current-wind glance", async ({ page }) => {
   await expect(chip).toContainText(/\d+ [NSEW]/);
 });
 
-test("popular launch sites are one-tap starting points", async ({ page }) => {
+test("launch sites are grouped by state as one-tap starting points", async ({ page }) => {
   await installStubs(page);
   await page.goto("/", { waitUntil: "networkidle" }); // empty state, no field in the URL
 
   await page.getByRole("button", { name: "Sites" }).click();
-  await expect(page.getByText(/Popular launch sites/)).toBeVisible();
+  await expect(page.getByText(/Launch sites by state/)).toBeVisible();
   await expect(page.getByText(/approximate/)).toBeVisible(); // honest labelling
 
+  // The individual sites are hidden until a state is chosen; pick a state, then its site.
+  await expect(page.getByRole("button", { name: /Black Rock Desert/ })).toHaveCount(0);
+  await page.getByRole("button", { name: /^Nevada/ }).click();
   await page.getByRole("button", { name: /Black Rock Desert/ }).click();
+
   // The chosen site loads the board and rides into the shareable URL.
   await expect(page).toHaveURL(/lat=40\.87/);
   await expect(page.getByRole("heading", { name: "Right now" })).toBeVisible();

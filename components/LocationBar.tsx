@@ -5,7 +5,7 @@ import { fetchGeocode, fetchWindPeek } from "@/lib/weather/net";
 import type { Place } from "@/lib/weather/geocode";
 import type { WindPeek } from "@/lib/weather/peek";
 import type { SavedField } from "@/lib/prefs";
-import { LAUNCH_SITES } from "@/lib/launchSites";
+import { sitesByState, US_STATE_NAMES } from "@/lib/launchSites";
 import {
   degToCompass,
   fmtWind,
@@ -20,6 +20,9 @@ const PEEK_TTL_MS = 10 * 60 * 1000;
 // Module-level so the glance survives remounts and back/forward without refetching.
 const peekCache = new Map<string, { peek: WindPeek | null; at: number }>();
 const fieldKey = (f: { lat: number; lon: number }) => `${f.lat.toFixed(3)},${f.lon.toFixed(3)}`;
+
+// Curated launch sites, grouped by state for the "pick a state, then a site" picker.
+const SITE_GROUPS = sitesByState();
 
 export default function LocationBar({
   onPick,
@@ -61,6 +64,7 @@ export default function LocationBar({
   const [error, setError] = useState<string | null>(null);
   const [showCoords, setShowCoords] = useState(false);
   const [showSites, setShowSites] = useState(false);
+  const [siteState, setSiteState] = useState<string | null>(null);
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
@@ -229,26 +233,59 @@ export default function LocationBar({
       {showSites && (
         <div className="mt-3">
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Popular launch sites — one-tap starting points. Coordinates are{" "}
-            <strong className="font-medium">approximate</strong>; fine-tune with search or
-            coordinates for your exact pad.
+            Launch sites by state — pick a state, then a club field as a one-tap starting point.
+            Coordinates are <strong className="font-medium">approximate</strong>; fine-tune with
+            search or coordinates for your exact pad.
           </p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {LAUNCH_SITES.map((s) => (
-              <button
-                key={s.name}
-                type="button"
-                onClick={() => {
-                  setShowSites(false);
-                  onPick(s.lat, s.lon, s.name);
-                }}
-                className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500/50 dark:hover:text-indigo-400"
-              >
-                <PinIcon className="h-3 w-3 shrink-0 text-zinc-400" />
-                {s.name}
-              </button>
-            ))}
+
+          {/* State chips. */}
+          <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="States with launch sites">
+            {SITE_GROUPS.map((g) => {
+              const active = g.state === siteState;
+              return (
+                <button
+                  key={g.state}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setSiteState(active ? null : g.state)}
+                  className={
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition " +
+                    (active
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500/60 dark:bg-indigo-950/40 dark:text-indigo-300"
+                      : "border-zinc-300 bg-zinc-50 text-zinc-700 hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500/50 dark:hover:text-indigo-400")
+                  }
+                >
+                  {g.name}
+                  <span className="text-zinc-400 dark:text-zinc-500">{g.sites.length}</span>
+                </button>
+              );
+            })}
           </div>
+
+          {/* Sites for the selected state. */}
+          {siteState && (
+            <div
+              className="mt-2 flex flex-wrap gap-1.5 border-t border-zinc-200 pt-2 dark:border-zinc-800"
+              role="group"
+              aria-label={`Launch sites in ${US_STATE_NAMES[siteState] ?? siteState}`}
+            >
+              {(SITE_GROUPS.find((g) => g.state === siteState)?.sites ?? []).map((s) => (
+                <button
+                  key={s.name}
+                  type="button"
+                  onClick={() => {
+                    setShowSites(false);
+                    setSiteState(null);
+                    onPick(s.lat, s.lon, s.name);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-indigo-500/50 dark:hover:text-indigo-400"
+                >
+                  <PinIcon className="h-3 w-3 shrink-0 text-zinc-400" />
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

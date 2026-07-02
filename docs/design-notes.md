@@ -604,16 +604,20 @@ posture as units and saved fields: a convenience held in the browser, nothing se
 
 v1 deliberately shipped *no curated directory* — the tool is field-agnostic and any coordinates
 work. But the reality is that most flyers launch at a handful of established waivered sites, and
-the empty state's single "try Lucerne Valley" example under-served that. So the location bar now
-has a **Sites** toggle (beside Coordinates) revealing a one-tap chip list of well-known US
-high-power / club sites — Black Rock, Lucerne (ROC), Argonia (Kloudbusters), Brothers (OROC),
-Bong, NEFAR, and a few more, roughly west to east. It's a static list (`lib/launchSites.ts`, with
-a typo-guard test bounding every coordinate to the continental US and forbidding dupes) — no API,
-no new dependency. The honesty caveat is built into the UI and the data comment: these are
-**approximate** launch-area coordinates (~1 km), not surveyed pads or an endorsement or a
-waiver-status claim — a starting point you fine-tune with search or coordinates. That's why it's a
-*small curated quick-pick*, not the full directory v1 ruled out: it lowers the barrier for the
-core audience's first lookup without pretending to be authoritative.
+the empty state's single "try Lucerne Valley" example under-served that. So the location bar has a
+**Sites** toggle (beside Coordinates). It started as a flat ~10-site chip list, then expanded to a
+**state-grouped picker** (`sitesByState()`): a row of state chips (each with its site count), and
+picking a state reveals its club fields as one-tap chips — pick a state, then a field. The data
+(`lib/launchSites.ts`) is now ~70 US club fields across ~37 states — Tripoli prefectures and NAR
+sections corroborated as active in 2023–2025 from the clubs' own pages plus the TRA/NAR listings,
+each tagged with its two-letter state (typo-guard test: continental-US bounds, no dupes, every
+state code known, grouping loses nothing). Still a static list — no API, no new dependency. The
+research also corrected three stale entries the original guessed (Hearne is Tripoli Houston's, not
+DARS's; Hartsel is Tripoli Colorado's, not NCR's — NCR flies at Pawnee/Nunn), and dropped a
+defunct one (NEFAR, launch ops on hold). The honesty caveat stays built into the UI and the data
+comment: these are **approximate** launch-area coordinates (~1 km), not surveyed pads or an
+endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
+It lowers the barrier for the core audience's first lookup without pretending to be authoritative.
 
 ### Saved fields, wind at a glance (post-v1)
 

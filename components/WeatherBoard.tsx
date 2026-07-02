@@ -6,6 +6,7 @@ import { loadBoard } from "@/lib/weather/net";
 import { readCache, writeCache } from "@/lib/cache";
 import { decodeState, encodeState, type UrlState } from "@/lib/state";
 import { pressureTendency } from "@/lib/weather/pressure";
+import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { isStale, relativeAge, clock } from "@/lib/format";
 import {
   addSaved,
@@ -431,7 +432,7 @@ export default function WeatherBoard() {
               now={now || data.fetchedAt}
               modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
               apogee={apogee}
-              lowCloudHourly={data.forecast.hourly.slice(currentHourIndex(data), currentHourIndex(data) + 48)}
+              lowCloudHourly={data.forecast.hourly.slice(currentHourIndex(data), currentHourIndex(data) + FLY_WINDOW_HOURS)}
             />
           </Panel>
 

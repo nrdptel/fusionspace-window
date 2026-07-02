@@ -303,7 +303,7 @@ export default function Page() {
             The observed ceiling is honest but <em>now</em> only — it can&apos;t tell you low cloud
             is forecast to build tomorrow afternoon, which is exactly what you&apos;d want to know
             before driving out. So beside it is Open-Meteo&apos;s modeled <em>low-cloud</em> cover
-            across the next two days, banded thin / broken / overcast. Low cloud is the layer that
+            across the next 3 days, banded thin / broken / overcast. Low cloud is the layer that
             usually forms a launch-blocking ceiling; high cirrus doesn&apos;t, so it&apos;s left out.
             It&apos;s cover, not a forecast ceiling height — deliberately softer than the observed
             read — so treat it as a heads-up while the observed ceiling keeps the go/no-go.

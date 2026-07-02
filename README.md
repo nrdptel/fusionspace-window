@@ -42,7 +42,7 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
   multi-day cloud picture beside it. Set an **expected apogee** and the ceiling is read as a
   go/no-go gate — you can't fly into cloud under a waiver, so a peak at the deck is a *No-go*.
   A **low-cloud outlook** (modeled) sits alongside as the forward-looking companion: the observed
-  ceiling is now-only, this flags low cloud building over the next two days before you drive out.
+  ceiling is now-only, this flags low cloud building over the next 3 days before you drive out.
   **Observed weather** from the nearest METAR flags a reported **thunderstorm** or **precipitation**
   (the safety code's other no-go) and visibility-cutting **haze/smoke** — the observed counterpart
   to the modeled storm potential.

@@ -2,6 +2,7 @@
 
 import type { HourPoint } from "@/lib/weather/model";
 import { clockShort, dayLabel } from "@/lib/format";
+import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 
 /** The shared fly-time scrubber. It appears under each of the three panels that read a single
  *  hour — the hourly timeline, the conditions grid, and the winds-aloft profile — all bound to
@@ -19,7 +20,7 @@ export default function FlyTimeSlider({
   selectedIndex,
   onSelect,
   todayIso,
-  windowHours = 48,
+  windowHours = FLY_WINDOW_HOURS,
 }: {
   hourly: HourPoint[];
   startIndex: number;

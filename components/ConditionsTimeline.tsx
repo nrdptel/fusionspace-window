@@ -14,6 +14,7 @@ import { windToneTextClass, type WindTone } from "@/lib/weather/limits";
 import { clockShort, dayLabel } from "@/lib/format";
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
+import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { useScrollFollowX } from "./useScrollFollow";
 
 const GUTTER = 54; // left column for the row labels
@@ -55,7 +56,7 @@ export default function ConditionsTimeline({
   todayIso: string;
 }) {
   const u = resolveUnits(units);
-  const window = useMemo(() => hourly.slice(startIndex, startIndex + 48), [hourly, startIndex]);
+  const window = useMemo(() => hourly.slice(startIndex, startIndex + FLY_WINDOW_HOURS), [hourly, startIndex]);
   const conds = useMemo(() => window.map((h) => hourConditions(h, windLine)), [window, windLine]);
   const selLocal = Math.max(0, Math.min(window.length - 1, selectedIndex - startIndex));
 
@@ -75,7 +76,7 @@ export default function ConditionsTimeline({
   return (
     <div>
       <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
-        The next two days, each factor against its own line. Scan down a column for one hour, or
+        The next 3 days, each factor against its own line. Scan down a column for one hour, or
         across a row for when a factor clears. Tap a column to set the fly-time.
       </p>
 
@@ -235,7 +236,7 @@ export default function ConditionsTimeline({
         >
           <table className="w-full text-left text-xs tabular-nums">
             <caption className="sr-only">
-              Wind, gusts, storm potential, and chance of rain by hour for the next two days
+              Wind, gusts, storm potential, and chance of rain by hour for the next 3 days
             </caption>
             <thead className="sticky top-0 bg-zinc-50 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
               <tr>

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { HourPoint } from "@/lib/weather/model";
-import { findCalmWindows, type CalmWindow } from "@/lib/weather/windows";
+import { findCalmWindows, FLY_WINDOW_HOURS, type CalmWindow } from "@/lib/weather/windows";
 import { fmtWind, limitLabel, resolveUnits, WIND_LABEL, type UnitPrefs } from "@/lib/units";
 import { SURFACE_LIMIT_MPH } from "@/lib/weather/limits";
 import { clockShort, dayLabel } from "@/lib/format";
@@ -35,7 +35,7 @@ export default function CalmWindows({
       findCalmWindows(hourly, {
         limitMph: limit,
         fromIndex,
-        horizonHours: Math.min(48, hourly.length - fromIndex),
+        horizonHours: Math.min(FLY_WINDOW_HOURS, hourly.length - fromIndex),
         minHours: 1,
       }),
     [hourly, limit, fromIndex],
@@ -47,7 +47,7 @@ export default function CalmWindows({
     return (
       <div className="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
         <span className="font-medium text-zinc-700 dark:text-zinc-300">Calm windows</span> — no
-        stretch stays {lineLabel} in the next two days. Keep an eye on it, or check back as the
+        stretch stays {lineLabel} in the next 3 days. Keep an eye on it, or check back as the
         forecast updates.
       </div>
     );

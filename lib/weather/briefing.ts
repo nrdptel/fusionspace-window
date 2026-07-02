@@ -15,7 +15,7 @@ import { gustiness } from "./gust";
 import { ceilingRead } from "./ceiling";
 import { lowCloudOutlook, lowCloudHeadline } from "./lowcloud";
 import { SURFACE_LIMIT_MPH } from "./limits";
-import { findCalmWindows } from "./windows";
+import { findCalmWindows, FLY_WINDOW_HOURS } from "./windows";
 import {
   degToCompass,
   fmtLength,
@@ -256,7 +256,7 @@ export function buildBriefing(board: BoardData, opts: BriefingOptions): string {
   const windows = findCalmWindows(forecast.hourly, {
     limitMph: windLine ?? SURFACE_LIMIT_MPH,
     fromIndex: hourIndex,
-    horizonHours: Math.min(48, forecast.hourly.length - hourIndex),
+    horizonHours: Math.min(FLY_WINDOW_HOURS, forecast.hourly.length - hourIndex),
   });
   if (windows.length > 0) {
     const w = windows[0];

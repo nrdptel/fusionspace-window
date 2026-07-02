@@ -56,7 +56,7 @@ import { StarIcon } from "./icons";
  *  ROC — a long-running Southern California high-power field) so the example link and the Sites
  *  picker never disagree on where the same field is. Falls back to the first curated site. */
 const EXAMPLE_SITE =
-  LAUNCH_SITES.find((s) => s.name.startsWith("Lucerne Valley")) ?? LAUNCH_SITES[0];
+  LAUNCH_SITES.find((s) => s.name.includes("Lucerne Valley")) ?? LAUNCH_SITES[0];
 
 /** The hourly index for the field's current hour. */
 function currentHourIndex(data: BoardData): number {

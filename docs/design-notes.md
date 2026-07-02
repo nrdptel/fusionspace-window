@@ -101,7 +101,7 @@ will I see it, and is the drive even worth it.
 3. **Right now** (`#now`) — surface wind + gust + direction against the **20 mph** surface
    limit reference line, temperature, sky, precip. Each figure carries its own freshness
    time and source. This is the "can I even set up" glance.
-4. **Today & tomorrow** (`#hourly`) — an hourly wind timeline so the flyer can find the calm
+4. **The next 3 days** (`#hourly`) — an hourly wind timeline so the flyer can find the calm
    window in the day, with gust band and the 20 mph line drawn through it.
 5. **Winds aloft** (`#aloft`) — the signature panel: wind speed + direction vs altitude AGL,
    surface up to waiver altitudes. The thing general weather apps bury or cap low.
@@ -164,7 +164,7 @@ where consumer apps stop.
 ### Charts: lightweight SVG, no chart library
 
 Debrief reaches for uPlot because a flight log is thousands of samples on a canvas. Window's
-data is tiny — ~48 hourly points and a dozen-odd aloft levels — so a small bespoke SVG
+data is tiny — ~72 hourly points and a dozen-odd aloft levels — so a small bespoke SVG
 component is the cleaner choice: it themes by `currentColor`, needs no dark-mode reinit, has
 no CSS to import, and gets a `<table>` fallback for free. Two of them — an hourly wind
 timeline and the vertical aloft profile — both pure render functions over already-parsed
@@ -663,7 +663,7 @@ rocketry — a turbulence heads-up, never a verdict. No new request or dependenc
 Each panel answers one question well, but a flyer hunting for a launch window was left to
 cross-reference four of them — surface wind, gusts, storm potential, rain — across time in their
 head. So a dedicated panel lines those four up as a grid: four rows, one cell per hour for the
-next two days, each cell green/amber/red. The honesty problem this raised is the obvious
+next 3 days, each cell green/amber/red. The honesty problem this raised is the obvious
 temptation: blend the four into one go/no-go colour. That's exactly what the whole tool refuses
 to do, so it stays four *separate* rows — each coloured against its **own** reference (wind and
 gusts against the 20 mph line and any personal line via `windTone`/`gustiness`, storms by CAPE
@@ -749,7 +749,7 @@ so they cost no new dependency and no extra request.
 
 ### Per-day calm window in the outlook (post-v1)
 
-The calm-window chips only look two days out, but the forecast (and the outlook) run seven —
+The calm-window chips only look three days out, but the forecast (and the outlook) run seven —
 so the outlook had an asymmetry: it showed each day's *maximum* wind but never said *when*
 within the day it was flyable. A club planning next weekend's launch could see a day was
 "windy" by its peak yet not learn it had a dead-calm morning. So each outlook card now carries
@@ -760,7 +760,7 @@ run-finder was refactored to share a single `summarizeWindow` helper, and a new 
 `bestDaylightWindow(hourly, date, limit, fromIndex)` (tested) picks the longest sub-limit
 daylight run on a given field-local date, breaking length ties toward the calmer peak and
 looking *forward* from the current hour so today's window never counts hours already gone. It's
-the same honest aggregation against a line you chose, extended from the 48-hour chips across the
+the same honest aggregation against a line you chose, extended from the 72-hour chips across the
 whole planning week — and it reads off the seven days of hourly data already fetched, so it costs
 no new dependency and no extra request. (While here: a long-standing JSX whitespace bug in the
 outlook source line — "20 mph**limit**" with the space swallowed after the interpolation — was

@@ -17,7 +17,8 @@ import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { useScrollFollowX } from "./useScrollFollow";
 
-const GUTTER = 54; // left column for the row labels
+const GUTTER = 70; // left column for the row labels — wide enough that the longest ("Storms")
+// clears the first cell, and the labels are left-anchored so they can never clip at the edge.
 const CW = 14; // px per hour
 const CH = 16; // row height
 const RG = 4; // gap between rows
@@ -88,13 +89,14 @@ export default function ConditionsTimeline({
           role="img"
           aria-label={`Conditions for the next ${window.length} hours, four rows — wind, gusts, storm potential, and chance of rain — each colored green, amber, or red against its own reference. Full values are in the table below.`}
         >
-          {/* row labels */}
+          {/* row labels — left-anchored at the edge so they can never clip on the left (font
+              width varies by device); the gutter is wide enough to keep them off the cells. */}
           {ROWS.map((row, r) => (
             <text
               key={row.key}
-              x={GUTTER - 6}
+              x={2}
               y={rowY(r) + CH / 2 + 3}
-              textAnchor="end"
+              textAnchor="start"
               className="fill-zinc-600 dark:fill-zinc-300"
               fontSize="10"
             >

@@ -614,7 +614,11 @@ each tagged with its two-letter state (typo-guard test: continental-US bounds, n
 state code known, grouping loses nothing). Still a static list — no API, no new dependency. The
 research also corrected three stale entries the original guessed (Hearne is Tripoli Houston's, not
 DARS's; Hartsel is Tripoli Colorado's, not NCR's — NCR flies at Pawnee/Nunn), and dropped a
-defunct one (NEFAR, launch ops on hold). The honesty caveat stays built into the UI and the data
+defunct one (NEFAR, launch ops on hold). A follow-up pass then tightened the weakest pins from
+town-centroid to the actual field — mostly by resolving each club's published field GPS or geocoding
+the named field address — which caught a few that were badly off (Black Rock's longitude by ~12 mi,
+Southern Oregon Rocketry pinned to its mailing address ~45 mi from the field, Rocketry SC actually
+flying at Dalzell not Rembert). The honesty caveat stays built into the UI and the data
 comment: these are **approximate** launch-area coordinates (~1 km), not surveyed pads or an
 endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
 It lowers the barrier for the core audience's first lookup without pretending to be authoritative.

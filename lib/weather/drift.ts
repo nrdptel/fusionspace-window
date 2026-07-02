@@ -119,6 +119,7 @@ export function dualDeployDrift(
 ): DualDeployDrift | null {
   const { apogeeFt, mainDeployFt, drogueRateFps, mainRateFps } = opts;
   if (
+    ![apogeeFt, mainDeployFt, drogueRateFps, mainRateFps].every(Number.isFinite) ||
     !(apogeeFt > 0) ||
     !(mainDeployFt > 0) ||
     mainDeployFt >= apogeeFt ||

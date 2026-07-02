@@ -127,5 +127,9 @@ describe("dualDeployDrift", () => {
     expect(dualDeployDrift(levels, { apogeeFt: 5000, mainDeployFt: 1000, drogueRateFps: 0, mainRateFps: 20 })).toBeNull();
     expect(dualDeployDrift(levels, { apogeeFt: 5000, mainDeployFt: 1000, drogueRateFps: 50, mainRateFps: 0 })).toBeNull();
     expect(dualDeployDrift([], opts)).toBeNull();
+    // Non-finite inputs are rejected rather than producing an infinite drift.
+    expect(dualDeployDrift(levels, { apogeeFt: Infinity, mainDeployFt: 1000, drogueRateFps: 50, mainRateFps: 20 })).toBeNull();
+    expect(dualDeployDrift(levels, { apogeeFt: 5000, mainDeployFt: 1000, drogueRateFps: Infinity, mainRateFps: 20 })).toBeNull();
+    expect(dualDeployDrift(levels, { apogeeFt: 5000, mainDeployFt: 1000, drogueRateFps: 50, mainRateFps: NaN })).toBeNull();
   });
 });

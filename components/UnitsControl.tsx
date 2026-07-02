@@ -1,6 +1,7 @@
 "use client";
 
 import type { UnitPrefs } from "@/lib/units";
+import type { RecoveryMode } from "@/lib/prefs";
 import { Segmented } from "./ui";
 
 export default function UnitsControl({
@@ -12,6 +13,12 @@ export default function UnitsControl({
   onApogee,
   descentRate,
   onDescentRate,
+  recoveryMode,
+  onRecoveryMode,
+  mainDeploy,
+  onMainDeploy,
+  mainDescentRate,
+  onMainDescentRate,
 }: {
   units: UnitPrefs;
   onUnits: (u: UnitPrefs) => void;
@@ -21,7 +28,14 @@ export default function UnitsControl({
   onApogee: (v: number | null) => void;
   descentRate: number | null;
   onDescentRate: (v: number | null) => void;
+  recoveryMode: RecoveryMode;
+  onRecoveryMode: (v: RecoveryMode) => void;
+  mainDeploy: number | null;
+  onMainDeploy: (v: number | null) => void;
+  mainDescentRate: number | null;
+  onMainDescentRate: (v: number | null) => void;
 }) {
+  const dual = recoveryMode === "dual";
   return (
     <div className="space-y-3 text-xs text-zinc-500 dark:text-zinc-400">
       {/* Display settings. */}
@@ -56,7 +70,8 @@ export default function UnitsControl({
       <div>
         <p className="mb-1.5 max-w-2xl">
           Optional — set a lower wind limit, and add your apogee and descent rate to unlock the
-          cloud-ceiling go/no-go and a recovery landing-drift estimate.
+          cloud-ceiling go/no-go and a recovery landing-drift estimate. Switch to dual-deploy to
+          split the drift between a fast drogue and the slow main.
         </p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <label
@@ -123,9 +138,13 @@ export default function UnitsControl({
 
       <label
         className="inline-flex items-center gap-1.5"
-        title="Optional recovery descent rate (ft/s) — with your apogee, turns the winds-aloft mean wind into a landing-drift distance."
+        title={
+          dual
+            ? "Optional drogue descent rate (ft/s) — the fast rate from apogee down to the main-deploy altitude."
+            : "Optional recovery descent rate (ft/s) — with your apogee, turns the winds-aloft mean wind into a landing-drift distance."
+        }
       >
-        <span>Descent rate</span>
+        <span>{dual ? "Drogue rate" : "Descent rate"}</span>
         <input
           type="number"
           min={1}
@@ -151,6 +170,86 @@ export default function UnitsControl({
           </button>
         )}
       </label>
+
+      <div className="flex items-center gap-2" title="Single = one descent rate the whole way down. Dual = a fast drogue from apogee to the main-deploy altitude, then the slow main to the ground.">
+        <span>Recovery</span>
+        <Segmented
+          size="sm"
+          ariaLabel="Recovery mode"
+          value={recoveryMode}
+          onChange={onRecoveryMode}
+          options={[
+            { value: "single", label: "Single" },
+            { value: "dual", label: "Dual" },
+          ]}
+        />
+      </div>
+
+      {dual && (
+        <>
+          <label
+            className="inline-flex items-center gap-1.5"
+            title="Main-chute deployment altitude (ft AGL) — where a dual-deploy switches from the fast drogue to the slow main. Must be below your apogee."
+          >
+            <span>Main deploy</span>
+            <input
+              type="number"
+              min={1}
+              max={100000}
+              step={100}
+              value={mainDeploy ?? ""}
+              placeholder="off"
+              onChange={(e) => {
+                const v = Number.parseInt(e.target.value, 10);
+                onMainDeploy(Number.isFinite(v) && v > 0 ? Math.min(100000, v) : null);
+              }}
+              aria-label="Main-chute deploy altitude in feet AGL (optional) — where a dual-deploy switches from drogue to main"
+              className="w-20 rounded-md border border-zinc-300 bg-white px-2 py-1 text-center font-mono tabular-nums outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <span>ft AGL</span>
+            {mainDeploy != null && (
+              <button
+                type="button"
+                onClick={() => onMainDeploy(null)}
+                className="text-zinc-500 underline hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                clear
+              </button>
+            )}
+          </label>
+
+          <label
+            className="inline-flex items-center gap-1.5"
+            title="Main-parachute descent rate (ft/s) — the slow rate a dual-deploy lands under, from the main-deploy altitude to the ground."
+          >
+            <span>Main rate</span>
+            <input
+              type="number"
+              min={1}
+              max={200}
+              step={1}
+              value={mainDescentRate ?? ""}
+              placeholder="off"
+              onChange={(e) => {
+                const v = Number.parseFloat(e.target.value);
+                onMainDescentRate(Number.isFinite(v) && v > 0 ? Math.min(200, v) : null);
+              }}
+              aria-label="Main-parachute descent rate in feet per second (optional) — the slow rate a dual-deploy lands under"
+              className="w-16 rounded-md border border-zinc-300 bg-white px-2 py-1 text-center font-mono tabular-nums outline-none focus:border-indigo-500 dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <span>ft/s</span>
+            {mainDescentRate != null && (
+              <button
+                type="button"
+                onClick={() => onMainDescentRate(null)}
+                className="text-zinc-500 underline hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                clear
+              </button>
+            )}
+          </label>
+        </>
+      )}
         </div>
       </div>
     </div>

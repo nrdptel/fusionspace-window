@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { BoardData } from "@/lib/weather/model";
 import { buildBriefing } from "@/lib/weather/briefing";
 import type { UnitPrefs } from "@/lib/units";
+import type { RecoveryMode } from "@/lib/prefs";
 
 type Flash = "" | "link" | "briefing";
 
@@ -13,6 +14,9 @@ export default function FieldBriefing({
   windLine,
   apogee,
   descentRate,
+  recoveryMode,
+  mainDeploy,
+  mainDescentRate,
   hourIndex,
 }: {
   board: BoardData;
@@ -20,6 +24,9 @@ export default function FieldBriefing({
   windLine: number | null;
   apogee: number | null;
   descentRate: number | null;
+  recoveryMode: RecoveryMode;
+  mainDeploy: number | null;
+  mainDescentRate: number | null;
   hourIndex: number;
 }) {
   const [href, setHref] = useState("");
@@ -41,6 +48,9 @@ export default function FieldBriefing({
     windLine,
     apogee,
     descentRate,
+    recoveryMode,
+    mainDeploy,
+    mainDescentRate,
     shareUrl: href || "https://window.fusionspace.co",
   });
 

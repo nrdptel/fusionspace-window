@@ -200,7 +200,7 @@ export default function SkyPanel({
         <div className="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <span className="text-[11px] uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Low cloud · next 2 days
+              Low cloud · next 3 days
             </span>
             <Pill tone="amber">Modeled</Pill>
           </div>

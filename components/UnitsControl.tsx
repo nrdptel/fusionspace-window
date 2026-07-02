@@ -23,32 +23,46 @@ export default function UnitsControl({
   onDescentRate: (v: number | null) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500 dark:text-zinc-400">
-      <div className="flex items-center gap-2">
-        <span>Units</span>
-        <Segmented
-          size="sm"
-          ariaLabel="Measurement system"
-          value={units.system}
-          onChange={(system) => onUnits({ ...units, system })}
-          options={[
-            { value: "imperial", label: "Imperial" },
-            { value: "metric", label: "Metric" },
-          ]}
-        />
+    <div className="space-y-3 text-xs text-zinc-500 dark:text-zinc-400">
+      {/* Display settings. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex items-center gap-2">
+          <span>Units</span>
+          <Segmented
+            size="sm"
+            ariaLabel="Measurement system"
+            value={units.system}
+            onChange={(system) => onUnits({ ...units, system })}
+            options={[
+              { value: "imperial", label: "Imperial" },
+              { value: "metric", label: "Metric" },
+            ]}
+          />
+        </div>
+
+        <label className="inline-flex cursor-pointer items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={units.windKnots}
+            onChange={(e) => onUnits({ ...units, windKnots: e.target.checked })}
+            className="h-3.5 w-3.5 accent-indigo-600"
+          />
+          Wind in knots
+        </label>
       </div>
 
-      <label className="inline-flex cursor-pointer items-center gap-1.5">
-        <input
-          type="checkbox"
-          checked={units.windKnots}
-          onChange={(e) => onUnits({ ...units, windKnots: e.target.checked })}
-          className="h-3.5 w-3.5 accent-indigo-600"
-        />
-        Wind in knots
-      </label>
-
-      <label className="inline-flex items-center gap-1.5">
+      {/* Optional personal inputs — spelled out so it's clear they're optional and what each
+          one turns on (the effects show up in other panels). */}
+      <div>
+        <p className="mb-1.5 max-w-2xl">
+          Optional — set a lower wind limit, and add your apogee and descent rate to unlock the
+          cloud-ceiling go/no-go and a recovery landing-drift estimate.
+        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <label
+        className="inline-flex items-center gap-1.5"
+        title="Optional lower wind limit (up to 20 mph) — tones the current wind, the hourly chart's line, and the calm windows against your number instead of the default."
+      >
         <span>Personal wind line</span>
         <input
           type="number"
@@ -76,7 +90,10 @@ export default function UnitsControl({
         )}
       </label>
 
-      <label className="inline-flex items-center gap-1.5">
+      <label
+        className="inline-flex items-center gap-1.5"
+        title="Optional predicted peak (ft AGL) — reads the observed cloud ceiling against it as a Clear / Tight / No-go gate, and feeds the landing-drift estimate."
+      >
         <span>Expected apogee</span>
         <input
           type="number"
@@ -104,7 +121,10 @@ export default function UnitsControl({
         )}
       </label>
 
-      <label className="inline-flex items-center gap-1.5">
+      <label
+        className="inline-flex items-center gap-1.5"
+        title="Optional recovery descent rate (ft/s) — with your apogee, turns the winds-aloft mean wind into a landing-drift distance."
+      >
         <span>Descent rate</span>
         <input
           type="number"
@@ -131,6 +151,8 @@ export default function UnitsControl({
           </button>
         )}
       </label>
+        </div>
+      </div>
     </div>
   );
 }

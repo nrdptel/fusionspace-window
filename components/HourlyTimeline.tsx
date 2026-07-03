@@ -20,7 +20,7 @@ import { SURFACE_LIMIT_MPH, windTone, windToneTextClass, type WindTone } from "@
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
-import { useScrollFollowX } from "./useScrollFollow";
+import { useScrollFollowX, usePinLeftX } from "./useScrollFollow";
 
 /** A compact labeled figure in the fly-time snapshot. */
 function Metric({
@@ -99,6 +99,11 @@ export default function HourlyTimeline({
   // narrow screens where the 72 h timeline overflows.
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollFollowX(scrollRef, x(selLocal) - STEP / 2, x(selLocal) + STEP / 2);
+  // Freeze the reference-line labels ("20 mph limit", the personal line) at the left as it scrolls.
+  const labelsRef = useRef<SVGGElement>(null);
+  usePinLeftX(scrollRef, labelsRef);
+  const limitText = `${limitLabel(u.wind)} limit`;
+  const yoursText = windLine != null ? `${fmtWind(windLine, u.wind)} ${WIND_LABEL[u.wind]} (yours)` : "";
 
   return (
     <div>
@@ -114,14 +119,11 @@ export default function HourlyTimeline({
           {/* grid baseline */}
           <line x1={PAD_X} y1={y(0)} x2={width - PAD_X} y2={y(0)} className="stroke-zinc-200 dark:stroke-zinc-800" strokeWidth="1" />
 
-          {/* 20 mph reference + optional personal line */}
+          {/* 20 mph reference + optional personal line — the full-width lines stay put; their
+              labels are pinned to the left edge (below) so they stay readable when scrolled. */}
           <line x1={PAD_X} y1={y(SURFACE_LIMIT_MPH)} x2={width - PAD_X} y2={y(SURFACE_LIMIT_MPH)} className="stroke-red-500/70" strokeWidth="1.25" strokeDasharray="5 4" />
-          <text x={PAD_X + 2} y={y(SURFACE_LIMIT_MPH) - 3} className="fill-red-500" fontSize="10">{limitLabel(u.wind)} limit</text>
           {windLine != null && windLine < SURFACE_LIMIT_MPH && (
-            <>
-              <line x1={PAD_X} y1={y(windLine)} x2={width - PAD_X} y2={y(windLine)} className="stroke-amber-500/70" strokeWidth="1.25" strokeDasharray="3 4" />
-              <text x={PAD_X + 2} y={y(windLine) - 3} className="fill-amber-500" fontSize="10">{fmtWind(windLine, u.wind)} {WIND_LABEL[u.wind]} (yours)</text>
-            </>
+            <line x1={PAD_X} y1={y(windLine)} x2={width - PAD_X} y2={y(windLine)} className="stroke-amber-500/70" strokeWidth="1.25" strokeDasharray="3 4" />
           )}
 
           {/* wind area + lines */}
@@ -133,12 +135,16 @@ export default function HourlyTimeline({
           {window.map((h, i) => {
             const isDayStart = h.time.endsWith("T00:00");
             if (i % 6 !== 0 && !isDayStart) return null;
+            // The midnight boundary shows "12 AM" + the day name; suppress a plain 6 h tick's clock
+            // when it crowds one (within 2 h) so "11 PM"/"12 AM" don't overlap.
+            const hr = Number(h.time.slice(11, 13));
+            const showClock = i === 0 || isDayStart || !(hr >= 22 || hr <= 2);
             return (
               <g key={i}>
                 {isDayStart && i !== 0 && (
                   <line x1={x(i)} y1={TOP} x2={x(i)} y2={TOP + innerH} className="stroke-zinc-200 dark:stroke-zinc-800" strokeWidth="1" />
                 )}
-                <text x={x(i)} y={H - 16} textAnchor="middle" className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">{clockShort(h.time)}</text>
+                {showClock && <text x={x(i)} y={H - 16} textAnchor="middle" className="fill-zinc-500 dark:fill-zinc-400" fontSize="10">{clockShort(h.time)}</text>}
                 {(i === 0 || isDayStart) && (
                   <text x={x(i)} y={H - 4} textAnchor="middle" className="fill-zinc-500 dark:fill-zinc-400" fontSize="9">{dayLabel(h.time, todayIso)}</text>
                 )}
@@ -165,6 +171,19 @@ export default function HourlyTimeline({
               <title>{`${clockShort(h.time)} — ${Math.round(h.windMph)} mph, gust ${Math.round(h.gustMph)}`}</title>
             </rect>
           ))}
+
+          {/* Frozen reference-line labels — pinned to the left edge (usePinLeftX) on a soft backing
+              so they stay legible over the wind line when the chart is scrolled. */}
+          <g ref={labelsRef}>
+            <rect x={PAD_X} y={y(SURFACE_LIMIT_MPH) - 12} width={limitText.length * 5.4 + 4} height={12} rx="2" className="fill-white/85 dark:fill-zinc-950/85" />
+            <text x={PAD_X + 2} y={y(SURFACE_LIMIT_MPH) - 3} className="fill-red-500" fontSize="10">{limitText}</text>
+            {windLine != null && windLine < SURFACE_LIMIT_MPH && (
+              <>
+                <rect x={PAD_X} y={y(windLine) - 12} width={yoursText.length * 5.4 + 4} height={12} rx="2" className="fill-white/85 dark:fill-zinc-950/85" />
+                <text x={PAD_X + 2} y={y(windLine) - 3} className="fill-amber-500" fontSize="10">{yoursText}</text>
+              </>
+            )}
+          </g>
         </svg>
       </div>
 

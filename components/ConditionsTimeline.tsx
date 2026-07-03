@@ -15,7 +15,7 @@ import { clockShort, dayLabel } from "@/lib/format";
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
-import { useScrollFollowX } from "./useScrollFollow";
+import { useScrollFollowX, usePinLeftX } from "./useScrollFollow";
 
 const GUTTER = 70; // left column for the row labels — wide enough that the longest ("Storms")
 // clears the first cell, and the labels are left-anchored so they can never clip at the edge.
@@ -73,6 +73,9 @@ export default function ConditionsTimeline({
   // Follow the fly-time selection so the selected column stays in view when the grid overflows.
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollFollowX(scrollRef, x(selLocal), x(selLocal) + CW);
+  // Freeze the row-label column at the left edge so you can always tell which row is which.
+  const labelsRef = useRef<SVGGElement>(null);
+  usePinLeftX(scrollRef, labelsRef);
 
   return (
     <div>
@@ -89,21 +92,6 @@ export default function ConditionsTimeline({
           role="img"
           aria-label={`Conditions for the next ${window.length} hours, four rows — wind, gusts, storm potential, and chance of rain — each colored green, amber, or red against its own reference. Full values are in the table below.`}
         >
-          {/* row labels — left-anchored at the edge so they can never clip on the left (font
-              width varies by device); the gutter is wide enough to keep them off the cells. */}
-          {ROWS.map((row, r) => (
-            <text
-              key={row.key}
-              x={2}
-              y={rowY(r) + CH / 2 + 3}
-              textAnchor="start"
-              className="fill-zinc-600 dark:fill-zinc-300"
-              fontSize="10"
-            >
-              {row.label}
-            </text>
-          ))}
-
           {/* cells */}
           {conds.map((c, i) =>
             ROWS.map((row, r) => {
@@ -126,6 +114,10 @@ export default function ConditionsTimeline({
           {window.map((h, i) => {
             const isDayStart = h.time.endsWith("T00:00");
             if (i % 6 !== 0 && !isDayStart) return null;
+            // A midnight boundary always shows "12 AM" + the day name; suppress a plain 6 h tick's
+            // clock when it crowds one (within 2 h), so labels like "11 PM" and "12 AM" don't collide.
+            const hr = Number(h.time.slice(11, 13));
+            const showClock = i === 0 || isDayStart || !(hr >= 22 || hr <= 2);
             return (
               <g key={`t${i}`}>
                 {isDayStart && i !== 0 && (
@@ -138,15 +130,17 @@ export default function ConditionsTimeline({
                     strokeWidth="1"
                   />
                 )}
-                <text
-                  x={x(i) + CW / 2}
-                  y={H - 8}
-                  textAnchor="middle"
-                  className="fill-zinc-500 dark:fill-zinc-400"
-                  fontSize="9"
-                >
-                  {clockShort(h.time)}
-                </text>
+                {showClock && (
+                  <text
+                    x={x(i) + CW / 2}
+                    y={H - 8}
+                    textAnchor="middle"
+                    className="fill-zinc-500 dark:fill-zinc-400"
+                    fontSize="9"
+                  >
+                    {clockShort(h.time)}
+                  </text>
+                )}
                 {(i === 0 || isDayStart) && (
                   <text
                     x={x(i) + CW / 2}
@@ -193,6 +187,25 @@ export default function ConditionsTimeline({
               </rect>
             );
           })}
+
+          {/* Frozen row-label column — pinned to the left edge as the grid scrolls (usePinLeftX),
+              on an opaque backing so cells never show through behind it. Left-anchored so it can't
+              clip; the gutter keeps it off the cells at rest. */}
+          <g ref={labelsRef}>
+            <rect x={0} y={0} width={GUTTER - 4} height={TOP + rowsH + 3} className="fill-white dark:fill-zinc-950" />
+            {ROWS.map((row, r) => (
+              <text
+                key={row.key}
+                x={2}
+                y={rowY(r) + CH / 2 + 3}
+                textAnchor="start"
+                className="fill-zinc-600 dark:fill-zinc-300"
+                fontSize="10"
+              >
+                {row.label}
+              </text>
+            ))}
+          </g>
         </svg>
       </div>
 

@@ -5,23 +5,22 @@ name: Deploy to Cloudflare Pages
 # Triggers:
 #   - push to main: ship code changes.
 #   - workflow_dispatch: manual deploy from the Actions tab.
-#   - schedule (hourly): rebuild so the all-sites conditions feed
-#     (public/conditions.json, generated in prebuild) refreshes, and so the
-#     month's awareness observance (lib/observances.ts) rolls over. Public repo
-#     ⇒ unlimited Actions minutes; the deploy is a direct wrangler upload, which
-#     isn't counted against Pages' build limit — so hourly is free.
-#   - repository_dispatch (refresh-conditions): lets an external scheduler like
-#     cron-job.org trigger a refresh via a webhook (POST /dispatches with
-#     {"event_type":"refresh-conditions"}), the same pattern the sibling tools use.
-#   NOTE: a schedule/dispatch trigger only fires once this file is on the default branch.
+#   - repository_dispatch (refresh-conditions): the hourly refresh. An external
+#     scheduler (cron-job.org) POSTs /dispatches with
+#     {"event_type":"refresh-conditions"} once an hour, which rebuilds so the
+#     all-sites conditions feed (public/api/v1/, generated in prebuild) refreshes
+#     and the month's awareness observance (lib/observances.ts) rolls over. We use
+#     an external ping rather than GitHub's own `schedule:` because scheduled
+#     workflows are frequently delayed or skipped; cron-job.org fires on time.
+#     Public repo ⇒ unlimited Actions minutes; the deploy is a direct wrangler
+#     upload, which isn't counted against Pages' build limit — so hourly is free.
+#   NOTE: a dispatch trigger only fires once this file is on the default branch.
 on:
   push:
     branches: [main]
   workflow_dispatch:
   repository_dispatch:
     types: [refresh-conditions]
-  schedule:
-    - cron: "17 * * * *" # hourly at :17 (offset off the top of the hour, which is the busiest/most-delayed slot)
 
 # One in-flight deploy at a time; a newer build supersedes an older one.
 concurrency:

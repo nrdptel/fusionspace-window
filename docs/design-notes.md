@@ -649,10 +649,12 @@ The whole point of this shape — versus the scheduled Cloudflare Worker + KV fi
 that it touches **no metered/shared quota**, which matters on a domain hosting many tools. Static
 assets on Pages are *unmetered* ("requests to static assets are free and unlimited") — no Workers
 invocations, no KV writes, no request cap — so the millions-of-reads path costs nothing and counts
-against nothing. Refresh is an **hourly re-deploy** (GitHub `schedule` at `:17`, plus
-`repository_dispatch` so an external scheduler like cron-job.org can drive it — the pattern the
-sibling tools use); the repo is public so Actions minutes are unlimited, and a direct `wrangler pages
-deploy` isn't a Pages CI "build" so it doesn't count against the 500-builds/month limit. The only
+against nothing. Refresh is an **hourly re-deploy** driven by an external scheduler (cron-job.org)
+that fires a `repository_dispatch` webhook once an hour — the pattern the sibling tools use. We drive
+it externally rather than with GitHub's own `schedule:` because scheduled workflows are frequently
+delayed or skipped, whereas the external ping fires on time. The repo is public so Actions minutes are
+unlimited, and a direct `wrangler pages deploy` isn't a Pages CI "build" so it doesn't count against
+the 500-builds/month limit. The only
 metered dependency left is Open-Meteo, and it's tiny: it counts **each location** in a batched
 request, so one request ≈ 104 weighted calls and hourly ≈ **~2,500/day of the 10,000/day** free
 allowance — comfortably clear, and the reason the cadence is hourly (a 15-min poll would push ~10k
@@ -892,7 +894,7 @@ for the field you choose. Geolocation, if you use it, only sets coordinates loca
 - **Deploy** via GitHub Actions → Cloudflare Pages, mirroring the siblings'
   `deploy-cloudflare.yml` (`cloudflare/wrangler-action`, `pages deploy out
   --project-name=fusionspace-window --branch=main`, push-to-`main` + `workflow_dispatch` +
-  the monthly observances cron, `concurrency`, least-privilege `permissions`). `test.yml`
+  the hourly `repository_dispatch` refresh, `concurrency`, least-privilege `permissions`). `test.yml`
   carried over (lint, unit, build, Playwright e2e + axe). No `@cloudflare/next-on-pages`.
 - **Tests are deterministic and never hit the live APIs.** Unit tests run pure `lib/`
   against fixtures derived from real Open-Meteo/NWS responses; e2e intercepts every

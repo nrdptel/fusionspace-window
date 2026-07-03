@@ -63,9 +63,10 @@ Pick a field by place search, your location, coordinates, or the **Sites** picke
 US club launch fields across 48 states, grouped by state (SEARS, HARA, Black Rock, Lucerne, Argonia…). The field rides in the URL, so any
 view is a shareable, reload-proof link; units, saved fields, and your personal wind line stay in
 your browser. Each saved field shows its current wind at a glance, so a club running more than
-one site can see which is flyable without opening each one. An optional **all-sites overview**
-(a scheduled Cloudflare Worker that pre-fetches every field's wind, all on free tiers — see
-`workers/conditions/`) lists the whole roster calmest-first so you can spot where to drive.
+one site can see which is flyable without opening each one. An **all-sites overview** lists the whole
+roster calmest-first so you can spot where to drive — from a static `conditions.json` generated at
+build time (`scripts/gen-conditions.ts`) and refreshed by an hourly deploy, served as an unmetered
+static asset (no backend, no per-request limits).
 
 ## The data
 

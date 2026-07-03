@@ -34,3 +34,6 @@ next-env.d.ts
 /test-results
 /playwright-report
 /playwright/.cache
+
+# Generated at build time (prebuild → scripts/gen-conditions.ts), never committed.
+/public/conditions.json

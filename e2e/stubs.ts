@@ -40,6 +40,12 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
   const airQuality = opts.airQuality ?? "ok";
   const observations = opts.observations ?? "mixed";
 
+  // The same-origin all-sites feed (public/conditions.json) is baked at build time from live data,
+  // so default it to empty for determinism — the overview is then absent unless a test stubs it.
+  await page.route("**/conditions.json", (route) =>
+    route.fulfill({ contentType: "application/json", body: '{"generatedAt":null,"model":"gfs_seamless","sites":[]}' }),
+  );
+
   await page.route("https://api.open-meteo.com/v1/forecast**", (route) => {
     if (forecast === "down") return route.abort("failed");
     return json(route, "forecast.json");

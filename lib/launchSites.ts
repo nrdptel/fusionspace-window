@@ -41,7 +41,7 @@ export const LAUNCH_SITES: LaunchSite[] = [
   // Arkansas
   { name: "CAR — Little Rock", state: "AR", lat: 34.81, lon: -92.4 },
   // Arizona
-  { name: "Tripoli Phoenix — Aguila", state: "AZ", lat: 33.9, lon: -113.18 },
+  { name: "Tripoli Phoenix — Aguila", state: "AZ", lat: 33.82, lon: -113.14 },
   { name: "SARA — Tucson (TIMPA)", state: "AZ", lat: 32.28, lon: -111.27 },
   // California
   { name: "ROC — Lucerne Valley", state: "CA", lat: 34.5, lon: -116.96 },
@@ -66,8 +66,10 @@ export const LAUNCH_SITES: LaunchSite[] = [
   // Illinois
   { name: "QCRS — Ohio, IL", state: "IL", lat: 41.49, lon: -89.5 },
   { name: "CIA — Rantoul", state: "IL", lat: 40.29, lon: -88.14 },
+  { name: "NIRA — Glendale Heights", state: "IL", lat: 41.88, lon: -88.0 },
   // Indiana
   { name: "Indiana Rocketry — Pence", state: "IN", lat: 40.39, lon: -87.51 },
+  { name: "SCAM — Milford", state: "IN", lat: 41.44, lon: -85.83 },
   // Kansas
   { name: "Kloudbusters — Argonia", state: "KS", lat: 37.17, lon: -97.74 },
   { name: "KOSMO — Ellinwood", state: "KS", lat: 38.39, lon: -98.62 },
@@ -86,6 +88,7 @@ export const LAUNCH_SITES: LaunchSite[] = [
   // Michigan
   { name: "Michigan Team 1 — St. Charles", state: "MI", lat: 43.28, lon: -84.04 },
   { name: "Michiana Rocketry — Three Oaks", state: "MI", lat: 41.78, lon: -86.57 },
+  { name: "JMRC — Rives Junction", state: "MI", lat: 42.43, lon: -84.38 },
   // Minnesota
   { name: "Tripoli MN — North Branch", state: "MN", lat: 45.56, lon: -92.93 },
   // Missouri
@@ -95,20 +98,24 @@ export const LAUNCH_SITES: LaunchSite[] = [
   { name: "BSRA — Twin Bridges", state: "MT", lat: 45.55, lon: -112.51 },
   // Nebraska
   { name: "THOR — Omaha", state: "NE", lat: 41.17, lon: -96.97 },
+  { name: "THOR — Concord", state: "NE", lat: 42.39, lon: -96.96 },
   // Nevada
   { name: "Black Rock Desert — Gerlach", state: "NV", lat: 40.87, lon: -119.11 },
   { name: "Tripoli Vegas — Jean", state: "NV", lat: 35.79, lon: -115.25 },
   // New Mexico
-  { name: "Tripoli NM — Alamogordo", state: "NM", lat: 32.92, lon: -106.05 },
+  { name: "Tripoli NM — Alamogordo", state: "NM", lat: 32.92, lon: -106.0 },
   // New York
   { name: "URRG — Potter", state: "NY", lat: 42.7, lon: -77.19 },
   { name: "METRA — Pine Island", state: "NY", lat: 41.34, lon: -74.48 },
+  { name: "MARS — Geneseo", state: "NY", lat: 42.8, lon: -77.82 },
   // North Carolina
   { name: "Tripoli East NC — Bayboro", state: "NC", lat: 35.17, lon: -76.83 },
   { name: "ROCC — Midland", state: "NC", lat: 35.2, lon: -80.45 },
+  { name: "SEVRA — Elizabeth City", state: "NC", lat: 36.43, lon: -76.47 },
   // Ohio
   { name: "Wright Stuff — Cedarville", state: "OH", lat: 39.73, lon: -83.7 },
   { name: "Tripoli Mid-Ohio — South Charleston", state: "OH", lat: 39.86, lon: -83.66 },
+  { name: "NOTRA — Amherst", state: "OH", lat: 41.27, lon: -82.26 },
   // Oklahoma
   { name: "Tripoli OK — Burns Flat", state: "OK", lat: 35.34, lon: -99.2 },
   { name: "Tulsa Rocketry — Leonard", state: "OK", lat: 35.93, lon: -95.79 },
@@ -117,7 +124,8 @@ export const LAUNCH_SITES: LaunchSite[] = [
   { name: "SOR — Eagle Point", state: "OR", lat: 42.42, lon: -122.77 },
   // Pennsylvania
   { name: "Tripoli Pittsburgh — Isabella", state: "PA", lat: 39.94, lon: -79.92 },
-  { name: "PSC — Grove City", state: "PA", lat: 41.19, lon: -80.04 },
+  { name: "PSC — Grove City", state: "PA", lat: 41.18, lon: -80.04 },
+  { name: "SPAAR — Annville", state: "PA", lat: 40.44, lon: -76.6 },
   // South Carolina
   { name: "Rocketry SC — Dalzell", state: "SC", lat: 34.06, lon: -80.43 },
   // Tennessee
@@ -130,6 +138,8 @@ export const LAUNCH_SITES: LaunchSite[] = [
   { name: "POTROCS — Boys Ranch", state: "TX", lat: 35.54, lon: -102.29 },
   { name: "WTSV — Wall", state: "TX", lat: 31.33, lon: -100.3 },
   { name: "NHRC — Houston (JSC)", state: "TX", lat: 29.55, lon: -95.09 },
+  { name: "Tripoli Houston — Alvin", state: "TX", lat: 29.27, lon: -95.14 },
+  { name: "HCR — El Paso", state: "TX", lat: 31.73, lon: -106.13 },
   // Utah
   { name: "UROC — Fairfield", state: "UT", lat: 40.22, lon: -112.25 },
   // Virginia
@@ -141,6 +151,26 @@ export const LAUNCH_SITES: LaunchSite[] = [
   { name: "WAC — Redmond (60 Acres)", state: "WA", lat: 47.7, lon: -122.14 },
   // Wisconsin
   { name: "WOOSH — Kansasville", state: "WI", lat: 42.64, lon: -88.13 },
+  // Alaska
+  { name: "Alaska NorthStars — Big Lake", state: "AK", lat: 61.53, lon: -149.92 },
+  // Hawaii
+  { name: "Hawaii Kai Rocketeers — Waipahu", state: "HI", lat: 21.39, lon: -158.01 },
+  // Iowa
+  { name: "ISOAR — Indianola", state: "IA", lat: 41.35, lon: -93.54 },
+  // Mississippi
+  { name: "MSRA — Starkville", state: "MS", lat: 33.38, lon: -88.76 },
+  // New Jersey
+  { name: "SOJARS — Williamstown", state: "NJ", lat: 39.71, lon: -75.05 },
+  { name: "Radical Rocketeers — Great Meadows", state: "NJ", lat: 40.87, lon: -74.92 },
+  { name: "CENJARS — Wall Twp", state: "NJ", lat: 40.15, lon: -74.09 },
+  // Rhode Island
+  { name: "RIMRA — West Kingston", state: "RI", lat: 41.49, lon: -71.54 },
+  // South Dakota
+  { name: "SDRJ — Bruce", state: "SD", lat: 44.43, lon: -96.92 },
+  // Vermont
+  { name: "SVRS — Putney", state: "VT", lat: 42.99, lon: -72.6 },
+  // Wyoming
+  { name: "WHF — Buffalo", state: "WY", lat: 44.35, lon: -106.7 },
 ];
 
 export interface StateSites {

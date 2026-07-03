@@ -48,6 +48,7 @@ import FlyTimeSlider from "./FlyTimeSlider";
 import WindsAloft from "./WindsAloft";
 import SkyPanel from "./SkyPanel";
 import AirQualityPanel from "./AirQualityPanel";
+import AllSitesConditions from "./AllSitesConditions";
 import Outlook from "./Outlook";
 import { Panel, Pill } from "./ui";
 import { StarIcon } from "./icons";
@@ -284,6 +285,10 @@ export default function WeatherBoard() {
           </button>
         </div>
       )}
+
+      {/* All-sites overview — current modeled wind at every field, calmest first (opt-in via the
+          conditions feed). Absent when the feed isn't configured. Shown before a field is picked. */}
+      {field?.lat == null && <AllSitesConditions onPick={pick} />}
 
       {field?.lat != null && error === "fetch" && !data && (
         <Notice tone="red">

@@ -36,6 +36,11 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install + build static export
+        # NEXT_PUBLIC_CONDITIONS_URL, when set as a repo variable (Settings → Secrets and variables
+        # → Actions → Variables → CONDITIONS_URL = the Worker's URL), lights up the "all sites"
+        # overview. Empty by default, in which case the overview is simply absent.
+        env:
+          NEXT_PUBLIC_CONDITIONS_URL: ${{ vars.CONDITIONS_URL }}
         run: |
           npm ci
           npm run build

@@ -1,13 +1,14 @@
 /** The "all sites at a glance" feed — the current surface wind at every curated launch field,
  *  toned against the 20 mph line, fetched in ONE batched Open-Meteo request rather than one per
- *  field. A scheduled Cloudflare Worker (workers/conditions) calls buildBatchUrl once every few
- *  minutes, runs summarizeSiteFeed over the response, and stores the result as a small JSON feed
- *  the site reads for its overview — so a flyer near several clubs sees which are flyable now
- *  without opening each, and no visitor's browser has to hammer the API for 100+ fields.
+ *  field. A build-time script (scripts/gen-conditions.ts), re-run by an hourly deploy, calls
+ *  buildBatchUrl once, runs summarizeSiteFeed over the response, and writes the result to
+ *  public/conditions.json — served as a plain static asset (unmetered on Cloudflare Pages: no
+ *  Workers/KV, no request cap). A flyer near several clubs sees which are flyable now without
+ *  opening each, and no visitor's browser has to hammer the API for 100+ fields.
  *
  *  Model-only by design: this is the same modeled surface wind the board already shows
  *  (gfs_seamless), NOT observed station data — the live station cross-check stays in the per-field
- *  view. Pure and tested; the fetch/store lives in the Worker. */
+ *  view. Pure and tested; the fetch/write lives in scripts/gen-conditions.ts. */
 
 import { LAUNCH_SITES, type LaunchSite } from "../launchSites";
 import { windTone, type WindTone } from "./limits";

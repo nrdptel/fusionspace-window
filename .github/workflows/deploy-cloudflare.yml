@@ -5,16 +5,23 @@ name: Deploy to Cloudflare Pages
 # Triggers:
 #   - push to main: ship code changes.
 #   - workflow_dispatch: manual deploy from the Actions tab.
-#   - schedule (monthly): rebuild so the month's awareness observance
-#     (lib/observances.ts, fixed at build time on a static export) rolls over
-#     when the calendar does. NOTE: a schedule/workflow trigger only fires once
-#     this file is on the default branch.
+#   - schedule (hourly): rebuild so the all-sites conditions feed
+#     (public/conditions.json, generated in prebuild) refreshes, and so the
+#     month's awareness observance (lib/observances.ts) rolls over. Public repo
+#     ⇒ unlimited Actions minutes; the deploy is a direct wrangler upload, which
+#     isn't counted against Pages' build limit — so hourly is free.
+#   - repository_dispatch (refresh-conditions): lets an external scheduler like
+#     cron-job.org trigger a refresh via a webhook (POST /dispatches with
+#     {"event_type":"refresh-conditions"}), the same pattern the sibling tools use.
+#   NOTE: a schedule/dispatch trigger only fires once this file is on the default branch.
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types: [refresh-conditions]
   schedule:
-    - cron: "0 6 1 * *" # 06:00 UTC on the 1st of each month
+    - cron: "17 * * * *" # hourly at :17 (offset off the top of the hour, which is the busiest/most-delayed slot)
 
 # One in-flight deploy at a time; a newer build supersedes an older one.
 concurrency:
@@ -36,11 +43,9 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install + build static export
-        # NEXT_PUBLIC_CONDITIONS_URL, when set as a repo variable (Settings → Secrets and variables
-        # → Actions → Variables → CONDITIONS_URL = the Worker's URL), lights up the "all sites"
-        # overview. Empty by default, in which case the overview is simply absent.
-        env:
-          NEXT_PUBLIC_CONDITIONS_URL: ${{ vars.CONDITIONS_URL }}
+        # prebuild → scripts/gen-conditions.ts fetches one batched Open-Meteo request and writes
+        # public/conditions.json, which the build copies into out/ and Pages serves as a static
+        # asset. Best-effort: a provider hiccup writes an empty feed rather than failing the build.
         run: |
           npm ci
           npm run build

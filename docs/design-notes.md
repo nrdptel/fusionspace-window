@@ -634,28 +634,31 @@ It lowers the barrier for the core audience's first lookup without pretending to
 ### All-sites conditions feed (post-v1)
 
 Once the site had ~100 curated fields, the obvious next question was "which of these is flyable
-*right now*?" — answerable only by opening each. The board itself stays a client-only static export
-(no backend), so the answer is a small, separate piece of infrastructure: a scheduled **Cloudflare
-Worker** (`workers/conditions`) that, every 15 minutes, makes ONE *batched* Open-Meteo request for
-all the field coordinates, summarises it with the shared, tested `lib/weather/sitefeed.ts`
-(same wind-toning as the board, so they can't drift), and stores the result as a single JSON in KV.
-`fetch()` serves that feed, CORS-enabled and edge-cached. The site's empty state gains an opt-in
-"Conditions across all sites" overview that reads the feed and lists every field calmest-first,
-toned against the 20 mph line — tap one to load its full board.
+*right now*?" — answerable only by opening each. The board stays a client-only static export, so the
+feed is generated the same way the OG images and favicon are: a **build-time script**
+(`scripts/gen-conditions.ts`, run in `prebuild`) makes ONE *batched* Open-Meteo request for all the
+field coordinates, summarises it with the shared, tested `lib/weather/sitefeed.ts` (same wind-toning
+as the board, so they can't drift), and writes `public/conditions.json`. The build copies that into
+the export and Cloudflare Pages serves it as a **plain static asset**. The empty state gains a
+"Conditions across all sites" overview that fetches it same-origin and lists every field
+calmest-first, toned against the 20 mph line — tap one to load its full board. It's best-effort at
+every layer: the generator writes an empty feed (not a build failure) if the provider hiccups, and
+the overview renders nothing if the feed is empty or missing (e.g. `next dev`, which skips prebuild).
 
-The design is dominated by the *free-tier* arithmetic. Open-Meteo bills by **weighted** calls
-(`locations × days/14 × variables/10`) and allows up to 1,000 locations per request, so all the
-fields cost ~9 weighted calls per cycle (~850/day of 10,000) — but only because it's ONE batched
-request; 100+ separate calls would be wasteful and could trip the limit. KV's free tier is
-**1,000 writes/day**, so the Worker writes ONE combined key per cycle (96/day), never per-field.
-15 minutes, not the 10 first floated, because Open-Meteo's model refreshes hourly — a faster poll
-mostly re-serves identical numbers. Cloudflare cron over GitHub Actions cron because the latter is
-documented to drop scheduled runs under load. And **model-only, not observed**: NWS station data
-isn't batchable (per-point, US-only) and bursting ~350 calls/cycle from one IP is exactly the proxy
-pattern their unpublished limit discourages — so the overview is honestly labelled modeled wind, and
-the observed cross-check stays in the per-field drill-down. The whole thing is **opt-in**: absent
-until `NEXT_PUBLIC_CONDITIONS_URL` points at the deployed Worker, so the site builds and works
-without it. Setup lives in `workers/conditions/README.md`.
+The whole point of this shape — versus the scheduled Cloudflare Worker + KV first built here — is
+that it touches **no metered/shared quota**, which matters on a domain hosting many tools. Static
+assets on Pages are *unmetered* ("requests to static assets are free and unlimited") — no Workers
+invocations, no KV writes, no request cap — so the millions-of-reads path costs nothing and counts
+against nothing. Refresh is an **hourly re-deploy** (GitHub `schedule` at `:17`, plus
+`repository_dispatch` so an external scheduler like cron-job.org can drive it — the pattern the
+sibling tools use); the repo is public so Actions minutes are unlimited, and a direct `wrangler pages
+deploy` isn't a Pages CI "build" so it doesn't count against the 500-builds/month limit. The only
+metered dependency left is Open-Meteo, and it's tiny: it counts **each location** in a batched
+request, so one request ≈ 104 weighted calls and hourly ≈ **~2,500/day of the 10,000/day** free
+allowance — comfortably clear, and the reason the cadence is hourly (a 15-min poll would push ~10k
+and graze the cap; the model only refreshes hourly anyway). **Model-only, not observed**: NWS station
+data isn't batchable (per-point, US-only), so the overview is honestly labelled modeled wind and the
+observed cross-check stays in the per-field drill-down.
 
 ### Saved fields, wind at a glance (post-v1)
 

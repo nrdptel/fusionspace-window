@@ -22,3 +22,8 @@
 /api/v1/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=300
+
+# The GeoJSON view gets the proper media type so mapping tools recognise it (the CORS + cache
+# headers above still apply — Cloudflare merges all matching _headers rules).
+/api/v1/*.geojson
+  Content-Type: application/geo+json

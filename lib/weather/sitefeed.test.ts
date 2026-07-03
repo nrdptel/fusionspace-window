@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, buildGeoJson, siteSlug, siteUrl, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
+import { buildBatchUrl, buildAirQualityBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, buildGeoJson, siteSlug, siteUrl, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
 import type { LaunchSite } from "../launchSites";
 
 const SITES: LaunchSite[] = [
@@ -15,6 +15,11 @@ function el(wind: number | null, dir: number | null, gust?: number | null, temp?
   if (gust !== undefined) current.wind_gusts_10m = gust;
   if (temp !== undefined) current.temperature_2m = temp;
   return { current };
+}
+
+/** An air-quality element aligned to the same request order. */
+function aq(usAqi: number, pm25: number, pm10: number) {
+  return { current: { us_aqi: usAqi, pm2_5: pm25, pm10: pm10 } };
 }
 
 /** A fully-populated batched element — every current variable plus the daily block. */
@@ -77,6 +82,15 @@ describe("buildBatchUrl", () => {
   });
 });
 
+describe("buildAirQualityBatchUrl", () => {
+  it("batches every site to the Air-Quality API for AQI + particulate", () => {
+    const u = new URL(buildAirQualityBatchUrl(SITES));
+    expect(u.origin + u.pathname).toBe("https://air-quality-api.open-meteo.com/v1/air-quality");
+    expect(u.searchParams.get("latitude")).toBe("34.5,30.87,39.01");
+    expect(u.searchParams.get("current")).toBe("us_aqi,pm2_5,pm10");
+  });
+});
+
 describe("summarizeSiteFeed", () => {
   const now = "2026-07-03T12:00:00Z";
 
@@ -135,12 +149,13 @@ describe("summarizeSiteFeed", () => {
     expect(Object.keys(feed.sites[0])).toEqual([
       "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness",
       "temp_f", "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
-      "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day", "tone", "today",
+      "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day",
+      "aqi", "aqi_category", "pm2_5", "pm10", "tone", "today",
     ]);
   });
 
   it("derives the full snapshot from a populated element", () => {
-    const feed = summarizeSiteFeed([full()], now, [SITES[0]], "https://example.test");
+    const feed = summarizeSiteFeed([full()], now, [SITES[0]], "https://example.test", [aq(164, 61.4, 22.1)]);
     const s = feed.sites[0];
     expect(s).toMatchObject({
       slug: "a-one",
@@ -151,6 +166,7 @@ describe("summarizeSiteFeed", () => {
       storm: "moderate",                // 1000 ≤ CAPE < 2500
       cloud_cover_pct: 40,
       weather_code: 95, conditions: "Thunderstorm", is_day: true,
+      aqi: 164, aqi_category: "unhealthy", pm2_5: 61, pm10: 22, // 151–200 → unhealthy
       tone: "emerald",
     });
     // A shareable board deep-link with the field's coordinates and label.
@@ -173,10 +189,24 @@ describe("summarizeSiteFeed", () => {
     expect(s.density_altitude_ft).toBeNull();
     expect(s.storm).toBeNull();
     expect(s.today).toBeNull();
+    // Air quality is a separate best-effort request; absent when not supplied.
+    expect(s.aqi).toBeNull();
+    expect(s.aqi_category).toBeNull();
+    expect(s.pm2_5).toBeNull();
     // …but the site is still included, with its identity intact — a missing extra never drops a row.
     expect(s.wind_mph).toBe(8);
     expect(s.slug).toBe("a-one");
     expect(s.url).toContain("lat=34.5");
+  });
+
+  it("aligns air quality by index and survives a missing AQ element", () => {
+    // Three sites; AQ only present for the first and third (second is undefined).
+    const raw = [el(8, 270), el(12, 180), el(5, 90)];
+    const aqRaw = [aq(30, 5, 9), undefined, aq(210, 90, 40)];
+    const feed = summarizeSiteFeed(raw, now, SITES, "https://example.test", aqRaw);
+    expect(feed.sites[0]).toMatchObject({ aqi: 30, aqi_category: "good" });
+    expect(feed.sites[1].aqi).toBeNull(); // AQ element missing → null, site still present
+    expect(feed.sites[2]).toMatchObject({ aqi: 210, aqi_category: "very-unhealthy" }); // 201–300 band
   });
 });
 

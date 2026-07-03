@@ -92,7 +92,8 @@
         "required": [
           "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
           "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
-          "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day", "tone", "today"
+          "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day",
+          "aqi", "aqi_category", "pm2_5", "pm10", "tone", "today"
         ],
         "properties": {
           "name": { "type": "string", "example": "SEARS — Samson" },
@@ -117,6 +118,10 @@
           "weather_code": { "type": ["integer", "null"], "description": "WMO weather-interpretation code.", "example": 0 },
           "conditions": { "type": ["string", "null"], "description": "Short sky/precip label from weather_code.", "example": "Clear" },
           "is_day": { "type": ["boolean", "null"], "description": "Daylight flag (true = day)." },
+          "aqi": { "type": ["integer", "null"], "description": "US EPA Air Quality Index (0–500) — null when the Air-Quality API was unreachable.", "example": 41 },
+          "aqi_category": { "type": ["string", "null"], "enum": ["good", "moderate", "usg", "unhealthy", "very-unhealthy", "hazardous", null], "description": "EPA AQI band. Smoke/haze cuts the visibility needed to track a flight." },
+          "pm2_5": { "type": ["integer", "null"], "description": "Fine particulate (≈ smoke), µg/m³.", "example": 8 },
+          "pm10": { "type": ["integer", "null"], "description": "Coarse particulate (≈ dust), µg/m³.", "example": 10 },
           "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
           "today": { "oneOf": [{ "$ref": "#/components/schemas/SiteToday" }, { "type": "null" }], "description": "Today's forecast peaks; null when the daily block is absent." }
         }

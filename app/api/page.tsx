@@ -42,6 +42,9 @@ const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "weather_code", type: "number | null", desc: "WMO weather-interpretation code." },
   { name: "conditions", type: "string | null", desc: "Short sky/precip label from weather_code — e.g. \"Clear\", \"Overcast\", \"Thunderstorm\"." },
   { name: "is_day", type: "boolean | null", desc: "Daylight flag (true = day)." },
+  { name: "aqi", type: "number | null", desc: "US EPA Air Quality Index (0–500). null if the Air-Quality API was unreachable." },
+  { name: "aqi_category", type: "\"good\" | \"moderate\" | \"usg\" | \"unhealthy\" | \"very-unhealthy\" | \"hazardous\" | null", desc: "EPA AQI band — smoke/haze cuts tracking visibility." },
+  { name: "pm2_5 / pm10", type: "number | null", desc: "Fine (≈ smoke) and coarse (≈ dust) particulate, µg/m³." },
   { name: "tone", type: "\"emerald\" | \"amber\" | \"red\"", desc: "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
   { name: "today", type: "object | null", desc: "Today's peaks + daylight: max_wind_mph, max_gust_mph, dominant_dir_deg, high_f, low_f, precip_in, precip_chance_pct, sunrise, sunset." },
 ];
@@ -63,7 +66,7 @@ export default function ApiPage() {
       <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
         A <strong>free, read-only JSON API</strong> for the current <strong>modeled conditions</strong>{" "}
         at every curated US launch field — wind and steadiness, density altitude, storm potential,
-        the moisture read, sky, and today&apos;s peaks. <strong>No API key, no rate limits, no cost.</strong> CORS-open
+        the moisture read, sky, air quality, and today&apos;s peaks. <strong>No API key, no rate limits, no cost.</strong> CORS-open
         (<Code>Access-Control-Allow-Origin: *</Code>) — call it straight from a browser. It&apos;s
         static JSON — no query parameters; fetch a file and filter client-side. Refreshed about
         hourly; check <Code>meta.json</Code> for the exact <Code>generated_at</Code>.

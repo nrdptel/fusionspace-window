@@ -1,8 +1,8 @@
 # Conditions API
 
 A **free, read-only JSON API** for the current **modeled conditions** at every curated US launch
-field — wind and steadiness, density altitude, storm potential (CAPE), the moisture read, sky, and
-today's forecast peaks. **No API key, no rate limits, no cost.** CORS-open
+field — wind and steadiness, density altitude, storm potential (CAPE), the moisture read, sky, air
+quality, and today's forecast peaks. **No API key, no rate limits, no cost.** CORS-open
 (`Access-Control-Allow-Origin: *`) — call it straight from a browser. It's static JSON — no query
 parameters; fetch a file and filter client-side. Refreshed about hourly (check `meta.json` for the
 exact `generated_at`); served as plain static files, no backend — unmetered on Cloudflare Pages.
@@ -60,6 +60,10 @@ when the model omits it — that never drops the whole site; only a missing usab
       "weather_code": 0,            // WMO code | null
       "conditions": "Clear",        // label from weather_code | null
       "is_day": true,               // boolean | null
+      "aqi": 41,                    // US EPA AQI (0–500) | null
+      "aqi_category": "good",       // "good"…"hazardous" | null — smoke cuts tracking visibility
+      "pm2_5": 8,                   // fine particulate (≈ smoke), µg/m³ | null
+      "pm10": 10,                   // coarse particulate (≈ dust), µg/m³ | null
       "tone": "emerald",            // "emerald" < 15, "amber" 15–20, "red" >= 20 mph
       "today": {                    // today's peaks + daylight | null
         "max_wind_mph": 5,
@@ -177,7 +181,9 @@ the same calculators the board uses, so the API and the board can't drift. It wr
 `public/api/v1/`, including `conditions.geojson`, one `sites/{slug}.json` per field split from the
 same in-memory feed (no extra fetch), plus the static `sites.json` roster (no request at all). The
 build copies it into the export; an hourly deploy refreshes it, driven by an external scheduler (cron-job.org) that
-fires a `repository_dispatch` webhook once an hour. Open-Meteo counts each **location** (extra
-variables on a single current+daily request barely add weight), so it stays ≈ one batched call per
-refresh — hourly is a few thousand/day, comfortably under the 10,000/day free non-commercial
-allowance. Static serving to consumers is separate and unmetered.
+fires a `repository_dispatch` webhook once an hour. It makes **two** batched requests per refresh —
+the main forecast and a separate one to Open-Meteo's Air-Quality API (best-effort: if it fails, the
+AQ fields come back null). Open-Meteo counts each **location** (extra variables on a single
+current+daily request barely add weight), so the two batched calls stay light — hourly is a few
+thousand/day, comfortably under the 10,000/day free non-commercial allowance. Static serving to
+consumers is separate and unmetered.

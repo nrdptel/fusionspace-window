@@ -25,9 +25,11 @@ import { densityAltitudeFt } from "./density";
 import { dewPointF } from "./dewpoint";
 import { gustiness, type GustBand } from "./gust";
 import { classifyCape, type InstabilityBand } from "./instability";
+import { classifyAqi, type AqiBand } from "./airquality";
 import { describeWeather } from "./wmo";
 
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
+const AIR_QUALITY = "https://air-quality-api.open-meteo.com/v1/air-quality";
 // Mirrors net.ts MODEL — the board's model, kept in sync so the overview and the drill-down agree.
 const MODEL = "gfs_seamless";
 /** Feed schema version — bumped on any breaking change to the JSON shape, so API consumers can
@@ -82,6 +84,19 @@ export function buildBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): stri
     timezone: "auto",
   });
   return `${OPEN_METEO}?${p.toString()}`;
+}
+
+/** A second batched request, to Open-Meteo's separate (free, keyless) Air-Quality API, for the US
+ *  AQI and the smoke/dust particulate at every field. Same comma-separated-locations batching, so
+ *  it's one more call per refresh — best-effort: if it fails, the AQ fields just come back null. */
+export function buildAirQualityBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): string {
+  const p = new URLSearchParams({
+    latitude: sites.map((s) => s.lat).join(","),
+    longitude: sites.map((s) => s.lon).join(","),
+    current: "us_aqi,pm2_5,pm10",
+    timezone: "auto",
+  });
+  return `${AIR_QUALITY}?${p.toString()}`;
 }
 
 /** Today's forecast peaks + the daylight window, from the daily aggregates. */
@@ -147,6 +162,14 @@ export interface SiteConditions {
   conditions: string | null;
   /** Daylight flag (true = day) — null when absent. */
   is_day: boolean | null;
+  /** US EPA Air Quality Index (0–500, rounded) — null when the Air-Quality API was unreachable. */
+  aqi: number | null;
+  /** EPA AQI category band — null when absent. Smoke/haze cuts the visibility you need to track a flight. */
+  aqi_category: AqiBand | null;
+  /** Fine particulate (≈ smoke), µg/m³ (rounded) — null when absent. */
+  pm2_5: number | null;
+  /** Coarse particulate (≈ dust), µg/m³ (rounded) — null when absent. */
+  pm10: number | null;
   /** Tone against the 20 mph line (emerald / amber / red), the default caution band. */
   tone: WindTone;
   /** Today's forecast peaks — null when the daily block is absent. */
@@ -259,8 +282,11 @@ export function summarizeSiteFeed(
   generatedAt: string,
   sites: readonly LaunchSite[] = LAUNCH_SITES,
   baseUrl: string = SITE_URL,
+  aqRaw: unknown = undefined,
 ): SiteFeed {
   const arr: unknown[] = Array.isArray(raw) ? raw : [raw];
+  // The air-quality response is index-aligned to the same request order (or a single object).
+  const aqArr: unknown[] = aqRaw === undefined ? [] : Array.isArray(aqRaw) ? aqRaw : [aqRaw];
   const out: SiteConditions[] = [];
   for (let i = 0; i < sites.length; i++) {
     const el = arr[i] as { current?: Record<string, unknown>; daily?: Record<string, unknown> } | undefined;
@@ -290,6 +316,9 @@ export function summarizeSiteFeed(
 
     const weatherCode = num(c.weather_code);
     const isDayRaw = num(c.is_day);
+
+    const aqC = (aqArr[i] as { current?: Record<string, unknown> } | undefined)?.current;
+    const aqiRaw = aqC ? num(aqC.us_aqi) : null;
 
     const d = el?.daily;
     const today: SiteToday | null = d
@@ -329,6 +358,10 @@ export function summarizeSiteFeed(
       weather_code: weatherCode,
       conditions: weatherCode != null ? describeWeather(weatherCode).label.replace(/^—$/, "") || null : null,
       is_day: isDayRaw == null ? null : isDayRaw === 1,
+      aqi: aqiRaw == null ? null : Math.round(aqiRaw),
+      aqi_category: aqiRaw == null ? null : classifyAqi(aqiRaw).band,
+      pm2_5: round(aqC ? num(aqC.pm2_5) : null),
+      pm10: round(aqC ? num(aqC.pm10) : null),
       tone: windTone(wind),
       today,
     });

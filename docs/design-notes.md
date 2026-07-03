@@ -676,8 +676,16 @@ next to the tip jar, and an `/api` docs page (`app/api/page.tsx`) plus `docs/api
 (`Access-Control-Allow-Origin: *`) and a 5-min cache come from `public/_headers`. Values are reported
 as **whole numbers** — the model's sub-mph precision is noise for a glance, and rounding keeps the
 JSON small and the `tone` band consistent with the integer a consumer sees (tone is taken from the
-rounded wind, so a `windMph: 15` always reads `amber`). No new runtime cost: it's the same static
+rounded wind, so a `wind_mph: 15` always reads `amber`). No new runtime cost: it's the same static
 asset the overview already fetched, now documented and versioned.
+
+The **wire format is snake_case** (`schema_version`, `generated_at`, `wind_mph`, `dir_deg`, …), the
+list carries a `count`, and `meta.json` is self-describing (`counts`, `endpoints`, `docs`, `license`,
+`notes`) — all to mirror the sibling motor API's conventions *exactly*, down to the field casing and
+the `"Free to use; attribution appreciated; provided as-is"` license line. The internal board keeps
+its idiomatic camelCase view model; the snake_case lives only at the API boundary (`sitefeed.ts`), so
+the two never have to agree on style. Because the API had no external consumers yet, this stayed at
+`schema_version: 1` rather than bumping.
 
 ### Saved fields, wind at a glance (post-v1)
 

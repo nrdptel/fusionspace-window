@@ -4,9 +4,8 @@
     "title": "Window — launch-site conditions API",
     "version": "1.0.0",
     "summary": "Free, read-only JSON: current modeled surface wind at every curated US launch field.",
-    "description": "The same modeled surface wind (gfs_seamless) the board shows, for all curated launch fields, refreshed hourly. No key, no rate limit, no cost. CORS-enabled. Modeled wind only — not observed station data; confirm conditions on the field's full board or a primary source before flying.",
-    "license": { "name": "MIT", "url": "https://github.com/nrdptel/fusionspace-window/blob/main/LICENSE" },
-    "contact": { "name": "Window", "url": "https://window.fusionspace.co/api" }
+    "description": "The same modeled surface wind (gfs_seamless) the board shows, for all curated launch fields, refreshed hourly. Static JSON — no API key, no rate limits, no cost, CORS-open. Modeled wind only — not observed station data; confirm conditions on the field's full board or a primary source before flying.",
+    "license": { "name": "Free to use; attribution appreciated; provided as-is", "url": "https://window.fusionspace.co/api" }
   },
   "servers": [{ "url": "https://window.fusionspace.co/api/v1" }],
   "paths": {
@@ -24,7 +23,7 @@
     },
     "/meta.json": {
       "get": {
-        "summary": "Feed metadata (version, generation time, counts)",
+        "summary": "Feed metadata (version, generation time, counts, endpoints)",
         "operationId": "getMeta",
         "responses": {
           "200": {
@@ -39,38 +38,49 @@
     "schemas": {
       "SiteFeed": {
         "type": "object",
-        "required": ["schemaVersion", "generatedAt", "model", "sites"],
+        "required": ["schema_version", "generated_at", "model", "count", "sites"],
         "properties": {
-          "schemaVersion": { "type": "integer", "example": 1 },
-          "generatedAt": { "type": ["string", "null"], "format": "date-time", "description": "When the feed was generated (null if the last refresh could not reach the provider)." },
+          "schema_version": { "type": "integer", "example": 1 },
+          "generated_at": { "type": ["string", "null"], "format": "date-time", "description": "When the feed was generated (null if the last refresh could not reach the provider)." },
           "model": { "type": "string", "example": "gfs_seamless" },
+          "count": { "type": "integer", "description": "Number of entries in sites.", "example": 104 },
           "sites": { "type": "array", "items": { "$ref": "#/components/schemas/SiteConditions" } }
         }
       },
       "SiteConditions": {
         "type": "object",
-        "required": ["name", "state", "lat", "lon", "windMph", "gustMph", "dirDeg", "tempF", "tone"],
+        "required": ["name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "temp_f", "tone"],
         "properties": {
           "name": { "type": "string", "example": "SEARS — Samson" },
           "state": { "type": "string", "description": "USPS two-letter code.", "example": "AL" },
           "lat": { "type": "number", "example": 31.13 },
           "lon": { "type": "number", "example": -86.07 },
-          "windMph": { "type": "integer", "description": "Sustained surface wind (10 m), mph — rounded.", "example": 7 },
-          "gustMph": { "type": ["integer", "null"], "description": "Gust, mph (rounded) — null when the model omits it.", "example": 11 },
-          "dirDeg": { "type": "integer", "description": "Direction the wind blows FROM, degrees — rounded.", "example": 270 },
-          "tempF": { "type": ["integer", "null"], "description": "Temperature, °F — rounded.", "example": 72 },
+          "wind_mph": { "type": "integer", "description": "Sustained surface wind (10 m), mph — rounded.", "example": 7 },
+          "gust_mph": { "type": ["integer", "null"], "description": "Gust, mph (rounded) — null when the model omits it.", "example": 11 },
+          "dir_deg": { "type": "integer", "description": "Direction the wind blows FROM, degrees — rounded.", "example": 270 },
+          "temp_f": { "type": ["integer", "null"], "description": "Temperature, °F — rounded.", "example": 72 },
           "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." }
         }
       },
       "Meta": {
         "type": "object",
-        "required": ["schemaVersion", "generatedAt", "model", "siteCount", "stateCount"],
+        "required": ["schema_version", "generated_at", "model", "counts", "endpoints", "docs", "license", "notes"],
         "properties": {
-          "schemaVersion": { "type": "integer", "example": 1 },
-          "generatedAt": { "type": ["string", "null"], "format": "date-time" },
+          "schema_version": { "type": "integer", "example": 1 },
+          "generated_at": { "type": ["string", "null"], "format": "date-time" },
           "model": { "type": "string", "example": "gfs_seamless" },
-          "siteCount": { "type": "integer", "example": 104 },
-          "stateCount": { "type": "integer", "example": 48 }
+          "counts": {
+            "type": "object",
+            "required": ["sites", "states"],
+            "properties": {
+              "sites": { "type": "integer", "example": 104 },
+              "states": { "type": "integer", "example": 48 }
+            }
+          },
+          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
+          "docs": { "type": "string", "format": "uri", "example": "https://window.fusionspace.co/api" },
+          "license": { "type": "string", "example": "Free to use; attribution appreciated; provided as-is" },
+          "notes": { "type": "string" }
         }
       }
     }

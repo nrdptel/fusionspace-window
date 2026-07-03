@@ -6,6 +6,9 @@
  *  Workers/KV, no request cap). A flyer near several clubs sees which are flyable now without
  *  opening each, and no visitor's browser has to hammer the API for 100+ fields.
  *
+ *  Wire format is snake_case (schema_version, generated_at, wind_mph, …) to match the sibling
+ *  motor.fusionspace.co API exactly, so a consumer who knows one knows both.
+ *
  *  Model-only by design: this is the same modeled surface wind the board already shows
  *  (gfs_seamless), NOT observed station data — the live station cross-check stays in the per-field
  *  view. Pure and tested; the fetch/write lives in scripts/gen-conditions.ts. */
@@ -19,6 +22,13 @@ const MODEL = "gfs_seamless";
 /** Feed schema version — bumped on any breaking change to the JSON shape, so API consumers can
  *  pin to it (published in the /api/v1 path and in meta.json). */
 export const SCHEMA_VERSION = 1;
+
+/** License line for the API, mirroring the sibling motor.fusionspace.co wording verbatim. */
+export const API_LICENSE = "Free to use; attribution appreciated; provided as-is";
+/** The three files the API serves, in the order the docs list them. */
+export const API_ENDPOINTS = ["/api/v1/conditions.json", "/api/v1/meta.json", "/api/v1/openapi.json"];
+const META_NOTES =
+  "Modeled surface wind (gfs_seamless), not observed station data — best-effort and approximate. Confirm at the field before flying.";
 
 /** One batched current-wind request for every site. Open-Meteo accepts comma-separated
  *  latitude/longitude (up to 1,000 locations) and returns an array of results in the same order,
@@ -43,27 +53,42 @@ export interface SiteConditions {
   state: string;
   lat: number;
   lon: number;
-  /** Sustained surface wind, mph (10 m). */
-  windMph: number;
-  /** Gust, mph — null when the model omits it. */
-  gustMph: number | null;
-  /** Direction the wind blows FROM, degrees. */
-  dirDeg: number;
-  /** Temperature, °F — null when absent. */
-  tempF: number | null;
+  /** Sustained surface wind, mph (10 m), rounded. */
+  wind_mph: number;
+  /** Gust, mph (rounded) — null when the model omits it. */
+  gust_mph: number | null;
+  /** Direction the wind blows FROM, degrees (rounded). */
+  dir_deg: number;
+  /** Temperature, °F (rounded) — null when absent. */
+  temp_f: number | null;
   /** Tone against the 20 mph line (emerald / amber / red), the default caution band. */
   tone: WindTone;
 }
 
 export interface SiteFeed {
   /** Feed schema version (see SCHEMA_VERSION). */
-  schemaVersion: number;
-  /** ISO timestamp the feed was generated (the fetch time), for the "as of" staleness flag. */
-  generatedAt: string;
+  schema_version: number;
+  /** ISO timestamp the feed was generated (the fetch time); null if the last refresh failed. */
+  generated_at: string | null;
   /** Model the winds came from (matches the board). */
   model: string;
+  /** Number of entries in `sites` (motor's list responses carry the same field). */
+  count: number;
   /** One entry per site that returned usable wind; sites missing data are omitted. */
   sites: SiteConditions[];
+}
+
+/** Self-describing metadata file, mirroring motor.fusionspace.co's meta.json shape: schema
+ *  version, generation time, counts, the endpoint list, docs URL, license, and an honesty note. */
+export interface SiteFeedMeta {
+  schema_version: number;
+  generated_at: string | null;
+  model: string;
+  counts: { sites: number; states: number };
+  endpoints: string[];
+  docs: string;
+  license: string;
+  notes: string;
 }
 
 function num(v: unknown): number | null {
@@ -78,7 +103,7 @@ function round(v: number | null): number | null {
 
 /** Turn a batched Open-Meteo response into the site feed. The response is an array (one element
  *  per location, in request order) — or a single object when only one location was requested.
- *  `generatedAt` is passed in so this stays pure (no clock); the Worker supplies its event time.
+ *  `generatedAt` is passed in so this stays pure (no clock); the caller supplies its build time.
  *  Sites whose element is missing or lacks a usable wind are skipped rather than faked. */
 export function summarizeSiteFeed(
   raw: unknown,
@@ -103,12 +128,30 @@ export function summarizeSiteFeed(
       state: s.state,
       lat: s.lat,
       lon: s.lon,
-      windMph: windRounded,
-      gustMph: round(num(c.wind_gusts_10m)),
-      dirDeg: Math.round(dirDeg),
-      tempF: round(num(c.temperature_2m)),
+      wind_mph: windRounded,
+      gust_mph: round(num(c.wind_gusts_10m)),
+      dir_deg: Math.round(dirDeg),
+      temp_f: round(num(c.temperature_2m)),
       tone: windTone(windRounded),
     });
   }
-  return { schemaVersion: SCHEMA_VERSION, generatedAt, model: MODEL, sites: out };
+  return { schema_version: SCHEMA_VERSION, generated_at: generatedAt, model: MODEL, count: out.length, sites: out };
+}
+
+/** Build the self-describing meta.json from a feed. `docsUrl` is the absolute URL of the human
+ *  docs page (fork-overridable via SITE_URL), so a fork's meta points at its own docs. Pure. */
+export function buildMeta(feed: SiteFeed, docsUrl: string): SiteFeedMeta {
+  return {
+    schema_version: feed.schema_version,
+    generated_at: feed.generated_at,
+    model: feed.model,
+    counts: {
+      sites: feed.count,
+      states: new Set(feed.sites.map((s) => s.state)).size,
+    },
+    endpoints: API_ENDPOINTS,
+    docs: docsUrl,
+    license: API_LICENSE,
+    notes: META_NOTES,
+  };
 }

@@ -45,7 +45,7 @@ export default function AllSitesConditions({
   // Nothing to show until we have a feed with at least one site.
   if (!feed || feed.sites.length === 0) return null;
 
-  const sites = [...feed.sites].sort((a, b) => a.windMph - b.windMph);
+  const sites = [...feed.sites].sort((a, b) => a.wind_mph - b.wind_mph);
   const flyable = sites.filter((s) => s.tone !== "red").length;
 
   return (
@@ -61,8 +61,8 @@ export default function AllSitesConditions({
         <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="font-medium text-zinc-700 dark:text-zinc-300">{flyable}</span> of{" "}
           {sites.length} under the 20 mph line ·{" "}
-          {feed.generatedAt && now
-            ? `as of ${relativeAge(new Date(feed.generatedAt).getTime(), now)}`
+          {feed.generated_at && now
+            ? `as of ${relativeAge(new Date(feed.generated_at).getTime(), now)}`
             : "modeled"}{" "}
           · modeled surface wind, not observed — open a field for the full read.
         </p>
@@ -95,7 +95,7 @@ function SiteRow({
         <span className="min-w-0 flex-1 truncate text-zinc-800 dark:text-zinc-200">{site.name}</span>
         <span className="shrink-0 text-[11px] text-zinc-400 dark:text-zinc-500">{site.state}</span>
         <span className={"shrink-0 font-mono tabular-nums " + windToneTextClass(site.tone)}>
-          {Math.round(site.windMph)} mph {degToCompass(site.dirDeg)}
+          {site.wind_mph} mph {degToCompass(site.dir_deg)}
         </span>
       </button>
     </li>

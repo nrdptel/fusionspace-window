@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBatchUrl, summarizeSiteFeed } from "./sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
 import type { LaunchSite } from "../launchSites";
 
 const SITES: LaunchSite[] = [
@@ -45,11 +45,12 @@ describe("summarizeSiteFeed", () => {
   it("maps a batched (array) response to one entry per site, in order", () => {
     const raw = [el(8, 270, 12, 70), el(21, 180, 28, 95), el(16, 90, 18, 60)];
     const feed = summarizeSiteFeed(raw, now, SITES);
-    expect(feed.schemaVersion).toBe(1);
-    expect(feed.generatedAt).toBe(now);
+    expect(feed.schema_version).toBe(1);
+    expect(feed.generated_at).toBe(now);
     expect(feed.model).toBe("gfs_seamless");
+    expect(feed.count).toBe(3);
     expect(feed.sites).toHaveLength(3);
-    expect(feed.sites[0]).toMatchObject({ name: "A — one", state: "CA", windMph: 8, gustMph: 12, dirDeg: 270, tempF: 70, tone: "emerald" });
+    expect(feed.sites[0]).toMatchObject({ name: "A — one", state: "CA", wind_mph: 8, gust_mph: 12, dir_deg: 270, temp_f: 70, tone: "emerald" });
     // 21 mph is over the 20 mph line → red; 16 is in the caution band (≥15) → amber.
     expect(feed.sites[1].tone).toBe("red");
     expect(feed.sites[2].tone).toBe("amber");
@@ -63,33 +64,73 @@ describe("summarizeSiteFeed", () => {
 
   it("rounds wind, gust, direction and temp to whole numbers", () => {
     const feed = summarizeSiteFeed([el(7.4, 269.6, 11.5, 72.4)], now, [SITES[0]]);
-    expect(feed.sites[0]).toMatchObject({ windMph: 7, gustMph: 12, dirDeg: 270, tempF: 72 });
+    expect(feed.sites[0]).toMatchObject({ wind_mph: 7, gust_mph: 12, dir_deg: 270, temp_f: 72 });
   });
 
   it("tones the rounded wind, so the number and its band always agree at the edge", () => {
     // 14.6 mph rounds to 15 → amber (the documented 'emerald < 15' edge), not emerald.
     const feed = summarizeSiteFeed([el(14.6, 200)], now, [SITES[0]]);
-    expect(feed.sites[0].windMph).toBe(15);
+    expect(feed.sites[0].wind_mph).toBe(15);
     expect(feed.sites[0].tone).toBe("amber");
   });
 
   it("carries null gust/temp through rather than faking them", () => {
     const raw = [el(10, 270)]; // no gust, no temp keys
     const feed = summarizeSiteFeed(raw, now, [SITES[0]]);
-    expect(feed.sites[0].gustMph).toBeNull();
-    expect(feed.sites[0].tempF).toBeNull();
+    expect(feed.sites[0].gust_mph).toBeNull();
+    expect(feed.sites[0].temp_f).toBeNull();
   });
 
   it("accepts a single-location object (not just an array)", () => {
     const feed = summarizeSiteFeed(el(5, 200), now, [SITES[0]]);
     expect(feed.sites).toHaveLength(1);
-    expect(feed.sites[0].windMph).toBe(5);
+    expect(feed.sites[0].wind_mph).toBe(5);
   });
 
-  it("produces a compact, JSON-serialisable feed", () => {
+  it("produces a compact, JSON-serialisable feed with snake_case keys", () => {
     const raw = SITES.map((_, i) => el(5 + i, 270));
     const feed = summarizeSiteFeed(raw, now, SITES);
     const round = JSON.parse(JSON.stringify(feed));
     expect(round).toEqual(feed);
+    // Wire format matches the sibling motor API: snake_case, no camelCase leakage.
+    expect(Object.keys(feed)).toEqual(["schema_version", "generated_at", "model", "count", "sites"]);
+    expect(Object.keys(feed.sites[0])).toEqual(["name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "temp_f", "tone"]);
+  });
+});
+
+describe("buildMeta", () => {
+  const now = "2026-07-03T12:00:00Z";
+
+  it("summarises the feed into a self-describing meta object", () => {
+    const raw = [el(8, 270), el(12, 180), el(5, 90)];
+    const feed = summarizeSiteFeed(raw, now, SITES);
+    const meta = buildMeta(feed, "https://window.fusionspace.co/api");
+    expect(meta).toEqual({
+      schema_version: 1,
+      generated_at: now,
+      model: "gfs_seamless",
+      counts: { sites: 3, states: 3 },
+      endpoints: API_ENDPOINTS,
+      docs: "https://window.fusionspace.co/api",
+      license: API_LICENSE,
+      notes: expect.any(String),
+    });
+  });
+
+  it("counts distinct states, not rows", () => {
+    const twoCal: LaunchSite[] = [
+      { name: "X", state: "CA", lat: 1, lon: 2 },
+      { name: "Y", state: "CA", lat: 3, lon: 4 },
+    ];
+    const feed = summarizeSiteFeed([el(5, 10), el(6, 20)], now, twoCal);
+    const meta = buildMeta(feed, "https://example.test/api");
+    expect(meta.counts).toEqual({ sites: 2, states: 1 });
+  });
+
+  it("passes a null generated_at through (failed refresh)", () => {
+    const empty = summarizeSiteFeed([], now, []);
+    const meta = buildMeta({ ...empty, generated_at: null }, "https://example.test/api");
+    expect(meta.generated_at).toBeNull();
+    expect(meta.counts).toEqual({ sites: 0, states: 0 });
   });
 });

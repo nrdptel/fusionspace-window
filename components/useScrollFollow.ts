@@ -2,6 +2,25 @@
 
 import { useEffect, type RefObject } from "react";
 
+/** Keep a `<g>` glued to the LEFT edge of a horizontally-scrolling SVG — a frozen label column /
+ *  axis label. It translates the group by the container's `scrollLeft` on every scroll, and
+ *  re-applies after any re-render (a content re-render would otherwise reset the transform). The
+ *  group renders in the SVG's own coordinate system, so vertical alignment is automatic; only X is
+ *  pinned. Give the group an opaque backing rect so the scrolling content can't show through. */
+export function usePinLeftX(
+  scrollRef: RefObject<HTMLElement | null>,
+  groupRef: RefObject<SVGGElement | null>,
+): void {
+  // No dependency array: this re-runs after every render, so the pin survives content changes.
+  useEffect(() => {
+    const el = scrollRef.current;
+    const apply = () => groupRef.current?.setAttribute("transform", `translate(${el?.scrollLeft ?? 0} 0)`);
+    apply();
+    el?.addEventListener("scroll", apply, { passive: true });
+    return () => el?.removeEventListener("scroll", apply);
+  });
+}
+
 /** Keep a horizontally-scrolling timeline's selected marker in view as the fly-time changes.
  *  When the marker (given as its left/right pixel span within the scroll content) approaches or
  *  passes an edge, scroll just enough to bring it back with a little padding — so dragging the

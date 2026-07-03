@@ -638,8 +638,8 @@ Once the site had ~100 curated fields, the obvious next question was "which of t
 feed is generated the same way the OG images and favicon are: a **build-time script**
 (`scripts/gen-conditions.ts`, run in `prebuild`) makes ONE *batched* Open-Meteo request for all the
 field coordinates, summarises it with the shared, tested `lib/weather/sitefeed.ts` (same wind-toning
-as the board, so they can't drift), and writes `public/conditions.json`. The build copies that into
-the export and Cloudflare Pages serves it as a **plain static asset**. The empty state gains a
+as the board, so they can't drift), and writes the feed under `public/api/v1/`. The build copies that
+into the export and Cloudflare Pages serves it as a **plain static asset**. The empty state gains a
 "Conditions across all sites" overview that fetches it same-origin and lists every field
 calmest-first, toned against the 20 mph line — tap one to load its full board. It's best-effort at
 every layer: the generator writes an empty feed (not a build failure) if the provider hiccups, and
@@ -659,6 +659,23 @@ allowance — comfortably clear, and the reason the cadence is hourly (a 15-min 
 and graze the cap; the model only refreshes hourly anyway). **Model-only, not observed**: NWS station
 data isn't batchable (per-point, US-only), so the overview is honestly labelled modeled wind and the
 observed cross-check stays in the per-field drill-down.
+
+### The feed is also a public API (post-v1)
+
+The overview already reads a plain, CORS-served static JSON — which *is* a public API, so the only
+work left was to say so and shape it like one. The sibling [motor.fusionspace.co](https://motor.fusionspace.co/api)
+already ships a free, keyless JSON API with a `</> API` header chip, a base-URL + endpoint table, an
+`openapi.json`, and a `docs/api.md`; Window now mirrors that convention exactly so a visitor who
+knows one knows both. Concretely: the feed moved from `public/conditions.json` to a **versioned**
+`public/api/v1/` path (`conditions.json` the feed, `meta.json` the counts/version, `openapi.json` an
+OpenAPI 3.1 spec), `lib/weather/sitefeed.ts` gained a `SCHEMA_VERSION` published in both the path and
+`meta.json` so consumers can pin, a `</> API` button (`components/ApiButton.tsx`) sits in the header
+next to the tip jar, and an `/api` docs page (`app/api/page.tsx`) plus `docs/api.md` document it. CORS
+(`Access-Control-Allow-Origin: *`) and a 5-min cache come from `public/_headers`. Values are reported
+as **whole numbers** — the model's sub-mph precision is noise for a glance, and rounding keeps the
+JSON small and the `tone` band consistent with the integer a consumer sees (tone is taken from the
+rounded wind, so a `windMph: 15` always reads `amber`). No new runtime cost: it's the same static
+asset the overview already fetched, now documented and versioned.
 
 ### Saved fields, wind at a glance (post-v1)
 

@@ -64,9 +64,15 @@ US club launch fields across 48 states, grouped by state (SEARS, HARA, Black Roc
 view is a shareable, reload-proof link; units, saved fields, and your personal wind line stay in
 your browser. Each saved field shows its current wind at a glance, so a club running more than
 one site can see which is flyable without opening each one. An **all-sites overview** lists the whole
-roster calmest-first so you can spot where to drive — from a static `conditions.json` generated at
+roster calmest-first so you can spot where to drive — from a static feed generated at
 build time (`scripts/gen-conditions.ts`) and refreshed by an hourly deploy, served as an unmetered
 static asset (no backend, no per-request limits).
+
+That same feed is a **[free public JSON API](https://window.fusionspace.co/api)** — current
+modeled surface wind at every field, `Access-Control-Allow-Origin: *`, no key, no rate limit, no
+cost. Versioned under `/api/v1/` (`conditions.json`, `meta.json`, `openapi.json`); docs at
+[`/api`](https://window.fusionspace.co/api) and [`docs/api.md`](docs/api.md), mirroring the
+conventions of the sibling [motor.fusionspace.co](https://motor.fusionspace.co/api) API.
 
 ## The data
 

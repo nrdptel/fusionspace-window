@@ -1,22 +1,26 @@
-/** Build-time generator for the "all sites" conditions feed: one batched Open-Meteo request for
- *  every curated launch field, summarised (with the shared, tested lib) into a small static JSON
- *  at public/conditions.json — copied into the export and served as a plain static asset (which is
- *  unmetered on Cloudflare Pages: unlimited reads, no Workers/KV, nothing on any account limit).
+/** Build-time generator for the public conditions API: one batched Open-Meteo request for every
+ *  curated launch field, summarised (with the shared, tested lib) into small static JSON under
+ *  public/api/v1/ — served as plain static assets (unmetered on Cloudflare Pages: unlimited reads,
+ *  no Workers/KV, nothing on any account limit). Free, read-only, no key, no rate limit.
  *
- *  Run in `prebuild`, so every deploy bakes in fresh conditions; an hourly deploy (schedule or a
- *  cron-job.org webhook → repository_dispatch) refreshes it. Best-effort: on any failure it writes
- *  an empty feed and exits 0, so a flaky provider never breaks the site build. */
+ *  Writes:
+ *    public/api/v1/conditions.json — the feed (schemaVersion, generatedAt, model, sites[])
+ *    public/api/v1/meta.json       — lightweight metadata (version, generatedAt, counts)
+ *
+ *  Run in `prebuild`, so every deploy bakes in fresh conditions; an hourly deploy refreshes them.
+ *  Best-effort: on any failure it writes an empty feed and exits 0, so a flaky provider never
+ *  breaks the site build. */
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { buildBatchUrl, summarizeSiteFeed, type SiteFeed } from "../lib/weather/sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, SCHEMA_VERSION, type SiteFeed } from "../lib/weather/sitefeed";
 
-const OUT = join(process.cwd(), "public", "conditions.json");
+const DIR = join(process.cwd(), "public", "api", "v1");
 const TIMEOUT_MS = 20_000;
 
 async function main() {
   const nowIso = new Date().toISOString();
-  let feed: SiteFeed = { generatedAt: null as unknown as string, model: "gfs_seamless", sites: [] };
+  let feed: SiteFeed = { schemaVersion: SCHEMA_VERSION, generatedAt: null as unknown as string, model: "gfs_seamless", sites: [] };
 
   try {
     const ctrl = new AbortController();
@@ -34,8 +38,17 @@ async function main() {
     console.warn(`gen-conditions: writing empty feed (${(err as Error).message})`);
   }
 
-  mkdirSync(join(process.cwd(), "public"), { recursive: true });
-  writeFileSync(OUT, JSON.stringify(feed));
+  const meta = {
+    schemaVersion: feed.schemaVersion,
+    generatedAt: feed.generatedAt,
+    model: feed.model,
+    siteCount: feed.sites.length,
+    stateCount: new Set(feed.sites.map((s) => s.state)).size,
+  };
+
+  mkdirSync(DIR, { recursive: true });
+  writeFileSync(join(DIR, "conditions.json"), JSON.stringify(feed));
+  writeFileSync(join(DIR, "meta.json"), JSON.stringify(meta));
 }
 
 main();

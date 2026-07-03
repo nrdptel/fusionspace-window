@@ -40,9 +40,9 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
   const airQuality = opts.airQuality ?? "ok";
   const observations = opts.observations ?? "mixed";
 
-  // The same-origin all-sites feed (public/conditions.json) is baked at build time from live data,
+  // The same-origin all-sites feed (public/api/v1/conditions.json) is baked at build time from live data,
   // so default it to empty for determinism — the overview is then absent unless a test stubs it.
-  await page.route("**/conditions.json", (route) =>
+  await page.route("**/api/v1/conditions.json", (route) =>
     route.fulfill({ contentType: "application/json", body: '{"generatedAt":null,"model":"gfs_seamless","sites":[]}' }),
   );
 

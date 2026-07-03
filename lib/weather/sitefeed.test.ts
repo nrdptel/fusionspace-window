@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, siteSlug, siteUrl, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
 import type { LaunchSite } from "../launchSites";
 
 const SITES: LaunchSite[] = [
@@ -37,6 +37,8 @@ function full() {
       temperature_2m_max: [96],
       temperature_2m_min: [70],
       precipitation_probability_max: [30],
+      sunrise: ["2026-07-03T05:50"],
+      sunset: ["2026-07-03T20:10"],
     },
   };
 }
@@ -56,6 +58,7 @@ describe("buildBatchUrl", () => {
     expect(u.searchParams.get("current")).toContain("surface_pressure");
     expect(u.searchParams.get("current")).toContain("cape");
     expect(u.searchParams.get("daily")).toContain("wind_speed_10m_max");
+    expect(u.searchParams.get("daily")).toContain("sunrise");
   });
 
   it("defaults to the full curated site list", () => {
@@ -123,16 +126,17 @@ describe("summarizeSiteFeed", () => {
     // Wire format matches the sibling motor API: snake_case, no camelCase leakage.
     expect(Object.keys(feed)).toEqual(["schema_version", "generated_at", "model", "count", "sites"]);
     expect(Object.keys(feed.sites[0])).toEqual([
-      "name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
-      "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
+      "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness",
+      "temp_f", "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
       "cape_jkg", "storm", "cloud_cover_pct", "tone", "today",
     ]);
   });
 
   it("derives the full snapshot from a populated element", () => {
-    const feed = summarizeSiteFeed([full()], now, [SITES[0]]);
+    const feed = summarizeSiteFeed([full()], now, [SITES[0]], "https://example.test");
     const s = feed.sites[0];
     expect(s).toMatchObject({
+      slug: "a-one",
       wind_mph: 10, gust_mph: 20, dir_deg: 270,
       steadiness: "very-gusty",         // gust 2× the sustained wind
       temp_f: 90, apparent_temp_f: 95, humidity_pct: 20,
@@ -140,11 +144,16 @@ describe("summarizeSiteFeed", () => {
       storm: "moderate",                // 1000 ≤ CAPE < 2500
       cloud_cover_pct: 40, tone: "emerald",
     });
+    // A shareable board deep-link with the field's coordinates and label.
+    expect(s.url).toBe("https://example.test/?lat=34.5&lon=-116.9&label=A+%E2%80%94+one");
     // Dew point below the dry-bulb temp; density altitude well above the field on a hot, high, dry day.
     expect(s.dewpoint_f).toBeLessThan(90);
     expect(s.density_altitude_ft).toBeGreaterThan(5000);
     expect((s.density_altitude_ft as number) % 10).toBe(0); // rounded to 10 ft
-    expect(s.today).toEqual({ max_wind_mph: 18, max_gust_mph: 26, high_f: 96, low_f: 70, precip_chance_pct: 30 });
+    expect(s.today).toEqual({
+      max_wind_mph: 18, max_gust_mph: 26, high_f: 96, low_f: 70, precip_chance_pct: 30,
+      sunrise: "2026-07-03T05:50", sunset: "2026-07-03T20:10",
+    });
   });
 
   it("degrades each derived field to null independently when its inputs are missing", () => {
@@ -155,23 +164,47 @@ describe("summarizeSiteFeed", () => {
     expect(s.density_altitude_ft).toBeNull();
     expect(s.storm).toBeNull();
     expect(s.today).toBeNull();
-    // …but the site is still included — a missing extra never drops the whole row.
+    // …but the site is still included, with its identity intact — a missing extra never drops a row.
     expect(s.wind_mph).toBe(8);
+    expect(s.slug).toBe("a-one");
+    expect(s.url).toContain("lat=34.5");
+  });
+});
+
+describe("siteSlug", () => {
+  it("makes a stable URL-safe id from a field name", () => {
+    expect(siteSlug("SEARS — Samson")).toBe("sears-samson");
+    expect(siteSlug("Black Rock Desert — Gerlach")).toBe("black-rock-desert-gerlach");
+    expect(siteSlug("  Trailing — Space  ")).toBe("trailing-space");
   });
 });
 
 describe("buildSitesFile", () => {
-  it("emits the static roster with no weather data", () => {
-    const file = buildSitesFile("2026-07-03T12:00:00Z", SITES);
+  it("emits the static roster with slug + board link and no weather data", () => {
+    const file = buildSitesFile("2026-07-03T12:00:00Z", SITES, "https://example.test");
     expect(file).toEqual({
       schema_version: 1,
       generated_at: "2026-07-03T12:00:00Z",
       count: 3,
       sites: [
-        { name: "A — one", state: "CA", lat: 34.5, lon: -116.9 },
-        { name: "B — two", state: "TX", lat: 30.87, lon: -96.62 },
-        { name: "C — three", state: "CO", lat: 39.01, lon: -105.7 },
+        { name: "A — one", state: "CA", slug: "a-one", lat: 34.5, lon: -116.9, url: siteUrl(SITES[0], "https://example.test") },
+        { name: "B — two", state: "TX", slug: "b-two", lat: 30.87, lon: -96.62, url: siteUrl(SITES[1], "https://example.test") },
+        { name: "C — three", state: "CO", slug: "c-three", lat: 39.01, lon: -105.7, url: siteUrl(SITES[2], "https://example.test") },
       ],
+    });
+  });
+});
+
+describe("buildSiteDetail", () => {
+  const now = "2026-07-03T12:00:00Z";
+  it("wraps one site with the feed's version and time", () => {
+    const feed = summarizeSiteFeed([full()], now, [SITES[0]], "https://example.test");
+    const detail = buildSiteDetail(feed, feed.sites[0]);
+    expect(detail).toEqual({
+      schema_version: 1,
+      generated_at: now,
+      model: "gfs_seamless",
+      site: feed.sites[0],
     });
   });
 });

@@ -19,7 +19,8 @@ https://window.fusionspace.co/api/v1
 | Endpoint | Returns |
 |---|---|
 | `/conditions.json` | The feed — current conditions at every field (wind, density altitude, storm potential, moisture, sky, today's peaks). |
-| `/sites.json` | The curated field roster — name, state, coordinates. Static, no weather data. |
+| `/sites.json` | The curated field roster — name, state, slug, coordinates, board link. Static, no weather data. |
+| `/sites/{slug}.json` | One field on its own — the same conditions for a single site, keyed by its `slug`. |
 | `/meta.json` | Self-describing metadata: schema version, generation time, counts, endpoints, docs, license. |
 | `/openapi.json` | OpenAPI 3.1 specification. |
 
@@ -38,8 +39,10 @@ when the model omits it — that never drops the whole site; only a missing usab
     {
       "name": "SEARS — Samson",
       "state": "AL",                // USPS two-letter code
+      "slug": "sears-samson",       // stable id; also /sites/sears-samson.json
       "lat": 31.13,
       "lon": -86.07,                // approximate launch-area point (~1 km)
+      "url": "https://window.fusionspace.co/?lat=31.13&lon=-86.07&label=SEARS+%E2%80%94+Samson", // board deep-link
       "wind_mph": 3,                // sustained surface wind (10 m)
       "gust_mph": 3,                // integer | null
       "dir_deg": 32,                // direction the wind blows FROM, degrees
@@ -54,12 +57,14 @@ when the model omits it — that never drops the whole site; only a missing usab
       "storm": "marginal",          // "none" | "marginal" | "moderate" | "strong" | null
       "cloud_cover_pct": 7,         // integer | null
       "tone": "emerald",            // "emerald" < 15, "amber" 15–20, "red" >= 20 mph
-      "today": {                    // today's forecast peaks | null
+      "today": {                    // today's peaks + daylight | null
         "max_wind_mph": 5,
         "max_gust_mph": 10,
         "high_f": 93,
         "low_f": 72,
-        "precip_chance_pct": 2
+        "precip_chance_pct": 2,
+        "sunrise": "2026-07-03T05:44", // local-time ISO | null
+        "sunset": "2026-07-03T19:52"
       }
     }
   ]
@@ -69,9 +74,22 @@ when the model omits it — that never drops the whole site; only a missing usab
 `generated_at` is `null` and `sites` may be empty if the most recent refresh couldn't reach the
 provider. Fields with no usable wind are omitted from `sites`.
 
+## `sites/{slug}.json`
+
+One field on its own — the same `SiteConditions` object, keyed by its `slug` (from `conditions.json`
+or `sites.json`). Fetch a single field without pulling the whole feed.
+
+```sh
+curl -s https://window.fusionspace.co/api/v1/sites/sears-samson.json
+```
+```jsonc
+{ "schema_version": 1, "generated_at": "…", "model": "gfs_seamless", "site": { /* one SiteConditions */ } }
+```
+
 ## `sites.json`
 
-The curated field roster on its own, with **no weather-API cost** — just the static list.
+The curated field roster on its own, with **no weather-API cost** — just the static list, each with a
+`slug` and a board deep-link.
 
 ```jsonc
 {
@@ -79,7 +97,8 @@ The curated field roster on its own, with **no weather-API cost** — just the s
   "generated_at": "2026-07-03T09:37:03.759Z",
   "count": 104,
   "sites": [
-    { "name": "SEARS — Samson", "state": "AL", "lat": 31.13, "lon": -86.07 }
+    { "name": "SEARS — Samson", "state": "AL", "slug": "sears-samson", "lat": 31.13, "lon": -86.07,
+      "url": "https://window.fusionspace.co/?lat=31.13&lon=-86.07&label=SEARS+%E2%80%94+Samson" }
   ]
 }
 ```
@@ -92,7 +111,7 @@ The curated field roster on its own, with **no weather-API cost** — just the s
   "generated_at": "2026-07-03T09:37:03.759Z",
   "model": "gfs_seamless",
   "counts": { "sites": 104, "states": 48 },
-  "endpoints": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/meta.json", "/api/v1/openapi.json"],
+  "endpoints": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"],
   "docs": "https://window.fusionspace.co/api",
   "license": "Free to use; attribution appreciated; provided as-is",
   "notes": "Modeled conditions (gfs_seamless), not observed station data …"
@@ -104,6 +123,9 @@ The curated field roster on its own, with **no weather-API cost** — just the s
 ```sh
 # the calmest field right now
 curl -s https://window.fusionspace.co/api/v1/conditions.json | jq '.sites | sort_by(.wind_mph)[0]'
+
+# just one field, by slug
+curl -s https://window.fusionspace.co/api/v1/sites/sears-samson.json | jq '.site.density_altitude_ft'
 ```
 
 ## Terms
@@ -123,7 +145,8 @@ curl -s https://window.fusionspace.co/api/v1/conditions.json | jq '.sites | sort
 field coordinates (a current block plus a single daily block), and summarises it with the tested
 `lib/weather/sitefeed.ts` — density altitude, dew point, storm band, and steadiness are computed by
 the same calculators the board uses, so the API and the board can't drift. It writes the JSON under
-`public/api/v1/` (`sites.json` needs no request at all — it's the static roster). The build copies it
+`public/api/v1/`, including one `sites/{slug}.json` per field split from the same in-memory feed
+(no extra fetch), plus the static `sites.json` roster (no request at all). The build copies it
 into the export; an hourly deploy refreshes it, driven by an external scheduler (cron-job.org) that
 fires a `repository_dispatch` webhook once an hour. Open-Meteo counts each **location** (extra
 variables on a single current+daily request barely add weight), so it stays ≈ one batched call per

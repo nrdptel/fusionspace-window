@@ -18,6 +18,8 @@
  *  cross-check stays in the per-field view. Pure; the fetch/write lives in gen-conditions.ts. */
 
 import { LAUNCH_SITES, type LaunchSite } from "../launchSites";
+import { SITE_URL } from "../links";
+import { encodeState } from "../state";
 import { windTone, type WindTone } from "./limits";
 import { densityAltitudeFt } from "./density";
 import { dewPointF } from "./dewpoint";
@@ -33,13 +35,26 @@ export const SCHEMA_VERSION = 1;
 
 /** License line for the API, mirroring the sibling motor.fusionspace.co wording verbatim. */
 export const API_LICENSE = "Free to use; attribution appreciated; provided as-is";
-/** The files the API serves, in the order the docs list them. */
+/** The files the API serves, in the order the docs list them. The `{slug}` entry is a template —
+ *  one static file per field lives at that path (the site's `slug`). */
 export const API_ENDPOINTS = [
   "/api/v1/conditions.json",
   "/api/v1/sites.json",
+  "/api/v1/sites/{slug}.json",
   "/api/v1/meta.json",
   "/api/v1/openapi.json",
 ];
+
+/** Stable URL-safe id for a field, derived from its name (e.g. "SEARS — Samson" → "sears-samson").
+ *  Used as the per-site detail filename and as each site's `slug`. The curated names are unique, so
+ *  the slugs are too. Pure and deterministic. */
+export function siteSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 const META_NOTES =
   "Modeled conditions (gfs_seamless), not observed station data — best-effort and approximate. Confirm at the field before flying.";
 
@@ -54,7 +69,7 @@ export function buildBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): stri
     current:
       "wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,apparent_temperature," +
       "relative_humidity_2m,surface_pressure,cape,cloud_cover",
-    daily: "wind_speed_10m_max,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    daily: "wind_speed_10m_max,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset",
     wind_speed_unit: "mph",
     temperature_unit: "fahrenheit",
     models: MODEL,
@@ -64,20 +79,33 @@ export function buildBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): stri
   return `${OPEN_METEO}?${p.toString()}`;
 }
 
-/** Today's forecast peaks — the day's worst-case at a glance, from the daily aggregates. */
+/** Today's forecast peaks + the daylight window, from the daily aggregates. */
 export interface SiteToday {
   max_wind_mph: number | null;
   max_gust_mph: number | null;
   high_f: number | null;
   low_f: number | null;
   precip_chance_pct: number | null;
+  /** Local-time ISO sunrise/sunset for launch-day planning — null when absent. */
+  sunrise: string | null;
+  sunset: string | null;
+}
+
+/** The shareable board link for a field — the same `?lat=&lon=&label=` URL the site itself uses,
+ *  so an API consumer can deep-link straight to the interactive board (motor lists a `url` too). */
+export function siteUrl(site: { name: string; lat: number; lon: number }, baseUrl: string = SITE_URL): string {
+  return `${baseUrl}/?${encodeState({ lat: site.lat, lon: site.lon, label: site.name })}`;
 }
 
 export interface SiteConditions {
   name: string;
   state: string;
+  /** Stable URL-safe id — also the per-site detail filename (/api/v1/sites/{slug}.json). */
+  slug: string;
   lat: number;
   lon: number;
+  /** Deep link to this field's interactive board. */
+  url: string;
   /** Sustained surface wind, mph (10 m), rounded. */
   wind_mph: number;
   /** Gust, mph (rounded) — null when the model omits it. */
@@ -136,13 +164,22 @@ export interface SiteFeedMeta {
   notes: string;
 }
 
-/** The curated field database as its own endpoint (name/state/lat/lon), with zero weather-API
- *  cost — just the static roster. The analogue of motor's vendors.json. */
+/** The curated field database as its own endpoint (name/state/slug/coords + board link), with zero
+ *  weather-API cost — just the static roster. The analogue of motor's vendors.json. */
 export interface SitesFile {
   schema_version: number;
   generated_at: string;
   count: number;
-  sites: { name: string; state: string; lat: number; lon: number }[];
+  sites: { name: string; state: string; slug: string; lat: number; lon: number; url: string }[];
+}
+
+/** A single field's conditions on its own — the per-site detail endpoint (/api/v1/sites/{slug}.json),
+ *  mirroring motor's per-motor files. Just the one site, wrapped with the feed's version/time. */
+export interface SiteDetail {
+  schema_version: number;
+  generated_at: string | null;
+  model: string;
+  site: SiteConditions;
 }
 
 function num(v: unknown): number | null {
@@ -152,6 +189,11 @@ function num(v: unknown): number | null {
 /** First value of a daily aggregate array (forecast_days=1 → one element), or null. */
 function daily1(v: unknown): number | null {
   return Array.isArray(v) ? num(v[0]) : null;
+}
+
+/** First value of a daily ISO-string array (sunrise/sunset), or null. */
+function iso1(v: unknown): string | null {
+  return Array.isArray(v) && typeof v[0] === "string" ? v[0] : null;
 }
 
 /** Round a usable number to the nearest integer, passing null through. */
@@ -173,6 +215,7 @@ export function summarizeSiteFeed(
   raw: unknown,
   generatedAt: string,
   sites: readonly LaunchSite[] = LAUNCH_SITES,
+  baseUrl: string = SITE_URL,
 ): SiteFeed {
   const arr: unknown[] = Array.isArray(raw) ? raw : [raw];
   const out: SiteConditions[] = [];
@@ -210,14 +253,18 @@ export function summarizeSiteFeed(
           high_f: round(daily1(d.temperature_2m_max)),
           low_f: round(daily1(d.temperature_2m_min)),
           precip_chance_pct: round(daily1(d.precipitation_probability_max)),
+          sunrise: iso1(d.sunrise),
+          sunset: iso1(d.sunset),
         }
       : null;
 
     out.push({
       name: s.name,
       state: s.state,
+      slug: siteSlug(s.name),
       lat: s.lat,
       lon: s.lon,
+      url: siteUrl(s, baseUrl),
       wind_mph: wind,
       gust_mph: gust,
       dir_deg: Math.round(dirRaw),
@@ -257,11 +304,32 @@ export function buildMeta(feed: SiteFeed, docsUrl: string): SiteFeedMeta {
 }
 
 /** Build the static sites.json roster from the curated list. No weather API involved. Pure. */
-export function buildSitesFile(generatedAt: string, sites: readonly LaunchSite[] = LAUNCH_SITES): SitesFile {
+export function buildSitesFile(
+  generatedAt: string,
+  sites: readonly LaunchSite[] = LAUNCH_SITES,
+  baseUrl: string = SITE_URL,
+): SitesFile {
   return {
     schema_version: SCHEMA_VERSION,
     generated_at: generatedAt,
     count: sites.length,
-    sites: sites.map((s) => ({ name: s.name, state: s.state, lat: s.lat, lon: s.lon })),
+    sites: sites.map((s) => ({
+      name: s.name,
+      state: s.state,
+      slug: siteSlug(s.name),
+      lat: s.lat,
+      lon: s.lon,
+      url: siteUrl(s, baseUrl),
+    })),
+  };
+}
+
+/** Wrap one site as its own detail document (for /api/v1/sites/{slug}.json). Pure. */
+export function buildSiteDetail(feed: SiteFeed, site: SiteConditions): SiteDetail {
+  return {
+    schema_version: feed.schema_version,
+    generated_at: feed.generated_at,
+    model: feed.model,
+    site,
   };
 }

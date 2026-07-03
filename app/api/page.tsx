@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 
 const ENDPOINTS: { path: string; desc: string }[] = [
   { path: "/conditions.json", desc: "The feed — current conditions at every field: wind, steadiness, density altitude, storm potential, moisture, sky, and today's peaks." },
-  { path: "/sites.json", desc: "The curated field roster — name, state, and coordinates. Static, no weather data." },
+  { path: "/sites.json", desc: "The curated field roster — name, state, slug, coordinates, board link. Static, no weather data." },
+  { path: "/sites/{slug}.json", desc: "One field on its own — the same conditions for a single site, keyed by its slug (e.g. /sites/sears-samson.json)." },
   { path: "/meta.json", desc: "Self-describing metadata: schema version, generation time, counts, endpoints, docs, license." },
   { path: "/openapi.json", desc: "OpenAPI 3.1 specification for the endpoints above." },
 ];
@@ -21,7 +22,9 @@ const ENDPOINTS: { path: string; desc: string }[] = [
 const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "name", type: "string", desc: "Field name, e.g. \"SEARS — Samson\"." },
   { name: "state", type: "string", desc: "USPS two-letter code." },
+  { name: "slug", type: "string", desc: "Stable URL-safe id — also the per-site filename (/sites/{slug}.json)." },
   { name: "lat / lon", type: "number", desc: "Approximate launch-area coordinates (~1 km)." },
+  { name: "url", type: "string", desc: "Deep link to this field's interactive board." },
   { name: "wind_mph", type: "number", desc: "Sustained surface wind (10 m), mph — rounded." },
   { name: "gust_mph", type: "number | null", desc: "Gust, mph (rounded) — null when the model omits it." },
   { name: "dir_deg", type: "number", desc: "Direction the wind blows FROM, degrees (rounded)." },
@@ -36,7 +39,7 @@ const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "storm", type: "\"none\" | \"marginal\" | \"moderate\" | \"strong\" | null", desc: "Storm-potential band from CAPE (SPC bands)." },
   { name: "cloud_cover_pct", type: "number | null", desc: "Cloud cover, % (rounded)." },
   { name: "tone", type: "\"emerald\" | \"amber\" | \"red\"", desc: "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
-  { name: "today", type: "object | null", desc: "Today's forecast peaks: max_wind_mph, max_gust_mph, high_f, low_f, precip_chance_pct." },
+  { name: "today", type: "object | null", desc: "Today's peaks + daylight: max_wind_mph, max_gust_mph, high_f, low_f, precip_chance_pct, sunrise, sunset." },
 ];
 
 function Code({ children }: { children: React.ReactNode }) {
@@ -97,7 +100,10 @@ export default function ApiPage() {
           >
 {`# the calmest field right now
 curl -s ${API_BASE_URL}/conditions.json \\
-  | jq '.sites | sort_by(.wind_mph)[0]'`}
+  | jq '.sites | sort_by(.wind_mph)[0]'
+
+# just one field, by its slug
+curl -s ${API_BASE_URL}/sites/sears-samson.json | jq '.site.density_altitude_ft'`}
           </pre>
         </section>
 

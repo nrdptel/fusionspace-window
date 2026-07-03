@@ -23,13 +23,29 @@
     },
     "/sites.json": {
       "get": {
-        "summary": "The curated field roster (name, state, coordinates)",
+        "summary": "The curated field roster (name, state, slug, coordinates, board link)",
         "operationId": "getSites",
         "responses": {
           "200": {
             "description": "The static site roster — no weather data.",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Sites" } } }
           }
+        }
+      }
+    },
+    "/sites/{slug}.json": {
+      "get": {
+        "summary": "One field's current conditions",
+        "operationId": "getSite",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" }, "description": "The field's slug (from conditions.json / sites.json), e.g. \"sears-samson\".", "example": "sears-samson" }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single field's conditions.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SiteDetail" } } }
+          },
+          "404": { "description": "No field with that slug." }
         }
       }
     },
@@ -62,15 +78,17 @@
       "SiteConditions": {
         "type": "object",
         "required": [
-          "name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
+          "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
           "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
           "cape_jkg", "storm", "cloud_cover_pct", "tone", "today"
         ],
         "properties": {
           "name": { "type": "string", "example": "SEARS — Samson" },
           "state": { "type": "string", "description": "USPS two-letter code.", "example": "AL" },
+          "slug": { "type": "string", "description": "Stable URL-safe id; also the per-site detail filename.", "example": "sears-samson" },
           "lat": { "type": "number", "example": 31.13 },
           "lon": { "type": "number", "example": -86.07 },
+          "url": { "type": "string", "format": "uri", "description": "Deep link to this field's interactive board.", "example": "https://window.fusionspace.co/?lat=31.13&lon=-86.07&label=SEARS+%E2%80%94+Samson" },
           "wind_mph": { "type": "integer", "description": "Sustained surface wind (10 m), mph — rounded.", "example": 7 },
           "gust_mph": { "type": ["integer", "null"], "description": "Gust, mph (rounded) — null when the model omits it.", "example": 11 },
           "dir_deg": { "type": "integer", "description": "Direction the wind blows FROM, degrees — rounded.", "example": 270 },
@@ -90,13 +108,25 @@
       },
       "SiteToday": {
         "type": "object",
-        "required": ["max_wind_mph", "max_gust_mph", "high_f", "low_f", "precip_chance_pct"],
+        "required": ["max_wind_mph", "max_gust_mph", "high_f", "low_f", "precip_chance_pct", "sunrise", "sunset"],
         "properties": {
           "max_wind_mph": { "type": ["integer", "null"], "description": "Day's peak sustained wind, mph.", "example": 18 },
           "max_gust_mph": { "type": ["integer", "null"], "description": "Day's peak gust, mph.", "example": 26 },
           "high_f": { "type": ["integer", "null"], "description": "Day's high temperature, °F.", "example": 88 },
           "low_f": { "type": ["integer", "null"], "description": "Day's low temperature, °F.", "example": 64 },
-          "precip_chance_pct": { "type": ["integer", "null"], "description": "Day's peak precipitation probability, %.", "example": 30 }
+          "precip_chance_pct": { "type": ["integer", "null"], "description": "Day's peak precipitation probability, %.", "example": 30 },
+          "sunrise": { "type": ["string", "null"], "description": "Local-time ISO sunrise.", "example": "2026-07-03T05:44" },
+          "sunset": { "type": ["string", "null"], "description": "Local-time ISO sunset.", "example": "2026-07-03T19:52" }
+        }
+      },
+      "SiteDetail": {
+        "type": "object",
+        "required": ["schema_version", "generated_at", "model", "site"],
+        "properties": {
+          "schema_version": { "type": "integer", "example": 1 },
+          "generated_at": { "type": ["string", "null"], "format": "date-time" },
+          "model": { "type": "string", "example": "gfs_seamless" },
+          "site": { "$ref": "#/components/schemas/SiteConditions" }
         }
       },
       "Sites": {
@@ -110,12 +140,14 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["name", "state", "lat", "lon"],
+              "required": ["name", "state", "slug", "lat", "lon", "url"],
               "properties": {
                 "name": { "type": "string", "example": "SEARS — Samson" },
                 "state": { "type": "string", "example": "AL" },
+                "slug": { "type": "string", "example": "sears-samson" },
                 "lat": { "type": "number", "example": 31.13 },
-                "lon": { "type": "number", "example": -86.07 }
+                "lon": { "type": "number", "example": -86.07 },
+                "url": { "type": "string", "format": "uri", "example": "https://window.fusionspace.co/?lat=31.13&lon=-86.07&label=SEARS+%E2%80%94+Samson" }
               }
             }
           }
@@ -136,7 +168,7 @@
               "states": { "type": "integer", "example": 48 }
             }
           },
-          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
+          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
           "docs": { "type": "string", "format": "uri", "example": "https://window.fusionspace.co/api" },
           "license": { "type": "string", "example": "Free to use; attribution appreciated; provided as-is" },
           "notes": { "type": "string" }

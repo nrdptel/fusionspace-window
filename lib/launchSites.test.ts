@@ -11,12 +11,12 @@ describe("LAUNCH_SITES", () => {
     }
   });
 
-  it("places every site within the continental US bounds", () => {
+  it("places every site within US bounds (incl. Alaska and Hawaii)", () => {
     for (const s of LAUNCH_SITES) {
-      expect(s.lat, s.name).toBeGreaterThan(24);
-      expect(s.lat, s.name).toBeLessThan(49);
-      expect(s.lon, s.name).toBeGreaterThan(-125);
-      expect(s.lon, s.name).toBeLessThan(-66);
+      expect(s.lat, s.name).toBeGreaterThan(18); // ~Hawaii south
+      expect(s.lat, s.name).toBeLessThan(72); // ~Alaska north
+      expect(s.lon, s.name).toBeGreaterThan(-168); // ~Alaska / Hawaii west
+      expect(s.lon, s.name).toBeLessThan(-66); // ~Maine east
     }
   });
 

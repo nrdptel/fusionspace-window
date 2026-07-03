@@ -4,12 +4,14 @@ import { installStubs } from "./stubs";
 // The all-sites overview reads the same-origin static feed (public/api/v1/conditions.json). Stub it with a
 // small sample so the test doesn't depend on the build-time fetch having populated real data.
 const sample = {
-  generatedAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
+  schema_version: 1,
+  generated_at: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
   model: "gfs_seamless",
+  count: 3,
   sites: [
-    { name: "SEARS — Samson", state: "AL", lat: 31.13, lon: -86.07, windMph: 7, gustMph: 11, dirDeg: 270, tempF: 72, tone: "emerald" },
-    { name: "HARA — Woodville", state: "AL", lat: 34.63, lon: -86.32, windMph: 16, gustMph: 22, dirDeg: 200, tempF: 68, tone: "amber" },
-    { name: "Black Rock Desert — Gerlach", state: "NV", lat: 40.87, lon: -119.11, windMph: 24, gustMph: 30, dirDeg: 300, tempF: 80, tone: "red" },
+    { name: "SEARS — Samson", state: "AL", lat: 31.13, lon: -86.07, wind_mph: 7, gust_mph: 11, dir_deg: 270, temp_f: 72, tone: "emerald" },
+    { name: "HARA — Woodville", state: "AL", lat: 34.63, lon: -86.32, wind_mph: 16, gust_mph: 22, dir_deg: 200, temp_f: 68, tone: "amber" },
+    { name: "Black Rock Desert — Gerlach", state: "NV", lat: 40.87, lon: -119.11, wind_mph: 24, gust_mph: 30, dir_deg: 300, temp_f: 80, tone: "red" },
   ],
 };
 
@@ -37,7 +39,7 @@ test("all-sites overview renders from the static feed and loads a field", async 
 test("the overview is absent when the feed is empty", async ({ page }) => {
   await installStubs(page);
   await page.route("**/api/v1/conditions.json", (r) =>
-    r.fulfill({ contentType: "application/json", body: JSON.stringify({ generatedAt: null, model: "gfs_seamless", sites: [] }) }),
+    r.fulfill({ contentType: "application/json", body: JSON.stringify({ schema_version: 1, generated_at: null, model: "gfs_seamless", count: 0, sites: [] }) }),
   );
   await page.goto("/", { waitUntil: "networkidle" });
   await expect(page.getByText("Conditions across all sites")).toHaveCount(0);

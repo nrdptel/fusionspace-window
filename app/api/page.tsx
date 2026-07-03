@@ -21,10 +21,10 @@ const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "name", type: "string", desc: "Field name, e.g. \"SEARS — Samson\"." },
   { name: "state", type: "string", desc: "USPS two-letter code." },
   { name: "lat / lon", type: "number", desc: "Approximate launch-area coordinates (~1 km)." },
-  { name: "windMph", type: "number", desc: "Sustained surface wind (10 m), mph — rounded to a whole number." },
-  { name: "gustMph", type: "number | null", desc: "Gust, mph (rounded) — null when the model omits it." },
-  { name: "dirDeg", type: "number", desc: "Direction the wind blows FROM, degrees (rounded)." },
-  { name: "tempF", type: "number | null", desc: "Temperature, °F (rounded)." },
+  { name: "wind_mph", type: "number", desc: "Sustained surface wind (10 m), mph — rounded to a whole number." },
+  { name: "gust_mph", type: "number | null", desc: "Gust, mph (rounded) — null when the model omits it." },
+  { name: "dir_deg", type: "number", desc: "Direction the wind blows FROM, degrees (rounded)." },
+  { name: "temp_f", type: "number | null", desc: "Temperature, °F (rounded)." },
   { name: "tone", type: "\"emerald\" | \"amber\" | \"red\"", desc: "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
 ];
 
@@ -45,8 +45,10 @@ export default function ApiPage() {
       <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
         A <strong>free, read-only JSON API</strong> for the current <strong>modeled surface wind</strong>{" "}
         at every curated US launch field — the same data behind the &ldquo;Conditions across all
-        sites&rdquo; overview. <strong>No key, no rate limit, no cost.</strong> CORS-enabled
-        (<Code>Access-Control-Allow-Origin: *</Code>), refreshed hourly, served as plain static files.
+        sites&rdquo; overview. <strong>No API key, no rate limits, no cost.</strong> CORS-open
+        (<Code>Access-Control-Allow-Origin: *</Code>) — call it straight from a browser. It&apos;s
+        static JSON — no query parameters; fetch a file and filter client-side. Refreshed about
+        hourly; check <Code>meta.json</Code> for the exact <Code>generated_at</Code>.
       </p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
@@ -84,14 +86,14 @@ export default function ApiPage() {
           >
 {`# the calmest field right now
 curl -s ${API_BASE_URL}/conditions.json \\
-  | jq '.sites | sort_by(.windMph)[0]'`}
+  | jq '.sites | sort_by(.wind_mph)[0]'`}
           </pre>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Response shape</h2>
           <p className="mt-2">
-            <Code>conditions.json</Code> is <Code>{"{ schemaVersion, generatedAt, model, sites[] }"}</Code>.
+            <Code>conditions.json</Code> is <Code>{"{ schema_version, generated_at, model, count, sites[] }"}</Code>.
             Each entry in <Code>sites</Code>:
           </p>
           <div className="mt-3 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
@@ -115,7 +117,7 @@ curl -s ${API_BASE_URL}/conditions.json \\
             </table>
           </div>
           <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            <Code>generatedAt</Code> is <Code>null</Code>, and <Code>sites</Code> may be empty, if the
+            <Code>generated_at</Code> is <Code>null</Code>, and <Code>sites</Code> may be empty, if the
             most recent refresh couldn&apos;t reach the provider. Fields with no usable wind are omitted.
           </p>
         </section>
@@ -129,15 +131,17 @@ curl -s ${API_BASE_URL}/conditions.json \\
               field&apos;s full board, or confirm at the field, before you fly.
             </li>
             <li>
-              <strong>Best-effort &amp; approximate.</strong> Coordinates are approximate launch-area
-              points (~1 km), and the feed can be up to an hour stale (or empty on a failed refresh).
+              <strong>Best-effort &amp; provided as-is.</strong> Coordinates are approximate launch-area
+              points (~1 km), the feed can be up to an hour stale (or empty on a failed refresh), and
+              it comes with no warranty — verify before relying on it.
             </li>
             <li>
-              <strong>Attribution.</strong> Weather data by{" "}
+              <strong>Free to use; attribution appreciated.</strong> A credit to{" "}
+              <Code>window.fusionspace.co</Code> is appreciated. Weather data by{" "}
               <a href={OPEN_METEO_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline underline-offset-2 hover:text-indigo-500 dark:text-indigo-400">
                 Open-Meteo
               </a>{" "}
-              (CC BY 4.0). The API itself is under the repo&apos;s MIT license — fork it, deploy your own.
+              (CC BY 4.0). The code itself is under the repo&apos;s MIT license — fork it, deploy your own.
             </li>
           </ul>
         </section>

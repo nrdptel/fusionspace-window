@@ -13,7 +13,9 @@ const config = [
       "react-hooks/set-state-in-effect": "off",
     },
   },
-  { ignores: ["out/**", ".next/**", "node_modules/**", "next-env.d.ts", "public/sw.js"] },
+  // The Cloudflare Worker is its own mini-project (own tsconfig, Cloudflare runtime types) and is
+  // bundled by wrangler, not the Next build — keep it out of the app's lint/type pass.
+  { ignores: ["out/**", ".next/**", "node_modules/**", "next-env.d.ts", "public/sw.js", "workers/**"] },
 ];
 
 export default config;

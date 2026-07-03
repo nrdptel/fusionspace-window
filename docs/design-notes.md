@@ -631,6 +631,32 @@ comment: these are **approximate** launch-area coordinates (~1 km), not surveyed
 endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
 It lowers the barrier for the core audience's first lookup without pretending to be authoritative.
 
+### All-sites conditions feed (post-v1)
+
+Once the site had ~100 curated fields, the obvious next question was "which of these is flyable
+*right now*?" — answerable only by opening each. The board itself stays a client-only static export
+(no backend), so the answer is a small, separate piece of infrastructure: a scheduled **Cloudflare
+Worker** (`workers/conditions`) that, every 15 minutes, makes ONE *batched* Open-Meteo request for
+all the field coordinates, summarises it with the shared, tested `lib/weather/sitefeed.ts`
+(same wind-toning as the board, so they can't drift), and stores the result as a single JSON in KV.
+`fetch()` serves that feed, CORS-enabled and edge-cached. The site's empty state gains an opt-in
+"Conditions across all sites" overview that reads the feed and lists every field calmest-first,
+toned against the 20 mph line — tap one to load its full board.
+
+The design is dominated by the *free-tier* arithmetic. Open-Meteo bills by **weighted** calls
+(`locations × days/14 × variables/10`) and allows up to 1,000 locations per request, so all the
+fields cost ~9 weighted calls per cycle (~850/day of 10,000) — but only because it's ONE batched
+request; 100+ separate calls would be wasteful and could trip the limit. KV's free tier is
+**1,000 writes/day**, so the Worker writes ONE combined key per cycle (96/day), never per-field.
+15 minutes, not the 10 first floated, because Open-Meteo's model refreshes hourly — a faster poll
+mostly re-serves identical numbers. Cloudflare cron over GitHub Actions cron because the latter is
+documented to drop scheduled runs under load. And **model-only, not observed**: NWS station data
+isn't batchable (per-point, US-only) and bursting ~350 calls/cycle from one IP is exactly the proxy
+pattern their unpublished limit discourages — so the overview is honestly labelled modeled wind, and
+the observed cross-check stays in the per-field drill-down. The whole thing is **opt-in**: absent
+until `NEXT_PUBLIC_CONDITIONS_URL` points at the deployed Worker, so the site builds and works
+without it. Setup lives in `workers/conditions/README.md`.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

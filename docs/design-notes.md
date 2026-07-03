@@ -708,6 +708,18 @@ by reusing `lib/state.ts`'s `encodeState`, so the API and the app agree on the f
 the `today` block gained **`sunrise`/`sunset`** (free daily fields — the daylight window for launch
 planning). Still additive, still `schema_version: 1`, still one batched request per refresh.
 
+A final comprehensiveness pass rounded out the snapshot and the formats. Cheap current/daily fields
+that were already one request away: **`weather_code` + `conditions`** (the WMO label, reusing the
+board's `wmo.ts`), **`is_day`**, and in `today` the **`dominant_dir_deg`** (prevailing wind for
+pad/rail setup) and **`precip_in`** (day rain total). `meta.json` gained a **`reference`** block that
+spells out the `tone` and `storm` thresholds in machine-readable form (sourced from `limits.ts`), so a
+consumer doesn't have to hard-code the band edges. And the feed is now also published as
+**`conditions.geojson`** — a GeoJSON `FeatureCollection` (Point per field, `[lon, lat]`, snapshot in
+`properties`) that drops straight into Leaflet/Mapbox/QGIS/kepler.gl, with `Content-Type:
+application/geo+json` set in `_headers`. What's deliberately *not* added: a "flyable/under-limit"
+filter view — the raw `tone` field lets a consumer do it themselves, and a curated "these are OK"
+endpoint would cut against Window's no-verdict stance. All additive; `schema_version` stays 1.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

@@ -21,6 +21,18 @@
         }
       }
     },
+    "/conditions.geojson": {
+      "get": {
+        "summary": "The feed as a GeoJSON FeatureCollection (for mapping tools)",
+        "operationId": "getConditionsGeoJson",
+        "responses": {
+          "200": {
+            "description": "A GeoJSON FeatureCollection — one Point feature per field, the site's snapshot in properties.",
+            "content": { "application/geo+json": { "schema": { "$ref": "#/components/schemas/GeoFeatureCollection" } } }
+          }
+        }
+      }
+    },
     "/sites.json": {
       "get": {
         "summary": "The curated field roster (name, state, slug, coordinates, board link)",
@@ -80,7 +92,7 @@
         "required": [
           "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
           "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
-          "cape_jkg", "storm", "cloud_cover_pct", "tone", "today"
+          "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day", "tone", "today"
         ],
         "properties": {
           "name": { "type": "string", "example": "SEARS — Samson" },
@@ -102,18 +114,23 @@
           "cape_jkg": { "type": ["integer", "null"], "description": "Convective available potential energy, J/kg — rounded.", "example": 120 },
           "storm": { "type": ["string", "null"], "enum": ["none", "marginal", "moderate", "strong", null], "description": "Storm-potential band from CAPE. null when CAPE is absent." },
           "cloud_cover_pct": { "type": ["integer", "null"], "description": "Cloud cover, % — rounded.", "example": 20 },
+          "weather_code": { "type": ["integer", "null"], "description": "WMO weather-interpretation code.", "example": 0 },
+          "conditions": { "type": ["string", "null"], "description": "Short sky/precip label from weather_code.", "example": "Clear" },
+          "is_day": { "type": ["boolean", "null"], "description": "Daylight flag (true = day)." },
           "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
           "today": { "oneOf": [{ "$ref": "#/components/schemas/SiteToday" }, { "type": "null" }], "description": "Today's forecast peaks; null when the daily block is absent." }
         }
       },
       "SiteToday": {
         "type": "object",
-        "required": ["max_wind_mph", "max_gust_mph", "high_f", "low_f", "precip_chance_pct", "sunrise", "sunset"],
+        "required": ["max_wind_mph", "max_gust_mph", "dominant_dir_deg", "high_f", "low_f", "precip_in", "precip_chance_pct", "sunrise", "sunset"],
         "properties": {
           "max_wind_mph": { "type": ["integer", "null"], "description": "Day's peak sustained wind, mph.", "example": 18 },
           "max_gust_mph": { "type": ["integer", "null"], "description": "Day's peak gust, mph.", "example": 26 },
+          "dominant_dir_deg": { "type": ["integer", "null"], "description": "Dominant wind direction for the day, degrees.", "example": 225 },
           "high_f": { "type": ["integer", "null"], "description": "Day's high temperature, °F.", "example": 88 },
           "low_f": { "type": ["integer", "null"], "description": "Day's low temperature, °F.", "example": 64 },
+          "precip_in": { "type": ["number", "null"], "description": "Total precipitation for the day, inches.", "example": 0.12 },
           "precip_chance_pct": { "type": ["integer", "null"], "description": "Day's peak precipitation probability, %.", "example": 30 },
           "sunrise": { "type": ["string", "null"], "description": "Local-time ISO sunrise.", "example": "2026-07-03T05:44" },
           "sunset": { "type": ["string", "null"], "description": "Local-time ISO sunset.", "example": "2026-07-03T19:52" }
@@ -127,6 +144,33 @@
           "generated_at": { "type": ["string", "null"], "format": "date-time" },
           "model": { "type": "string", "example": "gfs_seamless" },
           "site": { "$ref": "#/components/schemas/SiteConditions" }
+        }
+      },
+      "GeoFeatureCollection": {
+        "type": "object",
+        "required": ["type", "generated_at", "features"],
+        "properties": {
+          "type": { "type": "string", "enum": ["FeatureCollection"] },
+          "generated_at": { "type": ["string", "null"], "format": "date-time" },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "geometry", "properties"],
+              "properties": {
+                "type": { "type": "string", "enum": ["Feature"] },
+                "geometry": {
+                  "type": "object",
+                  "required": ["type", "coordinates"],
+                  "properties": {
+                    "type": { "type": "string", "enum": ["Point"] },
+                    "coordinates": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "description": "[lon, lat] per the GeoJSON spec.", "example": [-86.07, 31.13] }
+                  }
+                },
+                "properties": { "$ref": "#/components/schemas/SiteConditions" }
+              }
+            }
+          }
         }
       },
       "Sites": {
@@ -155,7 +199,7 @@
       },
       "Meta": {
         "type": "object",
-        "required": ["schema_version", "generated_at", "model", "counts", "endpoints", "docs", "license", "notes"],
+        "required": ["schema_version", "generated_at", "model", "counts", "endpoints", "docs", "license", "notes", "reference"],
         "properties": {
           "schema_version": { "type": "integer", "example": 1 },
           "generated_at": { "type": ["string", "null"], "format": "date-time" },
@@ -168,10 +212,19 @@
               "states": { "type": "integer", "example": 48 }
             }
           },
-          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
+          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/conditions.geojson", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
           "docs": { "type": "string", "format": "uri", "example": "https://window.fusionspace.co/api" },
           "license": { "type": "string", "example": "Free to use; attribution appreciated; provided as-is" },
-          "notes": { "type": "string" }
+          "notes": { "type": "string" },
+          "reference": {
+            "type": "object",
+            "description": "Machine-readable thresholds behind the derived fields.",
+            "properties": {
+              "surface_wind_limit_mph": { "type": "integer", "example": 20 },
+              "wind_tone_mph": { "type": "object", "properties": { "emerald": { "type": "string" }, "amber": { "type": "string" }, "red": { "type": "string" } } },
+              "storm_cape_jkg": { "type": "object", "properties": { "none": { "type": "string" }, "marginal": { "type": "string" }, "moderate": { "type": "string" }, "strong": { "type": "string" } } }
+            }
+          }
         }
       }
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, siteSlug, siteUrl, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, buildGeoJson, siteSlug, siteUrl, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
 import type { LaunchSite } from "../launchSites";
 
 const SITES: LaunchSite[] = [
@@ -30,12 +30,16 @@ function full() {
       surface_pressure: 850,
       cape: 1500,
       cloud_cover: 40,
+      weather_code: 95,
+      is_day: 1,
     },
     daily: {
       wind_speed_10m_max: [18],
       wind_gusts_10m_max: [26],
+      wind_direction_10m_dominant: [225],
       temperature_2m_max: [96],
       temperature_2m_min: [70],
+      precipitation_sum: [0.12],
       precipitation_probability_max: [30],
       sunrise: ["2026-07-03T05:50"],
       sunset: ["2026-07-03T20:10"],
@@ -57,8 +61,11 @@ describe("buildBatchUrl", () => {
     // Enriched current + a single daily block, all in the one request.
     expect(u.searchParams.get("current")).toContain("surface_pressure");
     expect(u.searchParams.get("current")).toContain("cape");
+    expect(u.searchParams.get("current")).toContain("weather_code");
     expect(u.searchParams.get("daily")).toContain("wind_speed_10m_max");
+    expect(u.searchParams.get("daily")).toContain("wind_direction_10m_dominant");
     expect(u.searchParams.get("daily")).toContain("sunrise");
+    expect(u.searchParams.get("precipitation_unit")).toBe("inch");
   });
 
   it("defaults to the full curated site list", () => {
@@ -128,7 +135,7 @@ describe("summarizeSiteFeed", () => {
     expect(Object.keys(feed.sites[0])).toEqual([
       "name", "state", "slug", "lat", "lon", "url", "wind_mph", "gust_mph", "dir_deg", "steadiness",
       "temp_f", "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
-      "cape_jkg", "storm", "cloud_cover_pct", "tone", "today",
+      "cape_jkg", "storm", "cloud_cover_pct", "weather_code", "conditions", "is_day", "tone", "today",
     ]);
   });
 
@@ -142,7 +149,9 @@ describe("summarizeSiteFeed", () => {
       temp_f: 90, apparent_temp_f: 95, humidity_pct: 20,
       pressure_hpa: 850, cape_jkg: 1500,
       storm: "moderate",                // 1000 ≤ CAPE < 2500
-      cloud_cover_pct: 40, tone: "emerald",
+      cloud_cover_pct: 40,
+      weather_code: 95, conditions: "Thunderstorm", is_day: true,
+      tone: "emerald",
     });
     // A shareable board deep-link with the field's coordinates and label.
     expect(s.url).toBe("https://example.test/?lat=34.5&lon=-116.9&label=A+%E2%80%94+one");
@@ -151,8 +160,8 @@ describe("summarizeSiteFeed", () => {
     expect(s.density_altitude_ft).toBeGreaterThan(5000);
     expect((s.density_altitude_ft as number) % 10).toBe(0); // rounded to 10 ft
     expect(s.today).toEqual({
-      max_wind_mph: 18, max_gust_mph: 26, high_f: 96, low_f: 70, precip_chance_pct: 30,
-      sunrise: "2026-07-03T05:50", sunset: "2026-07-03T20:10",
+      max_wind_mph: 18, max_gust_mph: 26, dominant_dir_deg: 225, high_f: 96, low_f: 70,
+      precip_in: 0.12, precip_chance_pct: 30, sunrise: "2026-07-03T05:50", sunset: "2026-07-03T20:10",
     });
   });
 
@@ -225,6 +234,11 @@ describe("buildMeta", () => {
       docs: "https://window.fusionspace.co/api",
       license: API_LICENSE,
       notes: expect.any(String),
+      reference: {
+        surface_wind_limit_mph: 20,
+        wind_tone_mph: { emerald: "< 15", amber: "15–20", red: ">= 20" },
+        storm_cape_jkg: { none: "< 300", marginal: "300–1000", moderate: "1000–2500", strong: ">= 2500" },
+      },
     });
   });
 
@@ -243,5 +257,22 @@ describe("buildMeta", () => {
     const meta = buildMeta({ ...empty, generated_at: null }, "https://example.test/api");
     expect(meta.generated_at).toBeNull();
     expect(meta.counts).toEqual({ sites: 0, states: 0 });
+  });
+});
+
+describe("buildGeoJson", () => {
+  const now = "2026-07-03T12:00:00Z";
+
+  it("emits a FeatureCollection with [lon, lat] Point geometry and the site in properties", () => {
+    const feed = summarizeSiteFeed([el(8, 270), el(12, 180)], now, SITES.slice(0, 2));
+    const gj = buildGeoJson(feed);
+    expect(gj.type).toBe("FeatureCollection");
+    expect(gj.generated_at).toBe(now);
+    expect(gj.features).toHaveLength(2);
+    const f = gj.features[0];
+    expect(f.type).toBe("Feature");
+    expect(f.geometry).toEqual({ type: "Point", coordinates: [SITES[0].lon, SITES[0].lat] }); // [lon, lat]
+    expect(f.properties.name).toBe("A — one");
+    expect(f.properties.wind_mph).toBe(8);
   });
 });

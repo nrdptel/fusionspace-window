@@ -20,11 +20,12 @@
 import { LAUNCH_SITES, type LaunchSite } from "../launchSites";
 import { SITE_URL } from "../links";
 import { encodeState } from "../state";
-import { windTone, type WindTone } from "./limits";
+import { windTone, SURFACE_LIMIT_MPH, DEFAULT_CAUTION_MPH, type WindTone } from "./limits";
 import { densityAltitudeFt } from "./density";
 import { dewPointF } from "./dewpoint";
 import { gustiness, type GustBand } from "./gust";
 import { classifyCape, type InstabilityBand } from "./instability";
+import { describeWeather } from "./wmo";
 
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
 // Mirrors net.ts MODEL — the board's model, kept in sync so the overview and the drill-down agree.
@@ -39,6 +40,7 @@ export const API_LICENSE = "Free to use; attribution appreciated; provided as-is
  *  one static file per field lives at that path (the site's `slug`). */
 export const API_ENDPOINTS = [
   "/api/v1/conditions.json",
+  "/api/v1/conditions.geojson",
   "/api/v1/sites.json",
   "/api/v1/sites/{slug}.json",
   "/api/v1/meta.json",
@@ -68,10 +70,13 @@ export function buildBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): stri
     longitude: sites.map((s) => s.lon).join(","),
     current:
       "wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m,apparent_temperature," +
-      "relative_humidity_2m,surface_pressure,cape,cloud_cover",
-    daily: "wind_speed_10m_max,wind_gusts_10m_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset",
+      "relative_humidity_2m,surface_pressure,cape,cloud_cover,weather_code,is_day",
+    daily:
+      "wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,temperature_2m_max," +
+      "temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset",
     wind_speed_unit: "mph",
     temperature_unit: "fahrenheit",
+    precipitation_unit: "inch",
     models: MODEL,
     forecast_days: "1",
     timezone: "auto",
@@ -83,8 +88,12 @@ export function buildBatchUrl(sites: readonly LaunchSite[] = LAUNCH_SITES): stri
 export interface SiteToday {
   max_wind_mph: number | null;
   max_gust_mph: number | null;
+  /** Dominant wind direction for the day, degrees (rounded) — for pad/rail setup. */
+  dominant_dir_deg: number | null;
   high_f: number | null;
   low_f: number | null;
+  /** Total precipitation for the day, inches — null when absent. */
+  precip_in: number | null;
   precip_chance_pct: number | null;
   /** Local-time ISO sunrise/sunset for launch-day planning — null when absent. */
   sunrise: string | null;
@@ -132,6 +141,12 @@ export interface SiteConditions {
   storm: InstabilityBand | null;
   /** Cloud cover, % (rounded) — null when absent. */
   cloud_cover_pct: number | null;
+  /** WMO weather-interpretation code — null when absent. */
+  weather_code: number | null;
+  /** Short sky/precip label from weather_code (e.g. "Clear", "Rain", "Thunderstorm") — null if unknown. */
+  conditions: string | null;
+  /** Daylight flag (true = day) — null when absent. */
+  is_day: boolean | null;
   /** Tone against the 20 mph line (emerald / amber / red), the default caution band. */
   tone: WindTone;
   /** Today's forecast peaks — null when the daily block is absent. */
@@ -151,8 +166,17 @@ export interface SiteFeed {
   sites: SiteConditions[];
 }
 
+/** Machine-readable thresholds behind the derived fields, so a consumer can interpret `tone` and
+ *  `storm` without hard-coding the edges. Sourced from the same constants the board uses. */
+export interface ApiReference {
+  surface_wind_limit_mph: number;
+  wind_tone_mph: { emerald: string; amber: string; red: string };
+  storm_cape_jkg: { none: string; marginal: string; moderate: string; strong: string };
+}
+
 /** Self-describing metadata file, mirroring motor.fusionspace.co's meta.json shape: schema
- *  version, generation time, counts, the endpoint list, docs URL, license, and an honesty note. */
+ *  version, generation time, counts, the endpoint list, docs URL, license, an honesty note, and a
+ *  reference block spelling out the tone/storm thresholds. */
 export interface SiteFeedMeta {
   schema_version: number;
   generated_at: string | null;
@@ -162,6 +186,20 @@ export interface SiteFeedMeta {
   docs: string;
   license: string;
   notes: string;
+  reference: ApiReference;
+}
+
+/** GeoJSON view of the feed — a FeatureCollection of Point features, so it drops straight into
+ *  Leaflet, Mapbox, QGIS, kepler.gl, etc. Each site's full snapshot rides in `properties`. */
+export interface GeoFeature {
+  type: "Feature";
+  geometry: { type: "Point"; coordinates: [number, number] };
+  properties: SiteConditions;
+}
+export interface GeoFeatureCollection {
+  type: "FeatureCollection";
+  generated_at: string | null;
+  features: GeoFeature[];
 }
 
 /** The curated field database as its own endpoint (name/state/slug/coords + board link), with zero
@@ -206,6 +244,11 @@ function roundTo(v: number | null, step: number): number | null {
   return v == null || !Number.isFinite(v) ? null : Math.round(v / step) * step;
 }
 
+/** Round to two decimals (precipitation, inches). */
+function round2(v: number | null): number | null {
+  return v == null ? null : Math.round(v * 100) / 100;
+}
+
 /** Turn a batched Open-Meteo response into the site feed. The response is an array (one element
  *  per location, in request order) — or a single object when only one location was requested.
  *  `generatedAt` is passed in so this stays pure (no clock); the caller supplies its build time.
@@ -245,13 +288,18 @@ export function summarizeSiteFeed(
         ? roundTo(densityAltitudeFt({ tempF: tempRaw, rhPct: humidityRaw, pressureHpa: pressureRaw }), 10)
         : null;
 
+    const weatherCode = num(c.weather_code);
+    const isDayRaw = num(c.is_day);
+
     const d = el?.daily;
     const today: SiteToday | null = d
       ? {
           max_wind_mph: round(daily1(d.wind_speed_10m_max)),
           max_gust_mph: round(daily1(d.wind_gusts_10m_max)),
+          dominant_dir_deg: round(daily1(d.wind_direction_10m_dominant)),
           high_f: round(daily1(d.temperature_2m_max)),
           low_f: round(daily1(d.temperature_2m_min)),
+          precip_in: round2(daily1(d.precipitation_sum)),
           precip_chance_pct: round(daily1(d.precipitation_probability_max)),
           sunrise: iso1(d.sunrise),
           sunset: iso1(d.sunset),
@@ -278,6 +326,9 @@ export function summarizeSiteFeed(
       cape_jkg: round(capeRaw),
       storm: capeRaw != null ? classifyCape(capeRaw).band : null,
       cloud_cover_pct: round(num(c.cloud_cover)),
+      weather_code: weatherCode,
+      conditions: weatherCode != null ? describeWeather(weatherCode).label.replace(/^—$/, "") || null : null,
+      is_day: isDayRaw == null ? null : isDayRaw === 1,
       tone: windTone(wind),
       today,
     });
@@ -300,6 +351,30 @@ export function buildMeta(feed: SiteFeed, docsUrl: string): SiteFeedMeta {
     docs: docsUrl,
     license: API_LICENSE,
     notes: META_NOTES,
+    reference: {
+      surface_wind_limit_mph: SURFACE_LIMIT_MPH,
+      wind_tone_mph: {
+        emerald: `< ${DEFAULT_CAUTION_MPH}`,
+        amber: `${DEFAULT_CAUTION_MPH}–${SURFACE_LIMIT_MPH}`,
+        red: `>= ${SURFACE_LIMIT_MPH}`,
+      },
+      // SPC-style CAPE bands, matching classifyCape() in instability.ts.
+      storm_cape_jkg: { none: "< 300", marginal: "300–1000", moderate: "1000–2500", strong: ">= 2500" },
+    },
+  };
+}
+
+/** Build the GeoJSON FeatureCollection from a feed — one Point per site (coordinates are
+ *  [lon, lat] per the GeoJSON spec), the site's snapshot in `properties`. Pure. */
+export function buildGeoJson(feed: SiteFeed): GeoFeatureCollection {
+  return {
+    type: "FeatureCollection",
+    generated_at: feed.generated_at,
+    features: feed.sites.map((s) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+      properties: s,
+    })),
   };
 }
 

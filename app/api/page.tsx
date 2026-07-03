@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 const ENDPOINTS: { path: string; desc: string }[] = [
   { path: "/conditions.json", desc: "The feed — current conditions at every field: wind, steadiness, density altitude, storm potential, moisture, sky, and today's peaks." },
+  { path: "/conditions.geojson", desc: "The same feed as a GeoJSON FeatureCollection — drop it straight into Leaflet, Mapbox, QGIS, or kepler.gl." },
   { path: "/sites.json", desc: "The curated field roster — name, state, slug, coordinates, board link. Static, no weather data." },
   { path: "/sites/{slug}.json", desc: "One field on its own — the same conditions for a single site, keyed by its slug (e.g. /sites/sears-samson.json)." },
   { path: "/meta.json", desc: "Self-describing metadata: schema version, generation time, counts, endpoints, docs, license." },
@@ -38,8 +39,11 @@ const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "cape_jkg", type: "number | null", desc: "Convective energy (CAPE), J/kg (rounded)." },
   { name: "storm", type: "\"none\" | \"marginal\" | \"moderate\" | \"strong\" | null", desc: "Storm-potential band from CAPE (SPC bands)." },
   { name: "cloud_cover_pct", type: "number | null", desc: "Cloud cover, % (rounded)." },
+  { name: "weather_code", type: "number | null", desc: "WMO weather-interpretation code." },
+  { name: "conditions", type: "string | null", desc: "Short sky/precip label from weather_code — e.g. \"Clear\", \"Overcast\", \"Thunderstorm\"." },
+  { name: "is_day", type: "boolean | null", desc: "Daylight flag (true = day)." },
   { name: "tone", type: "\"emerald\" | \"amber\" | \"red\"", desc: "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
-  { name: "today", type: "object | null", desc: "Today's peaks + daylight: max_wind_mph, max_gust_mph, high_f, low_f, precip_chance_pct, sunrise, sunset." },
+  { name: "today", type: "object | null", desc: "Today's peaks + daylight: max_wind_mph, max_gust_mph, dominant_dir_deg, high_f, low_f, precip_in, precip_chance_pct, sunrise, sunset." },
 ];
 
 function Code({ children }: { children: React.ReactNode }) {

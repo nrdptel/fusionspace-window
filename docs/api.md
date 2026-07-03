@@ -19,6 +19,7 @@ https://window.fusionspace.co/api/v1
 | Endpoint | Returns |
 |---|---|
 | `/conditions.json` | The feed — current conditions at every field (wind, density altitude, storm potential, moisture, sky, today's peaks). |
+| `/conditions.geojson` | The same feed as a **GeoJSON** FeatureCollection — drop it into Leaflet, Mapbox, QGIS, kepler.gl. |
 | `/sites.json` | The curated field roster — name, state, slug, coordinates, board link. Static, no weather data. |
 | `/sites/{slug}.json` | One field on its own — the same conditions for a single site, keyed by its `slug`. |
 | `/meta.json` | Self-describing metadata: schema version, generation time, counts, endpoints, docs, license. |
@@ -56,12 +57,17 @@ when the model omits it — that never drops the whole site; only a missing usab
       "cape_jkg": 610,              // convective energy, integer | null
       "storm": "marginal",          // "none" | "marginal" | "moderate" | "strong" | null
       "cloud_cover_pct": 7,         // integer | null
+      "weather_code": 0,            // WMO code | null
+      "conditions": "Clear",        // label from weather_code | null
+      "is_day": true,               // boolean | null
       "tone": "emerald",            // "emerald" < 15, "amber" 15–20, "red" >= 20 mph
       "today": {                    // today's peaks + daylight | null
         "max_wind_mph": 5,
         "max_gust_mph": 10,
+        "dominant_dir_deg": 288,    // prevailing wind direction for the day
         "high_f": 93,
         "low_f": 72,
+        "precip_in": 0,             // day total, inches | null
         "precip_chance_pct": 2,
         "sunrise": "2026-07-03T05:44", // local-time ISO | null
         "sunset": "2026-07-03T19:52"
@@ -73,6 +79,24 @@ when the model omits it — that never drops the whole site; only a missing usab
 
 `generated_at` is `null` and `sites` may be empty if the most recent refresh couldn't reach the
 provider. Fields with no usable wind are omitted from `sites`.
+
+## `conditions.geojson`
+
+The exact same data as a **GeoJSON** `FeatureCollection` — one `Point` feature per field (coordinates
+in `[lon, lat]` order per the spec), the full `SiteConditions` object in `properties`. Drops straight
+into Leaflet, Mapbox GL, QGIS, kepler.gl, etc. Served as `application/geo+json`.
+
+```jsonc
+{
+  "type": "FeatureCollection",
+  "generated_at": "2026-07-03T09:37:03.759Z",
+  "features": [
+    { "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-86.07, 31.13] },
+      "properties": { /* one SiteConditions */ } }
+  ]
+}
+```
 
 ## `sites/{slug}.json`
 
@@ -111,10 +135,15 @@ The curated field roster on its own, with **no weather-API cost** — just the s
   "generated_at": "2026-07-03T09:37:03.759Z",
   "model": "gfs_seamless",
   "counts": { "sites": 104, "states": 48 },
-  "endpoints": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"],
+  "endpoints": ["/api/v1/conditions.json", "/api/v1/conditions.geojson", "/api/v1/sites.json", "/api/v1/sites/{slug}.json", "/api/v1/meta.json", "/api/v1/openapi.json"],
   "docs": "https://window.fusionspace.co/api",
   "license": "Free to use; attribution appreciated; provided as-is",
-  "notes": "Modeled conditions (gfs_seamless), not observed station data …"
+  "notes": "Modeled conditions (gfs_seamless), not observed station data …",
+  "reference": {                    // machine-readable thresholds behind tone/storm
+    "surface_wind_limit_mph": 20,
+    "wind_tone_mph": { "emerald": "< 15", "amber": "15–20", "red": ">= 20" },
+    "storm_cape_jkg": { "none": "< 300", "marginal": "300–1000", "moderate": "1000–2500", "strong": ">= 2500" }
+  }
 }
 ```
 
@@ -145,9 +174,9 @@ curl -s https://window.fusionspace.co/api/v1/sites/sears-samson.json | jq '.site
 field coordinates (a current block plus a single daily block), and summarises it with the tested
 `lib/weather/sitefeed.ts` — density altitude, dew point, storm band, and steadiness are computed by
 the same calculators the board uses, so the API and the board can't drift. It writes the JSON under
-`public/api/v1/`, including one `sites/{slug}.json` per field split from the same in-memory feed
-(no extra fetch), plus the static `sites.json` roster (no request at all). The build copies it
-into the export; an hourly deploy refreshes it, driven by an external scheduler (cron-job.org) that
+`public/api/v1/`, including `conditions.geojson`, one `sites/{slug}.json` per field split from the
+same in-memory feed (no extra fetch), plus the static `sites.json` roster (no request at all). The
+build copies it into the export; an hourly deploy refreshes it, driven by an external scheduler (cron-job.org) that
 fires a `repository_dispatch` webhook once an hour. Open-Meteo counts each **location** (extra
 variables on a single current+daily request barely add weight), so it stays ≈ one batched call per
 refresh — hourly is a few thousand/day, comfortably under the 10,000/day free non-commercial

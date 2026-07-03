@@ -136,8 +136,9 @@ npm run test:e2e   # Playwright with the APIs stubbed, incl. an axe a11y audit (
 
 Push to `main`. GitHub Actions builds the static export and ships `out/` to the
 `fusionspace-window` Cloudflare Pages project with `cloudflare/wrangler-action` (no Cloudflare
-Git integration). A monthly cron rebuilds so the awareness-month observance rolls over with the
-calendar. `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repo secrets;
+Git integration). An hourly rebuild — triggered by an external scheduler (cron-job.org) firing a
+`repository_dispatch` webhook — refreshes the conditions feed and rolls the awareness-month
+observance over with the calendar. `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are repo secrets;
 `NEXT_PUBLIC_SITE_URL` defaults to the production origin and is fork-overridable.
 
 ## Privacy

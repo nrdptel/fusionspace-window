@@ -66,7 +66,7 @@ curl -s https://window.fusionspace.co/api/v1/conditions.json | jq '.sites | sort
 
 `scripts/gen-conditions.ts` runs in `prebuild`, makes one **batched** Open-Meteo request for all
 field coordinates (reusing the tested `lib/weather/sitefeed.ts`), and writes the JSON under
-`public/api/v1/`. The build copies it into the export; an hourly deploy (GitHub `schedule`, or a
-`repository_dispatch` from an external scheduler like cron-job.org) refreshes it. Because Open-Meteo
+`public/api/v1/`. The build copies it into the export; an hourly deploy refreshes it, driven by an
+external scheduler (cron-job.org) that fires a `repository_dispatch` webhook once an hour. Because Open-Meteo
 counts each location, one batched request ≈ 104 weighted calls, so hourly ≈ ~2,500/day of the
 10,000/day free non-commercial allowance.

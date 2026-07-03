@@ -15,3 +15,10 @@
 # names stays max-age=0/must-revalidate, so a deploy is still picked up instantly.
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Public conditions API (docs at /api). Free, read-only JSON, CORS-enabled so anything can consume
+# it; cached ~5 min at the edge/browser (well under the hourly refresh, so a reader never sees data
+# older than one cycle). Served as plain static assets — no Workers/KV, unmetered.
+/api/v1/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300

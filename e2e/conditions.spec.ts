@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { installStubs } from "./stubs";
 
-// The all-sites overview reads the same-origin static feed (public/conditions.json). Stub it with a
+// The all-sites overview reads the same-origin static feed (public/api/v1/conditions.json). Stub it with a
 // small sample so the test doesn't depend on the build-time fetch having populated real data.
 const sample = {
   generatedAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
@@ -15,7 +15,7 @@ const sample = {
 
 test("all-sites overview renders from the static feed and loads a field", async ({ page }) => {
   await installStubs(page);
-  await page.route("**/conditions.json", (r) =>
+  await page.route("**/api/v1/conditions.json", (r) =>
     r.fulfill({ contentType: "application/json", body: JSON.stringify(sample) }),
   );
   await page.goto("/", { waitUntil: "networkidle" });
@@ -36,7 +36,7 @@ test("all-sites overview renders from the static feed and loads a field", async 
 
 test("the overview is absent when the feed is empty", async ({ page }) => {
   await installStubs(page);
-  await page.route("**/conditions.json", (r) =>
+  await page.route("**/api/v1/conditions.json", (r) =>
     r.fulfill({ contentType: "application/json", body: JSON.stringify({ generatedAt: null, model: "gfs_seamless", sites: [] }) }),
   );
   await page.goto("/", { waitUntil: "networkidle" });

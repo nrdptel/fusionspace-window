@@ -45,6 +45,7 @@ describe("summarizeSiteFeed", () => {
   it("maps a batched (array) response to one entry per site, in order", () => {
     const raw = [el(8, 270, 12, 70), el(21, 180, 28, 95), el(16, 90, 18, 60)];
     const feed = summarizeSiteFeed(raw, now, SITES);
+    expect(feed.schemaVersion).toBe(1);
     expect(feed.generatedAt).toBe(now);
     expect(feed.model).toBe("gfs_seamless");
     expect(feed.sites).toHaveLength(3);
@@ -58,6 +59,18 @@ describe("summarizeSiteFeed", () => {
     const raw = [el(8, 270), undefined, el(null, 90)]; // B missing, C has no wind
     const feed = summarizeSiteFeed(raw, now, SITES);
     expect(feed.sites.map((s) => s.name)).toEqual(["A — one"]);
+  });
+
+  it("rounds wind, gust, direction and temp to whole numbers", () => {
+    const feed = summarizeSiteFeed([el(7.4, 269.6, 11.5, 72.4)], now, [SITES[0]]);
+    expect(feed.sites[0]).toMatchObject({ windMph: 7, gustMph: 12, dirDeg: 270, tempF: 72 });
+  });
+
+  it("tones the rounded wind, so the number and its band always agree at the edge", () => {
+    // 14.6 mph rounds to 15 → amber (the documented 'emerald < 15' edge), not emerald.
+    const feed = summarizeSiteFeed([el(14.6, 200)], now, [SITES[0]]);
+    expect(feed.sites[0].windMph).toBe(15);
+    expect(feed.sites[0].tone).toBe("amber");
   });
 
   it("carries null gust/temp through rather than faking them", () => {

@@ -1,8 +1,8 @@
 /** The "all sites at a glance" feed — the current surface wind at every curated launch field,
  *  toned against the 20 mph line, fetched in ONE batched Open-Meteo request rather than one per
  *  field. A build-time script (scripts/gen-conditions.ts), re-run by an hourly deploy, calls
- *  buildBatchUrl once, runs summarizeSiteFeed over the response, and writes the result to
- *  public/conditions.json — served as a plain static asset (unmetered on Cloudflare Pages: no
+ *  buildBatchUrl once, runs summarizeSiteFeed over the response, and writes the result under
+ *  public/api/v1/ — served as a plain static asset, and the public API (unmetered on Cloudflare Pages: no
  *  Workers/KV, no request cap). A flyer near several clubs sees which are flyable now without
  *  opening each, and no visitor's browser has to hammer the API for 100+ fields.
  *
@@ -16,6 +16,9 @@ import { windTone, type WindTone } from "./limits";
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
 // Mirrors net.ts MODEL — the board's model, kept in sync so the overview and the drill-down agree.
 const MODEL = "gfs_seamless";
+/** Feed schema version — bumped on any breaking change to the JSON shape, so API consumers can
+ *  pin to it (published in the /api/v1 path and in meta.json). */
+export const SCHEMA_VERSION = 1;
 
 /** One batched current-wind request for every site. Open-Meteo accepts comma-separated
  *  latitude/longitude (up to 1,000 locations) and returns an array of results in the same order,
@@ -53,6 +56,8 @@ export interface SiteConditions {
 }
 
 export interface SiteFeed {
+  /** Feed schema version (see SCHEMA_VERSION). */
+  schemaVersion: number;
   /** ISO timestamp the feed was generated (the fetch time), for the "as of" staleness flag. */
   generatedAt: string;
   /** Model the winds came from (matches the board). */
@@ -63,6 +68,12 @@ export interface SiteFeed {
 
 function num(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+/** Round a usable number to the nearest integer (mph, degrees, °F are all reported whole in the
+ *  feed — the model's sub-mph precision is noise for a go/no-go glance), passing null through. */
+function round(v: number | null): number | null {
+  return v == null ? null : Math.round(v);
 }
 
 /** Turn a batched Open-Meteo response into the site feed. The response is an array (one element
@@ -84,17 +95,20 @@ export function summarizeSiteFeed(
     const dirDeg = num(c.wind_direction_10m);
     if (windMph == null || dirDeg == null) continue;
     const s = sites[i];
+    // Reported whole; tone is taken from the same rounded integer so the number and its band
+    // always agree (e.g. 15 → amber, matching the documented "emerald < 15" edge).
+    const windRounded = Math.round(windMph);
     out.push({
       name: s.name,
       state: s.state,
       lat: s.lat,
       lon: s.lon,
-      windMph,
-      gustMph: num(c.wind_gusts_10m),
-      dirDeg,
-      tempF: num(c.temperature_2m),
-      tone: windTone(windMph),
+      windMph: windRounded,
+      gustMph: round(num(c.wind_gusts_10m)),
+      dirDeg: Math.round(dirDeg),
+      tempF: round(num(c.temperature_2m)),
+      tone: windTone(windRounded),
     });
   }
-  return { generatedAt, model: MODEL, sites: out };
+  return { schemaVersion: SCHEMA_VERSION, generatedAt, model: MODEL, sites: out };
 }

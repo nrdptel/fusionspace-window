@@ -6,6 +6,11 @@ export const HUB_URL = "https://fusionspace.co";
 export const REPO_URL = "https://github.com/nrdptel/fusionspace-window";
 export const KOFI_URL = "https://ko-fi.com/nrdptel";
 
+// Public conditions API — the docs page (a route on the site) and the versioned JSON base. Mirrors
+// the sibling tools' pattern (motor.fusionspace.co/api → /api/v1/*.json).
+export const API_DOCS_PATH = "/api";
+export const API_BASE_URL = `${SITE_URL}/api/v1`;
+
 // Sibling Fusion Space tools, linked inline in the footer the way the live siblings do
 // (Charge's footer carries a Motor Finder link, no "more tools" heading). The LIVE tools only
 // — Debrief is still in development, so it isn't linked from a launch-ready tool. Window is

@@ -1,6 +1,7 @@
 import FusionSpaceBadge from "./FusionSpaceBadge";
 import ThemeToggle from "./ThemeToggle";
 import KofiButton from "./KofiButton";
+import ApiButton from "./ApiButton";
 
 export default function SiteHeader() {
   return (
@@ -16,7 +17,10 @@ export default function SiteHeader() {
       </div>
       <div className="flex shrink-0 flex-col items-end gap-2">
         <ThemeToggle />
-        <KofiButton />
+        <div className="flex items-center gap-2">
+          <ApiButton />
+          <KofiButton />
+        </div>
       </div>
     </header>
   );

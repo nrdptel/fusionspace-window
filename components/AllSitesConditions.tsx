@@ -9,7 +9,8 @@ import { PinIcon } from "./icons";
 
 // Same-origin static feed, written at build time (scripts/gen-conditions.ts) and refreshed by an
 // hourly deploy. A plain static asset — unmetered on Cloudflare Pages, no Workers/KV, no limits.
-const FEED_PATH = "/conditions.json";
+// It's also the public API (documented at /api); the overview just consumes its own feed.
+const FEED_PATH = "/api/v1/conditions.json";
 
 /** An at-a-glance overview of the current modeled surface wind at every curated launch field, from
  *  the pre-fetched static feed (one build-time request, not one per visitor). Sorted calmest-first

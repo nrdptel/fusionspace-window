@@ -1,0 +1,78 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Window — launch-site conditions API",
+    "version": "1.0.0",
+    "summary": "Free, read-only JSON: current modeled surface wind at every curated US launch field.",
+    "description": "The same modeled surface wind (gfs_seamless) the board shows, for all curated launch fields, refreshed hourly. No key, no rate limit, no cost. CORS-enabled. Modeled wind only — not observed station data; confirm conditions on the field's full board or a primary source before flying.",
+    "license": { "name": "MIT", "url": "https://github.com/nrdptel/fusionspace-window/blob/main/LICENSE" },
+    "contact": { "name": "Window", "url": "https://window.fusionspace.co/api" }
+  },
+  "servers": [{ "url": "https://window.fusionspace.co/api/v1" }],
+  "paths": {
+    "/conditions.json": {
+      "get": {
+        "summary": "All sites — current surface wind",
+        "operationId": "getConditions",
+        "responses": {
+          "200": {
+            "description": "The conditions feed.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SiteFeed" } } }
+          }
+        }
+      }
+    },
+    "/meta.json": {
+      "get": {
+        "summary": "Feed metadata (version, generation time, counts)",
+        "operationId": "getMeta",
+        "responses": {
+          "200": {
+            "description": "Feed metadata.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Meta" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SiteFeed": {
+        "type": "object",
+        "required": ["schemaVersion", "generatedAt", "model", "sites"],
+        "properties": {
+          "schemaVersion": { "type": "integer", "example": 1 },
+          "generatedAt": { "type": ["string", "null"], "format": "date-time", "description": "When the feed was generated (null if the last refresh could not reach the provider)." },
+          "model": { "type": "string", "example": "gfs_seamless" },
+          "sites": { "type": "array", "items": { "$ref": "#/components/schemas/SiteConditions" } }
+        }
+      },
+      "SiteConditions": {
+        "type": "object",
+        "required": ["name", "state", "lat", "lon", "windMph", "gustMph", "dirDeg", "tempF", "tone"],
+        "properties": {
+          "name": { "type": "string", "example": "SEARS — Samson" },
+          "state": { "type": "string", "description": "USPS two-letter code.", "example": "AL" },
+          "lat": { "type": "number", "example": 31.13 },
+          "lon": { "type": "number", "example": -86.07 },
+          "windMph": { "type": "integer", "description": "Sustained surface wind (10 m), mph — rounded.", "example": 7 },
+          "gustMph": { "type": ["integer", "null"], "description": "Gust, mph (rounded) — null when the model omits it.", "example": 11 },
+          "dirDeg": { "type": "integer", "description": "Direction the wind blows FROM, degrees — rounded.", "example": 270 },
+          "tempF": { "type": ["integer", "null"], "description": "Temperature, °F — rounded.", "example": 72 },
+          "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "required": ["schemaVersion", "generatedAt", "model", "siteCount", "stateCount"],
+        "properties": {
+          "schemaVersion": { "type": "integer", "example": 1 },
+          "generatedAt": { "type": ["string", "null"], "format": "date-time" },
+          "model": { "type": "string", "example": "gfs_seamless" },
+          "siteCount": { "type": "integer", "example": 104 },
+          "stateCount": { "type": "integer", "example": 48 }
+        }
+      }
+    }
+  }
+}

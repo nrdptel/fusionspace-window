@@ -16,6 +16,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${siteUrl}/api`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
       // No trailing slash — the static export serves /privacy and 308-redirects /privacy/, so
       // the canonical, non-redirecting URL is the slashless one (matches the footer link).
       url: `${siteUrl}/privacy`,

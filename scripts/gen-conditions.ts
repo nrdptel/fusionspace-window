@@ -4,9 +4,10 @@
  *  no Workers/KV, nothing on any account limit). Free, read-only, no key, no rate limit.
  *
  *  Writes:
- *    public/api/v1/conditions.json — the feed (schema_version, generated_at, model, count, sites[])
- *    public/api/v1/sites.json      — the static field roster (name/state/lat/lon), no weather cost
- *    public/api/v1/meta.json       — self-describing metadata (version, counts, endpoints, docs, …)
+ *    public/api/v1/conditions.json     — the feed (schema_version, generated_at, model, count, sites[])
+ *    public/api/v1/sites.json          — the static field roster (name/state/slug/coords/url), no weather cost
+ *    public/api/v1/sites/{slug}.json    — one per-field detail file (same data, one site), no extra fetch
+ *    public/api/v1/meta.json           — self-describing metadata (version, counts, endpoints, docs, …)
  *
  *  Run in `prebuild`, so every deploy bakes in fresh conditions; an hourly deploy refreshes them.
  *  Best-effort: on any failure it writes an empty feed and exits 0, so a flaky provider never
@@ -14,10 +15,11 @@
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, SCHEMA_VERSION, type SiteFeed } from "../lib/weather/sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, buildSiteDetail, SCHEMA_VERSION, type SiteFeed } from "../lib/weather/sitefeed";
 import { SITE_URL } from "../lib/links";
 
 const DIR = join(process.cwd(), "public", "api", "v1");
+const SITES_DIR = join(DIR, "sites");
 const TIMEOUT_MS = 20_000;
 
 async function main() {
@@ -47,6 +49,13 @@ async function main() {
   writeFileSync(join(DIR, "conditions.json"), JSON.stringify(feed));
   writeFileSync(join(DIR, "sites.json"), JSON.stringify(sitesFile));
   writeFileSync(join(DIR, "meta.json"), JSON.stringify(meta));
+
+  // One detail file per field (/api/v1/sites/{slug}.json) — no extra fetch, the data's in hand.
+  mkdirSync(SITES_DIR, { recursive: true });
+  for (const site of feed.sites) {
+    writeFileSync(join(SITES_DIR, `${site.slug}.json`), JSON.stringify(buildSiteDetail(feed, site)));
+  }
+  console.log(`gen-conditions: wrote ${feed.sites.length} per-site detail files`);
 }
 
 main();

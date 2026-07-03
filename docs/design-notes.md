@@ -700,6 +700,14 @@ the multi-day timeline, landing drift — deliberately stay in the interactive t
 parameterized and would multiply the per-location weight past the free budget across ~100 fields.
 All fields are additive and degrade to `null` independently, so it remained `schema_version: 1`.
 
+A later pass mirrored motor's **per-entity endpoints**: each field also gets its own
+`/api/v1/sites/{slug}.json` (motor has `/motors/{mfr}/{designation}.json`), split from the same
+in-memory feed at build time — 104 tiny files, no extra Open-Meteo request. Each site now carries a
+stable **`slug`** (its detail filename) and a **`url`** deep-link back to the interactive board (built
+by reusing `lib/state.ts`'s `encodeState`, so the API and the app agree on the field-URL scheme), and
+the `today` block gained **`sunrise`/`sunset`** (free daily fields — the daylight window for launch
+planning). Still additive, still `schema_version: 1`, still one batched request per refresh.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

@@ -256,7 +256,7 @@ export default function LocationBar({
                   }
                 >
                   {g.name}
-                  <span className="text-zinc-400 dark:text-zinc-500">{g.sites.length}</span>
+                  <span className="text-zinc-600 dark:text-zinc-400">{g.sites.length}</span>
                 </button>
               );
             })}

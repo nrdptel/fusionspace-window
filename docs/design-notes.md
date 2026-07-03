@@ -608,17 +608,22 @@ the empty state's single "try Lucerne Valley" example under-served that. So the 
 **Sites** toggle (beside Coordinates). It started as a flat ~10-site chip list, then expanded to a
 **state-grouped picker** (`sitesByState()`): a row of state chips (each with its site count), and
 picking a state reveals its club fields as one-tap chips — pick a state, then a field. The data
-(`lib/launchSites.ts`) is now ~70 US club fields across ~37 states — Tripoli prefectures and NAR
-sections corroborated as active in 2023–2025 from the clubs' own pages plus the TRA/NAR listings,
-each tagged with its two-letter state (typo-guard test: continental-US bounds, no dupes, every
-state code known, grouping loses nothing). Still a static list — no API, no new dependency. The
-research also corrected three stale entries the original guessed (Hearne is Tripoli Houston's, not
-DARS's; Hartsel is Tripoli Colorado's, not NCR's — NCR flies at Pawnee/Nunn), and dropped a
-defunct one (NEFAR, launch ops on hold). A follow-up pass then tightened the weakest pins from
+(`lib/launchSites.ts`) grew across three research rounds to ~90 US club fields across 46 states —
+Tripoli prefectures and NAR sections corroborated as active in 2023–2025 from the clubs' own pages
+plus the TRA/NAR listings, each tagged with its two-letter state (typo-guard test: US bounds incl.
+Alaska/Hawaii, no dupes, every state code known, grouping loses nothing). Still a static list — no
+API, no new dependency. Round one corrected three stale entries the original guessed (Hearne is
+Tripoli Houston's, not DARS's; Hartsel is Tripoli Colorado's, not NCR's — NCR flies at Pawnee/Nunn)
+and dropped a defunct one (NEFAR, launch ops on hold). Round two tightened the weakest pins from
 town-centroid to the actual field — mostly by resolving each club's published field GPS or geocoding
-the named field address — which caught a few that were badly off (Black Rock's longitude by ~12 mi,
-Southern Oregon Rocketry pinned to its mailing address ~45 mi from the field, Rocketry SC actually
-flying at Dalzell not Rembert). The honesty caveat stays built into the UI and the data
+the named field address — catching a few badly off (Black Rock's longitude by ~12 mi, Southern
+Oregon Rocketry pinned to its mailing address ~45 mi from the field, Rocketry SC actually flying at
+Dalzell not Rembert). Round three was a completeness sweep: it filled nine uncovered states
+(including in-state fields for NJ, VT, RI, MS and the first AK/HI entries), added ~13 more clubs in
+already-covered states, and finally pinned Tripoli New Mexico (its site was offline round two —
+recovered via the Wayback Machine) and a badly-north Tripoli Phoenix. Only DE, NH, ND, WV stay
+uncovered — each confirmed to have no locatable in-state club field (their flyers travel to a
+neighbor's). The honesty caveat stays built into the UI and the data
 comment: these are **approximate** launch-area coordinates (~1 km), not surveyed pads or an
 endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
 It lowers the barrier for the core audience's first lookup without pretending to be authoritative.

@@ -37,4 +37,5 @@ next-env.d.ts
 
 # Generated at build time (prebuild → scripts/gen-conditions.ts), never committed.
 /public/api/v1/conditions.json
+/public/api/v1/sites.json
 /public/api/v1/meta.json

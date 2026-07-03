@@ -687,6 +687,19 @@ its idiomatic camelCase view model; the snake_case lives only at the API boundar
 the two never have to agree on style. Because the API had no external consumers yet, this stayed at
 `schema_version: 1` rather than bumping.
 
+Then the per-site payload was **enriched to the board's full current snapshot** — steadiness,
+apparent temp, humidity, dew point, pressure, **density altitude** (the flagship rocketry number:
+thin air cuts thrust and speeds descent), **storm potential** (CAPE band), cloud cover, and a
+`today` block of the day's wind/gust/temp/precip peaks — all reusing the board's tested calculators
+(`density.ts`, `dewpoint.ts`, `gust.ts`, `instability.ts`), so the API and the board can't disagree.
+Crucially this stayed **one batched request**: the extra fields are all in the same current block
+(plus one daily block), and Open-Meteo weights by *location*, not variable count, so the cost barely
+moved. A second endpoint, **`sites.json`**, publishes the static field roster with *zero* weather-API
+cost (the analogue of motor's `vendors.json`). The heavy, inherently per-field views — winds aloft,
+the multi-day timeline, landing drift — deliberately stay in the interactive tool: they're
+parameterized and would multiply the per-location weight past the free budget across ~100 fields.
+All fields are additive and degrade to `null` independently, so it remained `schema_version: 1`.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

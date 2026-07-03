@@ -7,25 +7,36 @@ import { SITE_URL, API_BASE_URL, REPO_URL, OPEN_METEO_URL } from "@/lib/links";
 export const metadata: Metadata = {
   title: "API — Window",
   description:
-    "Free, read-only JSON API: current modeled surface wind at every curated US launch field, refreshed hourly. No key, no rate limit, no cost. CORS-enabled.",
+    "Free, read-only JSON API: current modeled conditions — wind, density altitude, storm potential, and more — at every curated US launch field, refreshed hourly. No key, no rate limit, no cost. CORS-enabled.",
   alternates: { canonical: `${SITE_URL}/api` },
 };
 
 const ENDPOINTS: { path: string; desc: string }[] = [
-  { path: "/conditions.json", desc: "The feed — current surface wind at every field, with a tone against the 20 mph line." },
-  { path: "/meta.json", desc: "Lightweight metadata: schema version, generation time, site and state counts." },
-  { path: "/openapi.json", desc: "OpenAPI 3.1 specification for the two endpoints above." },
+  { path: "/conditions.json", desc: "The feed — current conditions at every field: wind, steadiness, density altitude, storm potential, moisture, sky, and today's peaks." },
+  { path: "/sites.json", desc: "The curated field roster — name, state, and coordinates. Static, no weather data." },
+  { path: "/meta.json", desc: "Self-describing metadata: schema version, generation time, counts, endpoints, docs, license." },
+  { path: "/openapi.json", desc: "OpenAPI 3.1 specification for the endpoints above." },
 ];
 
 const FIELDS: { name: string; type: string; desc: string }[] = [
   { name: "name", type: "string", desc: "Field name, e.g. \"SEARS — Samson\"." },
   { name: "state", type: "string", desc: "USPS two-letter code." },
   { name: "lat / lon", type: "number", desc: "Approximate launch-area coordinates (~1 km)." },
-  { name: "wind_mph", type: "number", desc: "Sustained surface wind (10 m), mph — rounded to a whole number." },
+  { name: "wind_mph", type: "number", desc: "Sustained surface wind (10 m), mph — rounded." },
   { name: "gust_mph", type: "number | null", desc: "Gust, mph (rounded) — null when the model omits it." },
   { name: "dir_deg", type: "number", desc: "Direction the wind blows FROM, degrees (rounded)." },
+  { name: "steadiness", type: "\"steady\" | \"gusty\" | \"very-gusty\" | null", desc: "How much the gusts overshoot the sustained wind — the turbulence the sustained limit misses." },
   { name: "temp_f", type: "number | null", desc: "Temperature, °F (rounded)." },
+  { name: "apparent_temp_f", type: "number | null", desc: "\"Feels like\" temperature, °F (rounded)." },
+  { name: "humidity_pct", type: "number | null", desc: "Relative humidity, % (rounded)." },
+  { name: "dewpoint_f", type: "number | null", desc: "Dew point, °F — a tight spread with temp_f warns of fog/condensation on cold gear." },
+  { name: "pressure_hpa", type: "number | null", desc: "Station (surface) pressure, hPa (rounded)." },
+  { name: "density_altitude_ft", type: "number | null", desc: "Density altitude, ft (to 10) — thin air cuts thrust and speeds descent. The number to watch on a hot, high day." },
+  { name: "cape_jkg", type: "number | null", desc: "Convective energy (CAPE), J/kg (rounded)." },
+  { name: "storm", type: "\"none\" | \"marginal\" | \"moderate\" | \"strong\" | null", desc: "Storm-potential band from CAPE (SPC bands)." },
+  { name: "cloud_cover_pct", type: "number | null", desc: "Cloud cover, % (rounded)." },
   { name: "tone", type: "\"emerald\" | \"amber\" | \"red\"", desc: "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
+  { name: "today", type: "object | null", desc: "Today's forecast peaks: max_wind_mph, max_gust_mph, high_f, low_f, precip_chance_pct." },
 ];
 
 function Code({ children }: { children: React.ReactNode }) {
@@ -43,9 +54,9 @@ export default function ApiPage() {
 
       <h1 className="mt-10 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">API</h1>
       <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-        A <strong>free, read-only JSON API</strong> for the current <strong>modeled surface wind</strong>{" "}
-        at every curated US launch field — the same data behind the &ldquo;Conditions across all
-        sites&rdquo; overview. <strong>No API key, no rate limits, no cost.</strong> CORS-open
+        A <strong>free, read-only JSON API</strong> for the current <strong>modeled conditions</strong>{" "}
+        at every curated US launch field — wind and steadiness, density altitude, storm potential,
+        the moisture read, sky, and today&apos;s peaks. <strong>No API key, no rate limits, no cost.</strong> CORS-open
         (<Code>Access-Control-Allow-Origin: *</Code>) — call it straight from a browser. It&apos;s
         static JSON — no query parameters; fetch a file and filter client-side. Refreshed about
         hourly; check <Code>meta.json</Code> for the exact <Code>generated_at</Code>.

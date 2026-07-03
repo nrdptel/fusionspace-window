@@ -3,20 +3,32 @@
   "info": {
     "title": "Window — launch-site conditions API",
     "version": "1.0.0",
-    "summary": "Free, read-only JSON: current modeled surface wind at every curated US launch field.",
-    "description": "The same modeled surface wind (gfs_seamless) the board shows, for all curated launch fields, refreshed hourly. Static JSON — no API key, no rate limits, no cost, CORS-open. Modeled wind only — not observed station data; confirm conditions on the field's full board or a primary source before flying.",
+    "summary": "Free, read-only JSON: current modeled conditions at every curated US launch field.",
+    "description": "The same modeled conditions (gfs_seamless) the board leads with — surface wind and steadiness, density altitude, storm potential (CAPE), the moisture read, pressure, sky, and today's forecast peaks — for all curated launch fields, refreshed hourly. Static JSON — no API key, no rate limits, no cost, CORS-open. Modeled, not observed station data; confirm conditions on the field's full board or a primary source before flying.",
     "license": { "name": "Free to use; attribution appreciated; provided as-is", "url": "https://window.fusionspace.co/api" }
   },
   "servers": [{ "url": "https://window.fusionspace.co/api/v1" }],
   "paths": {
     "/conditions.json": {
       "get": {
-        "summary": "All sites — current surface wind",
+        "summary": "All sites — current conditions",
         "operationId": "getConditions",
         "responses": {
           "200": {
             "description": "The conditions feed.",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SiteFeed" } } }
+          }
+        }
+      }
+    },
+    "/sites.json": {
+      "get": {
+        "summary": "The curated field roster (name, state, coordinates)",
+        "operationId": "getSites",
+        "responses": {
+          "200": {
+            "description": "The static site roster — no weather data.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Sites" } } }
           }
         }
       }
@@ -49,7 +61,11 @@
       },
       "SiteConditions": {
         "type": "object",
-        "required": ["name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "temp_f", "tone"],
+        "required": [
+          "name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
+          "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
+          "cape_jkg", "storm", "cloud_cover_pct", "tone", "today"
+        ],
         "properties": {
           "name": { "type": "string", "example": "SEARS — Samson" },
           "state": { "type": "string", "description": "USPS two-letter code.", "example": "AL" },
@@ -58,8 +74,51 @@
           "wind_mph": { "type": "integer", "description": "Sustained surface wind (10 m), mph — rounded.", "example": 7 },
           "gust_mph": { "type": ["integer", "null"], "description": "Gust, mph (rounded) — null when the model omits it.", "example": 11 },
           "dir_deg": { "type": "integer", "description": "Direction the wind blows FROM, degrees — rounded.", "example": 270 },
+          "steadiness": { "type": ["string", "null"], "enum": ["steady", "gusty", "very-gusty", null], "description": "How much the gusts overshoot the sustained wind. null when there is no gust reading." },
           "temp_f": { "type": ["integer", "null"], "description": "Temperature, °F — rounded.", "example": 72 },
-          "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." }
+          "apparent_temp_f": { "type": ["integer", "null"], "description": "\"Feels like\" temperature, °F — rounded.", "example": 74 },
+          "humidity_pct": { "type": ["integer", "null"], "description": "Relative humidity, % — rounded.", "example": 55 },
+          "dewpoint_f": { "type": ["integer", "null"], "description": "Dew point, °F — rounded. A tight spread with temp_f warns of fog/condensation.", "example": 56 },
+          "pressure_hpa": { "type": ["integer", "null"], "description": "Station (surface) pressure, hPa — rounded.", "example": 1013 },
+          "density_altitude_ft": { "type": ["integer", "null"], "description": "Density altitude, ft (rounded to 10). Thin air cuts motor thrust and speeds descent. null if inputs are absent.", "example": 1240 },
+          "cape_jkg": { "type": ["integer", "null"], "description": "Convective available potential energy, J/kg — rounded.", "example": 120 },
+          "storm": { "type": ["string", "null"], "enum": ["none", "marginal", "moderate", "strong", null], "description": "Storm-potential band from CAPE. null when CAPE is absent." },
+          "cloud_cover_pct": { "type": ["integer", "null"], "description": "Cloud cover, % — rounded.", "example": 20 },
+          "tone": { "type": "string", "enum": ["emerald", "amber", "red"], "description": "Against the 20 mph line: emerald < 15, amber 15–20, red ≥ 20 mph." },
+          "today": { "oneOf": [{ "$ref": "#/components/schemas/SiteToday" }, { "type": "null" }], "description": "Today's forecast peaks; null when the daily block is absent." }
+        }
+      },
+      "SiteToday": {
+        "type": "object",
+        "required": ["max_wind_mph", "max_gust_mph", "high_f", "low_f", "precip_chance_pct"],
+        "properties": {
+          "max_wind_mph": { "type": ["integer", "null"], "description": "Day's peak sustained wind, mph.", "example": 18 },
+          "max_gust_mph": { "type": ["integer", "null"], "description": "Day's peak gust, mph.", "example": 26 },
+          "high_f": { "type": ["integer", "null"], "description": "Day's high temperature, °F.", "example": 88 },
+          "low_f": { "type": ["integer", "null"], "description": "Day's low temperature, °F.", "example": 64 },
+          "precip_chance_pct": { "type": ["integer", "null"], "description": "Day's peak precipitation probability, %.", "example": 30 }
+        }
+      },
+      "Sites": {
+        "type": "object",
+        "required": ["schema_version", "generated_at", "count", "sites"],
+        "properties": {
+          "schema_version": { "type": "integer", "example": 1 },
+          "generated_at": { "type": "string", "format": "date-time" },
+          "count": { "type": "integer", "example": 104 },
+          "sites": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "state", "lat", "lon"],
+              "properties": {
+                "name": { "type": "string", "example": "SEARS — Samson" },
+                "state": { "type": "string", "example": "AL" },
+                "lat": { "type": "number", "example": 31.13 },
+                "lon": { "type": "number", "example": -86.07 }
+              }
+            }
+          }
         }
       },
       "Meta": {
@@ -77,7 +136,7 @@
               "states": { "type": "integer", "example": 48 }
             }
           },
-          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
+          "endpoints": { "type": "array", "items": { "type": "string" }, "example": ["/api/v1/conditions.json", "/api/v1/sites.json", "/api/v1/meta.json", "/api/v1/openapi.json"] },
           "docs": { "type": "string", "format": "uri", "example": "https://window.fusionspace.co/api" },
           "license": { "type": "string", "example": "Free to use; attribution appreciated; provided as-is" },
           "notes": { "type": "string" }

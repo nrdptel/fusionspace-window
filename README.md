@@ -69,9 +69,10 @@ build time (`scripts/gen-conditions.ts`) and refreshed by an hourly deploy, serv
 static asset (no backend, no per-request limits).
 
 That same feed is a **[free public JSON API](https://window.fusionspace.co/api)** — current
-modeled surface wind at every field, `Access-Control-Allow-Origin: *`, no key, no rate limit, no
-cost. Versioned under `/api/v1/` (`conditions.json`, `meta.json`, `openapi.json`); docs at
-[`/api`](https://window.fusionspace.co/api) and [`docs/api.md`](docs/api.md), mirroring the
+modeled conditions at every field (wind and steadiness, density altitude, storm potential, the
+moisture read, sky, and today's peaks), `Access-Control-Allow-Origin: *`, no key, no rate limit, no
+cost. Versioned under `/api/v1/` (`conditions.json`, `sites.json`, `meta.json`, `openapi.json`); docs
+at [`/api`](https://window.fusionspace.co/api) and [`docs/api.md`](docs/api.md), mirroring the
 conventions of the sibling [motor.fusionspace.co](https://motor.fusionspace.co/api) API.
 
 ## The data

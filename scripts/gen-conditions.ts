@@ -5,6 +5,7 @@
  *
  *  Writes:
  *    public/api/v1/conditions.json — the feed (schema_version, generated_at, model, count, sites[])
+ *    public/api/v1/sites.json      — the static field roster (name/state/lat/lon), no weather cost
  *    public/api/v1/meta.json       — self-describing metadata (version, counts, endpoints, docs, …)
  *
  *  Run in `prebuild`, so every deploy bakes in fresh conditions; an hourly deploy refreshes them.
@@ -13,7 +14,7 @@
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, SCHEMA_VERSION, type SiteFeed } from "../lib/weather/sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, SCHEMA_VERSION, type SiteFeed } from "../lib/weather/sitefeed";
 import { SITE_URL } from "../lib/links";
 
 const DIR = join(process.cwd(), "public", "api", "v1");
@@ -40,9 +41,11 @@ async function main() {
   }
 
   const meta = buildMeta(feed, `${SITE_URL}/api`);
+  const sitesFile = buildSitesFile(nowIso);
 
   mkdirSync(DIR, { recursive: true });
   writeFileSync(join(DIR, "conditions.json"), JSON.stringify(feed));
+  writeFileSync(join(DIR, "sites.json"), JSON.stringify(sitesFile));
   writeFileSync(join(DIR, "meta.json"), JSON.stringify(meta));
 }
 

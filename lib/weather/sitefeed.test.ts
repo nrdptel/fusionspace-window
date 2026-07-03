@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildBatchUrl, summarizeSiteFeed, buildMeta, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
+import { buildBatchUrl, summarizeSiteFeed, buildMeta, buildSitesFile, API_ENDPOINTS, API_LICENSE } from "./sitefeed";
 import type { LaunchSite } from "../launchSites";
 
 const SITES: LaunchSite[] = [
@@ -17,6 +17,30 @@ function el(wind: number | null, dir: number | null, gust?: number | null, temp?
   return { current };
 }
 
+/** A fully-populated batched element — every current variable plus the daily block. */
+function full() {
+  return {
+    current: {
+      wind_speed_10m: 10,
+      wind_direction_10m: 270,
+      wind_gusts_10m: 20,
+      temperature_2m: 90,
+      apparent_temperature: 95,
+      relative_humidity_2m: 20,
+      surface_pressure: 850,
+      cape: 1500,
+      cloud_cover: 40,
+    },
+    daily: {
+      wind_speed_10m_max: [18],
+      wind_gusts_10m_max: [26],
+      temperature_2m_max: [96],
+      temperature_2m_min: [70],
+      precipitation_probability_max: [30],
+    },
+  };
+}
+
 describe("buildBatchUrl", () => {
   it("packs every site into one request as comma-separated coordinates", () => {
     const u = new URL(buildBatchUrl(SITES));
@@ -28,6 +52,10 @@ describe("buildBatchUrl", () => {
     expect(u.searchParams.get("wind_speed_unit")).toBe("mph");
     expect(u.searchParams.get("forecast_days")).toBe("1");
     expect(u.searchParams.get("models")).toBe("gfs_seamless");
+    // Enriched current + a single daily block, all in the one request.
+    expect(u.searchParams.get("current")).toContain("surface_pressure");
+    expect(u.searchParams.get("current")).toContain("cape");
+    expect(u.searchParams.get("daily")).toContain("wind_speed_10m_max");
   });
 
   it("defaults to the full curated site list", () => {
@@ -94,7 +122,57 @@ describe("summarizeSiteFeed", () => {
     expect(round).toEqual(feed);
     // Wire format matches the sibling motor API: snake_case, no camelCase leakage.
     expect(Object.keys(feed)).toEqual(["schema_version", "generated_at", "model", "count", "sites"]);
-    expect(Object.keys(feed.sites[0])).toEqual(["name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "temp_f", "tone"]);
+    expect(Object.keys(feed.sites[0])).toEqual([
+      "name", "state", "lat", "lon", "wind_mph", "gust_mph", "dir_deg", "steadiness", "temp_f",
+      "apparent_temp_f", "humidity_pct", "dewpoint_f", "pressure_hpa", "density_altitude_ft",
+      "cape_jkg", "storm", "cloud_cover_pct", "tone", "today",
+    ]);
+  });
+
+  it("derives the full snapshot from a populated element", () => {
+    const feed = summarizeSiteFeed([full()], now, [SITES[0]]);
+    const s = feed.sites[0];
+    expect(s).toMatchObject({
+      wind_mph: 10, gust_mph: 20, dir_deg: 270,
+      steadiness: "very-gusty",         // gust 2× the sustained wind
+      temp_f: 90, apparent_temp_f: 95, humidity_pct: 20,
+      pressure_hpa: 850, cape_jkg: 1500,
+      storm: "moderate",                // 1000 ≤ CAPE < 2500
+      cloud_cover_pct: 40, tone: "emerald",
+    });
+    // Dew point below the dry-bulb temp; density altitude well above the field on a hot, high, dry day.
+    expect(s.dewpoint_f).toBeLessThan(90);
+    expect(s.density_altitude_ft).toBeGreaterThan(5000);
+    expect((s.density_altitude_ft as number) % 10).toBe(0); // rounded to 10 ft
+    expect(s.today).toEqual({ max_wind_mph: 18, max_gust_mph: 26, high_f: 96, low_f: 70, precip_chance_pct: 30 });
+  });
+
+  it("degrades each derived field to null independently when its inputs are missing", () => {
+    // Only wind + direction present (no gust, temp, humidity, pressure, cape, daily).
+    const s = summarizeSiteFeed([el(8, 270)], now, [SITES[0]]).sites[0];
+    expect(s.steadiness).toBeNull();
+    expect(s.dewpoint_f).toBeNull();
+    expect(s.density_altitude_ft).toBeNull();
+    expect(s.storm).toBeNull();
+    expect(s.today).toBeNull();
+    // …but the site is still included — a missing extra never drops the whole row.
+    expect(s.wind_mph).toBe(8);
+  });
+});
+
+describe("buildSitesFile", () => {
+  it("emits the static roster with no weather data", () => {
+    const file = buildSitesFile("2026-07-03T12:00:00Z", SITES);
+    expect(file).toEqual({
+      schema_version: 1,
+      generated_at: "2026-07-03T12:00:00Z",
+      count: 3,
+      sites: [
+        { name: "A — one", state: "CA", lat: 34.5, lon: -116.9 },
+        { name: "B — two", state: "TX", lat: 30.87, lon: -96.62 },
+        { name: "C — three", state: "CO", lat: 39.01, lon: -105.7 },
+      ],
+    });
   });
 });
 

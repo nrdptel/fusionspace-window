@@ -59,8 +59,8 @@ Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the h
 - **How this is derived** — source, model, valid time, and limits for every figure.
 
 US-first, imperial defaults (mph, ft, °F) with a units toggle (metric, and knots for wind).
-Pick a field by place search, your location, coordinates, or the **Sites** picker — ~90 active
-US club launch fields across 46 states, grouped by state (SEARS, HARA, Black Rock, Lucerne, Argonia…). The field rides in the URL, so any
+Pick a field by place search, your location, coordinates, or the **Sites** picker — ~100 active
+US club launch fields across 47 states, grouped by state (SEARS, HARA, Black Rock, Lucerne, Argonia…). The field rides in the URL, so any
 view is a shareable, reload-proof link; units, saved fields, and your personal wind line stay in
 your browser. Each saved field shows its current wind at a glance, so a club running more than
 one site can see which is flyable without opening each one.

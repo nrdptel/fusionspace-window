@@ -608,7 +608,7 @@ the empty state's single "try Lucerne Valley" example under-served that. So the 
 **Sites** toggle (beside Coordinates). It started as a flat ~10-site chip list, then expanded to a
 **state-grouped picker** (`sitesByState()`): a row of state chips (each with its site count), and
 picking a state reveals its club fields as one-tap chips — pick a state, then a field. The data
-(`lib/launchSites.ts`) grew across three research rounds to ~90 US club fields across 46 states —
+(`lib/launchSites.ts`) grew across several research rounds to ~100 US club fields across 47 states —
 Tripoli prefectures and NAR sections corroborated as active in 2023–2025 from the clubs' own pages
 plus the TRA/NAR listings, each tagged with its two-letter state (typo-guard test: US bounds incl.
 Alaska/Hawaii, no dupes, every state code known, grouping loses nothing). Still a static list — no
@@ -621,9 +621,10 @@ Oregon Rocketry pinned to its mailing address ~45 mi from the field, Rocketry SC
 Dalzell not Rembert). Round three was a completeness sweep: it filled nine uncovered states
 (including in-state fields for NJ, VT, RI, MS and the first AK/HI entries), added ~13 more clubs in
 already-covered states, and finally pinned Tripoli New Mexico (its site was offline round two —
-recovered via the Wayback Machine) and a badly-north Tripoli Phoenix. Only DE, NH, ND, WV stay
-uncovered — each confirmed to have no locatable in-state club field (their flyers travel to a
-neighbor's). The honesty caveat stays built into the UI and the data
+recovered via the Wayback Machine) and a badly-north Tripoli Phoenix. Later rounds added noteworthy second fields
+(distinct high-altitude/summer venues like Tripoli Vegas's Delamar playa and NCR's Atlas site) and
+a few more clubs (Syracuse, WVSOAR, Sierra Rocketry, NDRA). Only DE, NH, WV stay uncovered — each
+confirmed to have no locatable in-state club field (their flyers travel to a neighbor's). The honesty caveat stays built into the UI and the data
 comment: these are **approximate** launch-area coordinates (~1 km), not surveyed pads or an
 endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
 It lowers the barrier for the core audience's first lookup without pretending to be authoritative.

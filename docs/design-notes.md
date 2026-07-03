@@ -720,6 +720,18 @@ application/geo+json` set in `_headers`. What's deliberately *not* added: a "fly
 filter view — the raw `tone` field lets a consumer do it themselves, and a curated "these are OK"
 endpoint would cut against Window's no-verdict stance. All additive; `schema_version` stays 1.
 
+A completeness audit then found the one board dataset the API still lacked: **air quality**. The
+board pulls US AQI + PM2.5/PM10 from Open-Meteo's *separate* Air-Quality API, and it's batchable the
+same way — so `gen-conditions` now makes a **second** batched request and merges `aqi`,
+`aqi_category` (EPA band, via the tested `airquality.ts`), `pm2_5`, and `pm10` into each site,
+index-aligned to the same request order. Best-effort: a failed AQ call leaves those four fields null
+and never loses the feed. This is the one place we spend a second provider request — deliberate,
+because smoke/haze is a real rocketry scrub reason (it cuts the visibility you need to track a high
+flight), and two batched calls hourly still sit at ~half the free Open-Meteo allowance. Everything
+else the board computes but the API omits is the heavy/hourly/per-point set (winds aloft, the
+multi-day timeline, landing drift, observed METAR/ceiling, NWS alerts, the seasonal normal) that
+stays in the interactive tool by design. Still additive; `schema_version` stays 1.
+
 ### Saved fields, wind at a glance (post-v1)
 
 Saved fields were just labels you click to load. A club running more than one launch site,

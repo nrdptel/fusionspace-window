@@ -608,7 +608,7 @@ the empty state's single "try Lucerne Valley" example under-served that. So the 
 **Sites** toggle (beside Coordinates). It started as a flat ~10-site chip list, then expanded to a
 **state-grouped picker** (`sitesByState()`): a row of state chips (each with its site count), and
 picking a state reveals its club fields as one-tap chips — pick a state, then a field. The data
-(`lib/launchSites.ts`) grew across several research rounds to ~100 US club fields across 47 states —
+(`lib/launchSites.ts`) grew across several research rounds to ~100 US club fields across 48 states —
 Tripoli prefectures and NAR sections corroborated as active in 2023–2025 from the clubs' own pages
 plus the TRA/NAR listings, each tagged with its two-letter state (typo-guard test: US bounds incl.
 Alaska/Hawaii, no dupes, every state code known, grouping loses nothing). Still a static list — no
@@ -623,8 +623,10 @@ Dalzell not Rembert). Round three was a completeness sweep: it filled nine uncov
 already-covered states, and finally pinned Tripoli New Mexico (its site was offline round two —
 recovered via the Wayback Machine) and a badly-north Tripoli Phoenix. Later rounds added noteworthy second fields
 (distinct high-altitude/summer venues like Tripoli Vegas's Delamar playa and NCR's Atlas site) and
-a few more clubs (Syracuse, WVSOAR, Sierra Rocketry, NDRA). Only DE, NH, WV stay uncovered — each
-confirmed to have no locatable in-state club field (their flyers travel to a neighbor's). The honesty caveat stays built into the UI and the data
+a few more clubs (Syracuse, WVSOAR, Sierra Rocketry, NDRA, WVROCK, Mid-South, FLASH). A currency
+pass then dropped one that had gone dormant (Radical Rocketeers, NJ — no launches since 2021) and
+moved Hawaii Kai to its current Aiea field. Only DE and NH stay uncovered — each confirmed to have
+no locatable in-state club field (their flyers travel to a neighbor's). The honesty caveat stays built into the UI and the data
 comment: these are **approximate** launch-area coordinates (~1 km), not surveyed pads or an
 endorsement or a waiver-status claim — a starting point you fine-tune with search or coordinates.
 It lowers the barrier for the core audience's first lookup without pretending to be authoritative.

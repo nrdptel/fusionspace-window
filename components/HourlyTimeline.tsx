@@ -208,8 +208,12 @@ export default function HourlyTimeline({
             const da = Number.isFinite(s.densityAltitudeFt)
               ? `${fmtLength(Math.round(s.densityAltitudeFt / 50) * 50, u.length)} ${LENGTH_LABEL[u.length]}`
               : "—";
+            // Fixed grid, not flex-wrap: the metrics' widths change as you scrub (the wind sub goes
+            // "gusty"↔"very gusty", the storm label "Stable"↔"Strongly unstable"), which under
+            // flex-wrap flipped the row count and jumped the page. A 2-col grid with storm spanning
+            // the full width gives a constant three-row height whatever the values.
             return (
-              <div className="mt-1.5 flex flex-wrap gap-x-5 gap-y-2">
+              <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-2">
                 <Metric
                   label="Wind"
                   value={`${fmtWind(s.windMph, u.wind)} ${WIND_LABEL[u.wind]}`}
@@ -220,7 +224,9 @@ export default function HourlyTimeline({
                 />
                 <Metric label="Temp" value={`${fmtTemp(s.tempF, u.temp)}${TEMP_LABEL[u.temp]}`} />
                 <Metric label="Density altitude" value={da} />
-                <Metric label="Storm" value={s.instability.label} tone={s.instability.tone} />
+                <div className="col-span-2">
+                  <Metric label="Storm" value={s.instability.label} tone={s.instability.tone} />
+                </div>
               </div>
             );
           })()}

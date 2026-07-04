@@ -349,7 +349,10 @@ export default function WindsAloft({
           <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
             Shear
           </span>
-          <span className="text-zinc-700 dark:text-zinc-300">
+          {/* Reserve two lines on mobile so the reading (which wraps 1↔2 lines as the shear value
+              changes with the fly-time) can't jump the card height. Natural on sm+, where it fits
+              one line and never wraps. */}
+          <span className="block min-h-8 text-zinc-700 sm:min-h-0 dark:text-zinc-300">
             Strongest layer{" "}
             <span className="font-mono tabular-nums">
               {fmtLength(shear.lowerFt, u.length)} → {fmtLength(shear.upperFt, u.length)} {LENGTH_LABEL[u.length]}

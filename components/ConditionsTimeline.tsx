@@ -130,6 +130,11 @@ export default function ConditionsTimeline({
             // clock when it crowds one (within 2 h), so labels like "11 PM" and "12 AM" don't collide.
             const hr = Number(h.time.slice(11, 13));
             const showClock = i === 0 || isDayStart || !(hr >= 22 || hr <= 2);
+            // The first column sits flush at the left edge, so left-anchor its labels — centering
+            // them would run the left half off the edge and clip it. Mid-timeline labels stay centered.
+            const first = i === 0;
+            const tx = first ? 0 : x(i) + CW / 2;
+            const anchor = first ? "start" : "middle";
             return (
               <g key={`t${i}`}>
                 {isDayStart && i !== 0 && (
@@ -144,9 +149,9 @@ export default function ConditionsTimeline({
                 )}
                 {showClock && (
                   <text
-                    x={x(i) + CW / 2}
+                    x={tx}
                     y={H - 8}
-                    textAnchor="middle"
+                    textAnchor={anchor}
                     className="fill-zinc-500 dark:fill-zinc-400"
                     fontSize="9"
                   >
@@ -155,9 +160,9 @@ export default function ConditionsTimeline({
                 )}
                 {(i === 0 || isDayStart) && (
                   <text
-                    x={x(i) + CW / 2}
+                    x={tx}
                     y={H - 0}
-                    textAnchor="middle"
+                    textAnchor={anchor}
                     className="fill-zinc-500 dark:fill-zinc-400"
                     fontSize="8"
                   >

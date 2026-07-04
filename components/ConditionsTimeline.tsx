@@ -15,10 +15,8 @@ import { clockShort, dayLabel } from "@/lib/format";
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
-import { useScrollFollowX, usePinLeftX } from "./useScrollFollow";
+import { useScrollFollowX } from "./useScrollFollow";
 
-const GUTTER = 70; // left column for the row labels — wide enough that the longest ("Storms")
-// clears the first cell, and the labels are left-anchored so they can never clip at the edge.
 const CW = 14; // px per hour
 const CH = 16; // row height
 const RG = 4; // gap between rows
@@ -63,8 +61,10 @@ export default function ConditionsTimeline({
 
   const rowsH = ROWS.length * CH + (ROWS.length - 1) * RG;
   const H = TOP + rowsH + BOT;
-  const width = GUTTER + window.length * CW + PAD_R;
-  const x = (i: number) => GUTTER + i * CW;
+  // No gutter inside the SVG: the row labels live in their own fixed column beside the scroll area
+  // (below), so cells start at x=0 and nothing ever hides behind a frozen label.
+  const width = window.length * CW + PAD_R;
+  const x = (i: number) => i * CW;
   const rowY = (r: number) => TOP + r * (CH + RG);
 
   const cellOf = (c: ReturnType<typeof hourConditions>, key: (typeof ROWS)[number]["key"]): FactorCell =>
@@ -73,9 +73,6 @@ export default function ConditionsTimeline({
   // Follow the fly-time selection so the selected column stays in view when the grid overflows.
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollFollowX(scrollRef, x(selLocal), x(selLocal) + CW);
-  // Freeze the row-label column at the left edge so you can always tell which row is which.
-  const labelsRef = useRef<SVGGElement>(null);
-  usePinLeftX(scrollRef, labelsRef);
 
   return (
     <div>
@@ -84,7 +81,22 @@ export default function ConditionsTimeline({
         across a row for when a factor clears. Tap a column to set the fly-time.
       </p>
 
-      <div ref={scrollRef} className="overflow-x-auto">
+      {/* A fixed row-label column beside the horizontally-scrolling grid — the labels stay put and
+          never cover data (a true frozen column, not an overlay). */}
+      <div className="flex items-start">
+        <div className="relative shrink-0 pr-1.5" style={{ height: H, width: 54 }} aria-hidden="true">
+          {ROWS.map((row, r) => (
+            <span
+              key={row.key}
+              className="absolute left-0 text-[10px] text-zinc-600 dark:text-zinc-300"
+              style={{ top: rowY(r) + CH / 2, transform: "translateY(-50%)" }}
+            >
+              {row.label}
+            </span>
+          ))}
+        </div>
+
+        <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           width={width}
@@ -187,26 +199,8 @@ export default function ConditionsTimeline({
               </rect>
             );
           })}
-
-          {/* Frozen row-label column — pinned to the left edge as the grid scrolls (usePinLeftX),
-              on an opaque backing so cells never show through behind it. Left-anchored so it can't
-              clip; the gutter keeps it off the cells at rest. */}
-          <g ref={labelsRef}>
-            <rect x={0} y={0} width={GUTTER - 4} height={TOP + rowsH + 3} className="fill-white dark:fill-zinc-950" />
-            {ROWS.map((row, r) => (
-              <text
-                key={row.key}
-                x={2}
-                y={rowY(r) + CH / 2 + 3}
-                textAnchor="start"
-                className="fill-zinc-600 dark:fill-zinc-300"
-                fontSize="10"
-              >
-                {row.label}
-              </text>
-            ))}
-          </g>
         </svg>
+        </div>
       </div>
 
       {/* fly-time scrubber — synced with the other panels, and it scrolls the grid to the hour */}

@@ -173,14 +173,12 @@ export default function WindsAloft({
           No winds-aloft data is available for this hour over this field.
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div>
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            width="100%"
-            height={H}
             role="img"
             aria-label={`Winds-aloft profile valid ${clockShort(profile.time)}: wind speed in ${WIND_LABEL[u.wind]} versus altitude above ground, from the surface to ${fmtLength(topFt, u.length)} ${LENGTH_LABEL[u.length]}. Full numbers are in the table below.`}
-            className="text-indigo-600 dark:text-indigo-400"
+            className="block h-auto w-full text-indigo-600 dark:text-indigo-400"
           >
             {/* altitude gridlines + labels */}
             {altTicks.map((a) => (

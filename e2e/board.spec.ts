@@ -102,6 +102,37 @@ test("the low-cloud timeline shares the fly-time in both directions", async ({ p
   await expect(page.locator("#hourly").getByText(/^At /).first()).toContainText("12 PM");
 });
 
+test("no fly-time-driven panel changes height as you scrub (mobile)", async ({ page }) => {
+  // Guards against the class of bug where a reading wraps 1↔2 lines as the fly-time changes and
+  // jumps the card (and the page) up and down. Every panel bound to the shared fly-time must keep
+  // a constant height across the whole scrub. Apogee + descent rate are set so the value-driven
+  // prose (the drift landing line, the ceiling-clearance read) is present and exercised.
+  await page.setViewportSize({ width: 393, height: 900 });
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  await page.getByLabel(/Expected apogee/).fill("9000");
+  await page.getByLabel(/Recovery descent rate/).fill("18");
+
+  const slider = page.locator("#hourly").getByRole("slider", { name: /Pick a launch time/ });
+  await slider.focus();
+  const heights: Record<string, Set<number>> = { hourly: new Set(), conditions: new Set(), aloft: new Set(), sky: new Set() };
+  for (const k of [0, 9, 18, 27, 36, 45, 54, 63, 71]) {
+    await slider.evaluate((el: HTMLInputElement, v) => {
+      el.value = String(v);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, k);
+    await page.waitForTimeout(20);
+    for (const id of Object.keys(heights)) {
+      const b = await page.locator(`#${id}`).boundingBox();
+      if (b) heights[id].add(Math.round(b.height));
+    }
+  }
+  for (const [id, set] of Object.entries(heights)) {
+    expect(set.size, `#${id} height varied across the scrub: ${[...set].join(",")}`).toBe(1);
+  }
+});
+
 test("the conditions grid stacks the factor rows and lists them in a table", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

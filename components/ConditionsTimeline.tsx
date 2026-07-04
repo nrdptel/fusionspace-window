@@ -15,7 +15,7 @@ import { clockShort, dayLabel } from "@/lib/format";
 import { SourceLine } from "./ui";
 import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
-import { useScrollFollowX, usePinLeftX } from "./useScrollFollow";
+import { useScrollFollowX } from "./useScrollFollow";
 
 const CW = 14; // px per hour
 const CH = 16; // row height
@@ -73,9 +73,6 @@ export default function ConditionsTimeline({
   // Follow the fly-time selection so the selected column stays in view when the grid overflows.
   const scrollRef = useRef<HTMLDivElement>(null);
   useScrollFollowX(scrollRef, x(selLocal), x(selLocal) + CW);
-  // Freeze the row-label column at the left edge so you can always tell which row is which.
-  const labelsRef = useRef<SVGGElement>(null);
-  usePinLeftX(scrollRef, labelsRef);
 
   return (
     <div>
@@ -202,25 +199,6 @@ export default function ConditionsTimeline({
               </rect>
             );
           })}
-
-          {/* Frozen row-label column — pinned to the left edge as the grid scrolls (usePinLeftX),
-              on an opaque backing so cells never show through behind it. Left-anchored so it can't
-              clip; the gutter keeps it off the cells at rest. */}
-          <g ref={labelsRef}>
-            <rect x={0} y={0} width={GUTTER - 4} height={TOP + rowsH + 3} className="fill-white dark:fill-zinc-950" />
-            {ROWS.map((row, r) => (
-              <text
-                key={row.key}
-                x={2}
-                y={rowY(r) + CH / 2 + 3}
-                textAnchor="start"
-                className="fill-zinc-600 dark:fill-zinc-300"
-                fontSize="10"
-              >
-                {row.label}
-              </text>
-            ))}
-          </g>
         </svg>
         </div>
       </div>

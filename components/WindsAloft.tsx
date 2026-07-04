@@ -257,7 +257,7 @@ export default function WindsAloft({
       )}
 
       {!empty && mean && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
+        <div className="mt-3 flex flex-col items-start gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
             Drift
           </span>
@@ -345,7 +345,7 @@ export default function WindsAloft({
       )}
 
       {!empty && shear && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
+        <div className="mt-3 flex flex-col items-start gap-y-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
             Shear
           </span>

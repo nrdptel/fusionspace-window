@@ -178,18 +178,20 @@ export default function LowCloudTimeline({
         windowHours={window.length}
       />
 
-      {/* snapshot at the selected hour */}
+      {/* Snapshot at the selected hour. On mobile the label and reading stack (each `block`) so the
+          reading can't wrap mid-phrase; on sm+ they sit inline with an em-dash between them. */}
       {selHour && (
         <p className="mt-2 text-sm">
-          <span className="text-zinc-600 dark:text-zinc-400">
-            At your fly-time · {dayLabel(selHour.time, todayIso)} {clockShort(selHour.time)} —{" "}
+          <span className="block text-zinc-600 sm:inline dark:text-zinc-400">
+            At your fly-time · {dayLabel(selHour.time, todayIso)} {clockShort(selHour.time)}
+            <span className="hidden sm:inline"> — </span>
           </span>
           {selPct != null && selRead ? (
-            <span className={"font-medium " + windToneTextClass(selRead.tone)}>
+            <span className={"block sm:inline font-medium " + windToneTextClass(selRead.tone)}>
               {selRead.label.toLowerCase()} low cloud ({selPct}%)
             </span>
           ) : (
-            <span className="text-zinc-500 dark:text-zinc-400">no low-cloud model data</span>
+            <span className="block text-zinc-500 sm:inline dark:text-zinc-400">no low-cloud model data</span>
           )}
         </p>
       )}

@@ -79,36 +79,43 @@ export default function FieldBriefing({
   }
 
   return (
-    <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/40">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
+    <section className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50/60 p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
           Take it to the field
-        </span>
-        <button
-          type="button"
-          onClick={() => copy(href, "link")}
-          className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-        >
-          {flash === "link" ? "Link copied ✓" : "Copy link"}
-        </button>
+        </h2>
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">brief · link · share</span>
+      </div>
+      <p className="mt-1.5 max-w-3xl text-sm text-zinc-500 dark:text-zinc-400">
+        Copy the full launch briefing as plain text for your crew, or grab a link to this exact
+        field, units, and fly-time.
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => copy(briefing, "briefing")}
-          className="rounded-md border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-500/40 dark:bg-indigo-950/30 dark:text-indigo-300 dark:hover:bg-indigo-950/50"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
         >
           {flash === "briefing" ? "Briefing copied ✓" : "Copy briefing"}
+        </button>
+        <button
+          type="button"
+          onClick={() => copy(href, "link")}
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+        >
+          {flash === "link" ? "Link copied ✓" : "Copy link"}
         </button>
         {canShare && (
           <button
             type="button"
             onClick={share}
-            className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           >
             Share
           </button>
         )}
       </div>
-      <details className="mt-2">
+      <details className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <summary className="cursor-pointer select-none text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
           Preview the text briefing
         </summary>
@@ -116,6 +123,6 @@ export default function FieldBriefing({
 {briefing}
         </pre>
       </details>
-    </div>
+    </section>
   );
 }

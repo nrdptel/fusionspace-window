@@ -22,24 +22,29 @@ import FlyTimeSlider from "./FlyTimeSlider";
 import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { useScrollFollowX, usePinLeftX } from "./useScrollFollow";
 
-/** A compact labeled figure in the fly-time snapshot. */
+/** A compact labeled figure in the fly-time snapshot. Every line is `whitespace-nowrap` so a
+ *  changing value can never wrap and change the row height — the snapshot keeps a constant height as
+ *  you scrub the fly-time (no page jump). `mono` is off for word values like the storm band, whose
+ *  proportional text fits a half-width cell where the mono figure would be too wide. */
 function Metric({
   label,
   value,
   sub,
   tone,
+  mono = true,
 }: {
   label: string;
   value: string;
   sub?: string;
   tone?: WindTone;
+  mono?: boolean;
 }) {
   const toneCls = tone ? windToneTextClass(tone) : "text-zinc-900 dark:text-zinc-100";
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wide text-zinc-600 dark:text-zinc-400">{label}</div>
-      <div className={"font-mono text-sm tabular-nums " + toneCls}>{value}</div>
-      {sub && <div className="text-[10px] text-zinc-600 dark:text-zinc-400">{sub}</div>}
+    <div className="min-w-0">
+      <div className="truncate text-[10px] uppercase tracking-wide text-zinc-600 dark:text-zinc-400">{label}</div>
+      <div className={(mono ? "font-mono tabular-nums " : "") + "whitespace-nowrap text-sm " + toneCls}>{value}</div>
+      {sub && <div className="truncate text-[10px] text-zinc-600 dark:text-zinc-400">{sub}</div>}
     </div>
   );
 }
@@ -208,12 +213,15 @@ export default function HourlyTimeline({
             const da = Number.isFinite(s.densityAltitudeFt)
               ? `${fmtLength(Math.round(s.densityAltitudeFt / 50) * 50, u.length)} ${LENGTH_LABEL[u.length]}`
               : "—";
-            // Fixed grid, not flex-wrap: the metrics' widths change as you scrub (the wind sub goes
-            // "gusty"↔"very gusty", the storm label "Stable"↔"Strongly unstable"), which under
-            // flex-wrap flipped the row count and jumped the page. A 2-col grid with storm spanning
-            // the full width gives a constant three-row height whatever the values.
+            // Fixed grid, never flex-wrap: the metrics' widths change as you scrub (the wind sub
+            // goes "gusty"↔"very gusty", the storm label "Stable"↔"Strongly unstable"), which under
+            // flex-wrap flipped the row count and jumped the page. Two columns on mobile, four on
+            // desktop; every Metric line is whitespace-nowrap so each cell is a fixed line-count and
+            // the card height is constant whatever the values. Source order is Wind, Density,
+            // Temp, Storm → mobile reads Wind│Density over Temp│Storm; desktop puts all four in a
+            // row. Storm uses the proportional font (mono={false}) so its wordy label fits the cell.
             return (
-              <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-2">
+              <div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                 <Metric
                   label="Wind"
                   value={`${fmtWind(s.windMph, u.wind)} ${WIND_LABEL[u.wind]}`}
@@ -222,11 +230,9 @@ export default function HourlyTimeline({
                   }`}
                   tone={windTone(s.windMph, windLine)}
                 />
-                <Metric label="Temp" value={`${fmtTemp(s.tempF, u.temp)}${TEMP_LABEL[u.temp]}`} />
                 <Metric label="Density altitude" value={da} />
-                <div className="col-span-2">
-                  <Metric label="Storm" value={s.instability.label} tone={s.instability.tone} />
-                </div>
+                <Metric label="Temp" value={`${fmtTemp(s.tempF, u.temp)}${TEMP_LABEL[u.temp]}`} />
+                <Metric label="Storm" value={s.instability.label} tone={s.instability.tone} mono={false} />
               </div>
             );
           })()}

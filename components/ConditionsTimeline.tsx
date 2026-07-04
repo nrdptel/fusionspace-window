@@ -59,6 +59,11 @@ export default function ConditionsTimeline({
   const conds = useMemo(() => window.map((h) => hourConditions(h, windLine)), [window, windLine]);
   const selLocal = Math.max(0, Math.min(window.length - 1, selectedIndex - startIndex));
 
+  // If a midnight boundary lands within ~3 h of the window start, its centered "12 AM / Tomorrow"
+  // label would overlap the first column's "10 PM / Today"; when that happens, drop the first
+  // column's labels and let the boundary (which carries the day name) stand alone.
+  const boundaryNearStart = window.slice(1, 4).some((h) => h.time.endsWith("T00:00"));
+
   const rowsH = ROWS.length * CH + (ROWS.length - 1) * RG;
   const H = TOP + rowsH + BOT;
   // No gutter inside the SVG: the row labels live in their own fixed column beside the scroll area
@@ -129,12 +134,18 @@ export default function ConditionsTimeline({
             // A midnight boundary always shows "12 AM" + the day name; suppress a plain 6 h tick's
             // clock when it crowds one (within 2 h), so labels like "11 PM" and "12 AM" don't collide.
             const hr = Number(h.time.slice(11, 13));
-            const showClock = i === 0 || isDayStart || !(hr >= 22 || hr <= 2);
-            // The first column sits flush at the left edge, so left-anchor its labels — centering
-            // them would run the left half off the edge and clip it. Mid-timeline labels stay centered.
-            const first = i === 0;
-            const tx = first ? 0 : x(i) + CW / 2;
-            const anchor = first ? "start" : "middle";
+            const isFirst = i === 0;
+            // The first column carries "now"; show its label unless a day boundary crowds it (above).
+            const showFirst = isFirst && !boundaryNearStart;
+            const showClock = isFirst ? showFirst : isDayStart || !(hr >= 22 || hr <= 2);
+            const showDay = isFirst ? showFirst : isDayStart;
+            // Left-anchor any label near the left edge (the first column, or a midnight boundary a
+            // column or two in) — centering it would run its left half off the edge and clip it.
+            // Mid-timeline labels stay centered under their column.
+            const cx = x(i) + CW / 2;
+            const nearLeft = isFirst || cx < 26;
+            const tx = nearLeft ? x(i) : cx;
+            const anchor = nearLeft ? "start" : "middle";
             return (
               <g key={`t${i}`}>
                 {isDayStart && i !== 0 && (
@@ -158,7 +169,7 @@ export default function ConditionsTimeline({
                     {clockShort(h.time)}
                   </text>
                 )}
-                {(i === 0 || isDayStart) && (
+                {showDay && (
                   <text
                     x={tx}
                     y={H - 0}

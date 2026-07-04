@@ -12,15 +12,11 @@ import {
 } from "@/lib/units";
 import { clockShort, dayLabel, relativeAge } from "@/lib/format";
 import { ceilingRead } from "@/lib/weather/ceiling";
-import { lowCloudOutlook, lowCloudHeadline, lowCloudRead } from "@/lib/weather/lowcloud";
-import { windToneTextClass, type WindTone } from "@/lib/weather/limits";
+import { lowCloudOutlook, lowCloudHeadline } from "@/lib/weather/lowcloud";
+import { windToneTextClass } from "@/lib/weather/limits";
+import { FLY_WINDOW_HOURS } from "@/lib/weather/windows";
 import { Card, Pill, SourceLine } from "./ui";
-
-const LOW_CLOUD_FILL: Record<WindTone, string> = {
-  emerald: "fill-emerald-400 dark:fill-emerald-500",
-  amber: "fill-amber-400 dark:fill-amber-500",
-  red: "fill-red-400 dark:fill-red-500",
-};
+import LowCloudTimeline from "./LowCloudTimeline";
 
 export default function SkyPanel({
   sky,
@@ -30,9 +26,10 @@ export default function SkyPanel({
   now,
   modeledVisibilityMi,
   apogee,
-  lowCloudHourly,
+  hourly,
   startIndex,
   selectedIndex,
+  onSelect,
 }: {
   sky: Sky;
   daily: DayOutlook[];
@@ -43,27 +40,25 @@ export default function SkyPanel({
   modeledVisibilityMi: number;
   /** Expected apogee (feet AGL), or null — turns the ceiling into a go/no-go clearance read. */
   apogee: number | null;
-  /** Forward window of hourly points (from the current hour) for the low-cloud outlook. */
-  lowCloudHourly: HourPoint[];
-  /** Absolute index of the window's first hour ("now"), so the shared fly-time can be located. */
+  /** Full hourly series — the low-cloud timeline slices its own forward window and feeds the
+   *  shared fly-time scrubber. */
+  hourly: HourPoint[];
+  /** Absolute index of the window's first hour ("now"). */
   startIndex: number;
-  /** Absolute index of the shared fly-time selection — marks the launch hour on the low-cloud
-   *  sparkline and drives its at-fly-time read. The sparkline only reflects this; you scrub it
-   *  from the wind/conditions sliders. */
+  /** Absolute index of the shared fly-time selection — drives the low-cloud timeline's marker,
+   *  scrubber, and at-fly-time read. */
   selectedIndex: number;
+  /** Sets the shared fly-time when the low-cloud timeline is tapped or scrubbed. */
+  onSelect: (absIndex: number) => void;
 }) {
   const u = resolveUnits(units);
   const apogeeLen = apogee != null ? `${fmtLength(apogee, u.length)} ${LENGTH_LABEL[u.length]}` : "";
 
+  const lowCloudHourly = useMemo(
+    () => hourly.slice(startIndex, startIndex + FLY_WINDOW_HOURS),
+    [hourly, startIndex],
+  );
   const lowCloud = useMemo(() => lowCloudOutlook(lowCloudHourly), [lowCloudHourly]);
-
-  // Where the shared fly-time lands within the low-cloud window. The fly-time slider scrubs the
-  // same FLY_WINDOW_HOURS slice, so this is always in range; clamp defensively all the same.
-  const selLocal = Math.max(0, Math.min(lowCloudHourly.length - 1, selectedIndex - startIndex));
-  const selHour = lowCloudHourly[selLocal];
-  const selPct = selHour && Number.isFinite(selHour.cloudCoverLowPct)
-    ? Math.round(selHour.cloudCoverLowPct)
-    : null;
 
   // Visibility prefers the station observation; otherwise the model fills in.
   const observedVisMi = sky.source === "station" ? sky.visibilityMi : null;
@@ -228,85 +223,13 @@ export default function SkyPanel({
               )}
             </span>
           </p>
-          {(() => {
-            const CW = 5;
-            const CH = 16;
-            const BOT = 12;
-            const W = lowCloudHourly.length * CW;
-            const H = CH + BOT;
-            return (
-              <svg
-                viewBox={`0 0 ${W} ${H}`}
-                width={W}
-                height={H}
-                role="img"
-                aria-label={`Modeled low-cloud cover, next ${lowCloudHourly.length} hours. ${lowCloudHeadline(
-                  lowCloud,
-                  (iso) => `${dayLabel(iso, todayIso)} ${clockShort(iso)}`,
-                )}.`}
-                className="mt-2 max-w-full"
-              >
-                <line x1={0} y1={CH} x2={W} y2={CH} className="stroke-zinc-200 dark:stroke-zinc-800" strokeWidth="1" />
-                {lowCloudHourly.map((h, i) => {
-                  const pct = Number.isFinite(h.cloudCoverLowPct) ? h.cloudCoverLowPct : 0;
-                  const barH = Math.max(1, (CH * Math.max(0, Math.min(100, pct))) / 100);
-                  return (
-                    <rect
-                      key={i}
-                      x={i * CW}
-                      y={CH - barH}
-                      width={CW - 1}
-                      height={barH}
-                      rx="0.5"
-                      className={LOW_CLOUD_FILL[lowCloudRead(pct).tone]}
-                    >
-                      <title>{`${dayLabel(h.time, todayIso)} ${clockShort(h.time)} — ${Math.round(pct)}% low cloud`}</title>
-                    </rect>
-                  );
-                })}
-                {lowCloudHourly.map((h, i) => {
-                  if (!h.time.endsWith("T00:00") || i === 0) return null;
-                  return (
-                    <g key={`d${i}`}>
-                      <line x1={i * CW} y1={0} x2={i * CW} y2={CH} className="stroke-zinc-300 dark:stroke-zinc-600" strokeWidth="1" />
-                      <text x={i * CW + 2} y={H - 2} className="fill-zinc-500 dark:fill-zinc-400" fontSize="8">
-                        {dayLabel(h.time, todayIso)}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* The shared fly-time, marked with the same indigo outline the conditions grid
-                    uses — so the launch hour reads as one selection across every panel. */}
-                <rect
-                  x={selLocal * CW - 0.5}
-                  y={-1}
-                  width={CW}
-                  height={CH + 2}
-                  rx="1"
-                  fill="none"
-                  className="stroke-indigo-600 dark:stroke-indigo-400"
-                  strokeWidth="1"
-                />
-              </svg>
-            );
-          })()}
-          {/* The marked hour in words — the headline reads the whole window's peak; this reads the
-              one hour you're actually planning to fly. */}
-          {selHour && (
-            <p className="mt-2 text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">
-                At your fly-time · {dayLabel(selHour.time, todayIso)} {clockShort(selHour.time)} —{" "}
-              </span>
-              {selPct != null ? (
-                <span className={"font-medium " + windToneTextClass(lowCloudRead(selPct).tone)}>
-                  {lowCloudRead(selPct).label.toLowerCase()} low cloud ({selPct}%)
-                </span>
-              ) : (
-                <span className="text-zinc-500 dark:text-zinc-400">no low-cloud model data</span>
-              )}
-            </p>
-          )}
+          <LowCloudTimeline
+            hourly={hourly}
+            startIndex={startIndex}
+            selectedIndex={selectedIndex}
+            onSelect={onSelect}
+            todayIso={todayIso}
+          />
           <SourceLine>
             Modeled low-cloud cover from Open-Meteo — the forward-looking companion to the
             observed ceiling. Low cloud is the layer that usually forms a launch-blocking ceiling;

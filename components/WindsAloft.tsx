@@ -261,7 +261,9 @@ export default function WindsAloft({
           <span className="text-[11px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
             Drift
           </span>
-          <span className="text-zinc-700 dark:text-zinc-300">
+          {/* Reserve two lines on mobile (same as the Shear reading) so this fly-time-driven line
+              can't jump the card height when a value change tips a line boundary. Natural on sm+. */}
+          <span className="block min-h-8 text-zinc-700 sm:min-h-0 dark:text-zinc-300">
             Mean wind to {fmtLength(mean.topFt, u.length)} {LENGTH_LABEL[u.length]}{" "}
             <span className="font-mono tabular-nums">
               {fmtWind(mean.speedMph, u.wind)} {WIND_LABEL[u.wind]}

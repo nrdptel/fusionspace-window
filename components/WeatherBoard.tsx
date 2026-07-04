@@ -478,6 +478,8 @@ export default function WeatherBoard() {
               modeledVisibilityMi={data.forecast.hourly[currentHourIndex(data)]?.visibilityMi ?? NaN}
               apogee={apogee}
               lowCloudHourly={data.forecast.hourly.slice(currentHourIndex(data), currentHourIndex(data) + FLY_WINDOW_HOURS)}
+              startIndex={currentHourIndex(data)}
+              selectedIndex={selectedHour}
             />
           </Panel>
 

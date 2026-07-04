@@ -84,10 +84,10 @@ test("the conditions grid stacks the factor rows and lists them in a table", asy
   const grid = page.locator("#conditions");
   await expect(grid.getByRole("heading", { name: "Conditions at a glance" })).toBeVisible();
 
-  // Four factors, stacked as labelled rows (the row labels live in the SVG).
-  const svg = grid.locator("svg");
+  // Four factors, stacked as labelled rows (the labels are a fixed column beside the scrolling grid;
+  // .first() picks that column over the identically-named headers in the collapsed table fallback).
   for (const label of ["Wind", "Gusts", "Storms", "Precip"]) {
-    await expect(svg.getByText(label, { exact: true })).toBeVisible();
+    await expect(grid.getByText(label, { exact: true }).first()).toBeVisible();
   }
   // The colour key is present; there is deliberately no single blended verdict.
   await expect(grid.getByText("caution", { exact: true })).toBeVisible();

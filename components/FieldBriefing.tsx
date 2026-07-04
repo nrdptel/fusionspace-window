@@ -81,7 +81,7 @@ export default function FieldBriefing({
   return (
     <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/40">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
           Take it to the field
         </span>
         <button

@@ -22,6 +22,27 @@ const ogDir = resolve(here, "..", "public", "og");
 const SIZE = { width: 1200, height: 630 };
 const h = React.createElement;
 
+// next/og (Satori) ignores `fontWeight` unless a font file is supplied at that weight — with no
+// fonts it renders everything in its single bundled regular face, so the wordmark came out thin
+// instead of bold. Embed the site's Geist faces (sans at the weights the card uses, plus mono for
+// the domain) so the bold name and semibold tagline render as designed, matching the sibling tools.
+const geistSans = resolve(here, "..", "node_modules", "geist", "dist", "fonts", "geist-sans");
+const geistMono = resolve(here, "..", "node_modules", "geist", "dist", "fonts", "geist-mono");
+async function loadFonts() {
+  const [regular, semibold, bold, mono] = await Promise.all([
+    readFile(resolve(geistSans, "Geist-Regular.ttf")),
+    readFile(resolve(geistSans, "Geist-SemiBold.ttf")),
+    readFile(resolve(geistSans, "Geist-Bold.ttf")),
+    readFile(resolve(geistMono, "GeistMono-Regular.ttf")),
+  ]);
+  return [
+    { name: "Geist", data: regular, weight: 400, style: "normal" },
+    { name: "Geist", data: semibold, weight: 600, style: "normal" },
+    { name: "Geist", data: bold, weight: 700, style: "normal" },
+    { name: "GeistMono", data: mono, weight: 400, style: "normal" },
+  ];
+}
+
 // Shared default card — identical template to the Motor Finder's, so the family reads as
 // one. Only the name, tagline, and domain differ between tools.
 function defaultCard(markUri) {
@@ -40,7 +61,7 @@ function defaultCard(markUri) {
         backgroundImage:
           "radial-gradient(56% 64% at 50% 31%, rgba(99,102,241,0.27) 0%, rgba(99,102,241,0) 76%)",
         color: "#fafafa",
-        fontFamily: "sans-serif",
+        fontFamily: "Geist",
       },
     },
     h("img", { src: markUri, width: 130, height: 120, style: { marginBottom: 40 } }),
@@ -56,7 +77,7 @@ function defaultCard(markUri) {
     ),
     h(
       "div",
-      { style: { fontSize: 26, color: "#818cf8", marginTop: 28, fontFamily: "monospace", letterSpacing: "0.02em" } },
+      { style: { fontSize: 26, color: "#818cf8", marginTop: 28, fontFamily: "GeistMono", letterSpacing: "0.02em" } },
       "window.fusionspace.co",
     ),
   );
@@ -70,7 +91,7 @@ async function main() {
   if (!markUri) throw new Error("gen-og: could not extract OG_MARK_PNG from lib/og-mark.ts");
 
   await mkdir(ogDir, { recursive: true });
-  const resp = new ImageResponse(defaultCard(markUri), { ...SIZE });
+  const resp = new ImageResponse(defaultCard(markUri), { ...SIZE, fonts: await loadFonts() });
   await writeFile(resolve(ogDir, "default.png"), Buffer.from(await resp.arrayBuffer()));
   console.log("gen-og: wrote public/og/default.png");
 }

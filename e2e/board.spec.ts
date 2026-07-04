@@ -78,23 +78,28 @@ test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
   await expect(header).not.toContainText("12 PM");
 });
 
-test("the shared fly-time drives the sky panel's low-cloud read", async ({ page }) => {
+test("the low-cloud timeline shares the fly-time in both directions", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });
   const sky = page.locator("#sky");
 
-  // The low-cloud outlook reads the selected launch hour — synced to the same fly-time as the
-  // other panels, not its own control. At the default selection that's the fixture's current hour.
+  // The low-cloud outlook is a full timeline with its own scrubber, reading the selected launch
+  // hour. At the default selection that's the fixture's current hour.
   const flyRead = sky.getByText(/At your fly-time/);
   await expect(flyRead).toContainText("12 PM");
-  const before = await flyRead.textContent();
 
   // Scrubbing the hourly panel's slider moves the sky read too (one selection across the board).
-  const slider = page.locator("#hourly").getByRole("slider", { name: /Pick a launch time/ });
-  await slider.focus();
-  await slider.press("End");
+  const hourlySlider = page.locator("#hourly").getByRole("slider", { name: /Pick a launch time/ });
+  await hourlySlider.focus();
+  await hourlySlider.press("End");
   await expect(flyRead).not.toContainText("12 PM");
-  expect(await flyRead.textContent()).not.toBe(before);
+
+  // And the reverse: the sky panel's own slider drives the rest of the board.
+  const skySlider = sky.getByRole("slider", { name: /Pick a launch time/ });
+  await skySlider.focus();
+  await skySlider.press("Home");
+  await expect(flyRead).toContainText("12 PM");
+  await expect(page.locator("#hourly").getByText(/^At /).first()).toContainText("12 PM");
 });
 
 test("the conditions grid stacks the factor rows and lists them in a table", async ({ page }) => {

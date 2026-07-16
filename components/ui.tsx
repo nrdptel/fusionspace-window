@@ -21,7 +21,9 @@ export function Segmented<T extends string>({
   ariaLabel: string;
   size?: "sm" | "md";
 }) {
-  const pad = size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm";
+  // py-1.5 keeps the small segmented controls (units, winds-aloft top) above the 24px WCAG 2.2
+  // target-size minimum; py-0.5 rendered them ~20px.
+  const pad = size === "sm" ? "px-2.5 py-1.5 text-xs" : "px-3 py-1 text-sm";
   return (
     <div
       role="group"

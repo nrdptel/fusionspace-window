@@ -101,7 +101,7 @@ export default function ConditionsTimeline({
           ))}
         </div>
 
-        <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto">
+        <div ref={scrollRef} tabIndex={0} aria-label="Conditions grid — scroll horizontally for later hours" className="min-w-0 flex-1 overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           width={width}

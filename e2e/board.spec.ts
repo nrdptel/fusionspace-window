@@ -72,7 +72,7 @@ test("the fly-time scrubber drives a conditions snapshot", async ({ page }) => {
 
   // Scrubbing the slider moves the snapshot to another hour. Each scrub panel now has its own
   // synced fly-time slider, so scope to the hourly panel's.
-  const slider = hourly.getByRole("slider", { name: /Pick a launch time/ });
+  const slider = hourly.getByRole("slider", { name: /Pick a fly-time/ });
   await slider.focus();
   await slider.press("End");
   await expect(header).not.toContainText("12 PM");
@@ -89,13 +89,13 @@ test("the low-cloud timeline shares the fly-time in both directions", async ({ p
   await expect(flyRead).toContainText("12 PM");
 
   // Scrubbing the hourly panel's slider moves the sky read too (one selection across the board).
-  const hourlySlider = page.locator("#hourly").getByRole("slider", { name: /Pick a launch time/ });
+  const hourlySlider = page.locator("#hourly").getByRole("slider", { name: /Pick a fly-time/ });
   await hourlySlider.focus();
   await hourlySlider.press("End");
   await expect(flyRead).not.toContainText("12 PM");
 
   // And the reverse: the sky panel's own slider drives the rest of the board.
-  const skySlider = sky.getByRole("slider", { name: /Pick a launch time/ });
+  const skySlider = sky.getByRole("slider", { name: /Pick a fly-time/ });
   await skySlider.focus();
   await skySlider.press("Home");
   await expect(flyRead).toContainText("12 PM");
@@ -113,7 +113,7 @@ test("no fly-time-driven panel changes height as you scrub (mobile)", async ({ p
   await page.getByLabel(/Expected apogee/).fill("9000");
   await page.getByLabel(/Recovery descent rate/).fill("18");
 
-  const slider = page.locator("#hourly").getByRole("slider", { name: /Pick a launch time/ });
+  const slider = page.locator("#hourly").getByRole("slider", { name: /Pick a fly-time/ });
   await slider.focus();
   const heights: Record<string, Set<number>> = { hourly: new Set(), conditions: new Set(), aloft: new Set(), sky: new Set() };
   for (const k of [0, 9, 18, 27, 36, 45, 54, 63, 71]) {

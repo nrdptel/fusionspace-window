@@ -112,7 +112,9 @@ export default function HourlyTimeline({
 
   return (
     <div>
-      <div ref={scrollRef} className="overflow-x-auto">
+      {/* tabIndex/aria-label so the horizontally-scrolling chart is keyboard-operable when the
+          72 h timeline overflows a narrow screen (matches the low-cloud timeline). */}
+      <div ref={scrollRef} tabIndex={0} aria-label="Hourly wind chart — scroll horizontally for later hours" className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${H}`}
           width={width}

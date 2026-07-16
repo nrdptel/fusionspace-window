@@ -49,7 +49,10 @@ export default function FlyTimeSlider({
         max={count - 1}
         value={selLocal}
         onChange={(e) => onSelect(startIndex + Number(e.target.value))}
-        aria-label="Pick a launch time — sets the hourly snapshot, the conditions grid, and the winds-aloft profile"
+        aria-label="Pick a fly-time — sets the hourly snapshot, the conditions grid, and the winds-aloft profile"
+        // Without this a screen reader announces the raw hour offset ("5", "6"…) as you scrub;
+        // aria-valuetext makes each step speak the actual launch hour instead.
+        aria-valuetext={sel ? `${dayLabel(sel.time, todayIso)} ${clockShort(sel.time)}` : undefined}
         className="block w-full accent-indigo-600"
       />
     </div>

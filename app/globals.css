@@ -82,3 +82,15 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* Respect a reduced-motion preference: near-instant the only continuous motion (the loading
+   skeleton pulse) and the sub-200ms hover fades. Scroll-following is already instant in JS. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

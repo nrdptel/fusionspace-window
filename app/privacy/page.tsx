@@ -6,11 +6,30 @@ import { SITE_URL, REPO_URL, OPEN_METEO_URL, NWS_URL } from "@/lib/links";
 
 const GITHUB_ISSUES = `${REPO_URL}/issues`;
 
+const TITLE = "Privacy — Window";
+const DESCRIPTION =
+  "What Window collects (nothing), the only third parties it talks to (the weather providers), and how geolocation and your saved fields work.";
+
+// Own the social card: without an openGraph/twitter block this page inherits the layout's
+// homepage card, so a shared /privacy link would preview as the board and point og:url at the root.
 export const metadata: Metadata = {
-  title: "Privacy — Window",
-  description:
-    "What Window collects (nothing), the only third parties it talks to (the weather providers), and how geolocation and your saved fields work.",
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: `${SITE_URL}/privacy` },
+  openGraph: {
+    type: "website",
+    siteName: "Window",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: `${SITE_URL}/privacy`,
+    images: [{ url: "/og/default.png", width: 1200, height: 630, alt: "Window — HPR launch weather" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og/default.png"],
+  },
 };
 
 export default function PrivacyPage() {

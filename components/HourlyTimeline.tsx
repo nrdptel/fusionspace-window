@@ -243,7 +243,7 @@ export default function HourlyTimeline({
 
       <SourceLine>
         Hourly surface wind from Open-Meteo ({model}); the dashed line is gusts. Drag the
-        slider to pick a launch time — it sets the snapshot above and the winds-aloft profile
+        slider to pick a fly-time — it sets the snapshot above and the winds-aloft profile
         below, so you can read the conditions at the hour you plan to fly, not just now.
       </SourceLine>
 

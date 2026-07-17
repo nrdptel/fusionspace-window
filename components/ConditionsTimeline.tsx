@@ -109,20 +109,20 @@ export default function ConditionsTimeline({
           role="img"
           aria-label={`Conditions for the next ${window.length} hours, four rows — wind, gusts, storm potential, and chance of rain — each colored green, amber, or red against its own reference. Full values are in the table below.`}
         >
-          {/* cells */}
+          {/* cells — fill HEIGHT encodes severity as a second, non-color cue (WCAG 1.4.1, "use of
+              color"): watch = full-height block, caution ≈ two-thirds, clear ≈ a third, bottom-
+              anchored on a faint track. So a red-green colorblind flyer reads the grid by the rising
+              silhouette, not by telling emerald/amber/red apart. */}
           {conds.map((c, i) =>
             ROWS.map((row, r) => {
               const cell = cellOf(c, row.key);
+              const frac = cell.tone === "red" ? 1 : cell.tone === "amber" ? 0.66 : 0.36;
+              const bh = Math.max(3, Math.round(CH * frac));
               return (
-                <rect
-                  key={`${row.key}${i}`}
-                  x={x(i)}
-                  y={rowY(r)}
-                  width={CW - 1}
-                  height={CH}
-                  rx="1.5"
-                  className={FILL[cell.tone]}
-                />
+                <g key={`${row.key}${i}`}>
+                  <rect x={x(i)} y={rowY(r)} width={CW - 1} height={CH} rx="1.5" className="fill-zinc-200/70 dark:fill-zinc-800/50" />
+                  <rect x={x(i)} y={rowY(r) + (CH - bh)} width={CW - 1} height={bh} rx="1.5" className={FILL[cell.tone]} />
+                </g>
               );
             }),
           )}
@@ -229,16 +229,17 @@ export default function ConditionsTimeline({
         windowHours={window.length}
       />
 
-      {/* color key */}
+      {/* color key — the swatches also step up in height, teaching the grid's non-color cue
+          (taller = worse) so the legend itself doesn't rely on telling the hues apart. */}
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500 dark:text-zinc-400">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-3 rounded-sm bg-emerald-400 dark:bg-emerald-500" /> clear
+          <span className="flex h-3.5 w-3 items-end"><span className="h-1.5 w-full rounded-sm bg-emerald-400 dark:bg-emerald-500" /></span> clear
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-3 rounded-sm bg-amber-400 dark:bg-amber-500" /> caution
+          <span className="flex h-3.5 w-3 items-end"><span className="h-2.5 w-full rounded-sm bg-amber-400 dark:bg-amber-500" /></span> caution
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-2.5 w-3 rounded-sm bg-red-400 dark:bg-red-500" /> watch
+          <span className="flex h-3.5 w-3 items-end"><span className="h-3.5 w-full rounded-sm bg-red-400 dark:bg-red-500" /></span> watch
         </span>
       </div>
 

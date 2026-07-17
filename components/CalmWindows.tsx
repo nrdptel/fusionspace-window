@@ -65,6 +65,7 @@ export default function CalmWindows({
             key={w.startIndex}
             w={w}
             unit={u.wind}
+            limitMph={limit}
             todayIso={todayIso}
             selected={selectedIndex >= w.startIndex && selectedIndex <= w.endIndex}
             onClick={() => onSelect(w.startIndex)}
@@ -78,12 +79,14 @@ export default function CalmWindows({
 function WindowChip({
   w,
   unit,
+  limitMph,
   todayIso,
   selected,
   onClick,
 }: {
   w: CalmWindow;
   unit: ReturnType<typeof resolveUnits>["wind"];
+  limitMph: number;
   todayIso: string;
   selected: boolean;
   onClick: () => void;
@@ -92,7 +95,10 @@ function WindowChip({
   const range = sameDay
     ? `${dayLabel(w.startTime, todayIso)} ${clockShort(w.startTime)}–${clockShort(w.endTime)}`
     : `${dayLabel(w.startTime, todayIso)} ${clockShort(w.startTime)} – ${dayLabel(w.endTime, todayIso)} ${clockShort(w.endTime)}`;
-  const gusty = Number.isFinite(w.gustMaxMph) && w.gustMaxMph >= 20;
+  // Flag gustiness against the SAME line the window is judged on (the personal line, or the 20 mph
+  // limit) — so a conservative flyer's gusts that break their line get called out, not only gusts
+  // that reach the default limit. The window's sustained wind is already ≤ this line by definition.
+  const gusty = Number.isFinite(w.gustMaxMph) && w.gustMaxMph >= limitMph;
 
   return (
     <button

@@ -168,6 +168,21 @@ test("calm windows are surfaced and jump the profile when tapped", async ({ page
   await expect(page.locator("#aloft").getByText(/Valid .* field-local/)).toBeVisible();
 });
 
+test("calm windows flag gusts against the personal line, not just the 20 mph limit", async ({ page }) => {
+  await installStubs(page);
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+  const hourly = page.locator("#hourly");
+
+  // With a conservative personal line, a window's gusts that break *that* line are flagged — even
+  // though they're under the 20 mph default that the chip used to hardcode.
+  await page.getByLabel(/Personal surface-wind line/i).fill("12");
+  const chip = hourly.locator("button", { hasText: /≤/ }).first();
+  await expect(chip).toContainText(/gusts/);
+  const flagged = Number((await chip.innerText()).match(/gusts\s+(\d+)/)?.[1] ?? "0");
+  expect(flagged).toBeGreaterThanOrEqual(12); // breaks the personal line
+  expect(flagged).toBeLessThan(20); // and would NOT have tripped the old hardcoded 20
+});
+
 test("the field briefing previews and copies", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL, { waitUntil: "networkidle" });

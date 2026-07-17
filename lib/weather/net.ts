@@ -260,6 +260,13 @@ export async function loadBoard(
     .catch(() => null);
 
   const raw = await forecastP;
+  // A 200 with an empty or partial body — including Open-Meteo's own `{error:true,reason}`
+  // responses, which come back 200 — would otherwise flow through parseForecast as all-NaN and
+  // render a garbage board that looks valid ("Right now" wind "—", empty timelines). Require the
+  // core hourly series; if it's missing, fail like a network error so the honest error card shows.
+  if (!raw?.hourly?.time?.length) {
+    throw new Error("Open-Meteo returned no forecast data");
+  }
   const point = await pointP;
 
   const skyP = point.stationsUrl

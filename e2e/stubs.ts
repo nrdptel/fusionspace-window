@@ -18,8 +18,9 @@ function json(route: Route, name: string) {
 }
 
 export interface StubOptions {
-  /** Open-Meteo forecast availability (the hard dependency). */
-  forecast?: "ok" | "down";
+  /** Open-Meteo forecast availability (the hard dependency). "empty200" simulates a 200 response
+   *  with no usable body — including Open-Meteo's own `{error:true}` payloads, which come back 200. */
+  forecast?: "ok" | "down" | "empty200";
   /** NWS availability (alerts + observed ceiling). */
   nws?: "ok" | "down";
   /** Open-Meteo historical archive availability (the seasonal normal). */
@@ -48,6 +49,8 @@ export async function installStubs(page: Page, opts: StubOptions = {}): Promise<
 
   await page.route("https://api.open-meteo.com/v1/forecast**", (route) => {
     if (forecast === "down") return route.abort("failed");
+    if (forecast === "empty200")
+      return route.fulfill({ contentType: "application/json", body: '{"error":true,"reason":"No data available"}' });
     return json(route, "forecast.json");
   });
 

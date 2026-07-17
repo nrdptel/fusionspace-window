@@ -21,6 +21,15 @@ function validLon(n: number): boolean {
   return Number.isFinite(n) && n >= -180 && n <= 180;
 }
 
+/** The label is display-only, but it rides in the URL and so is user-controllable via a shared
+ *  link. React escapes it everywhere it renders (no XSS), but an unbounded value would still bloat
+ *  the DOM and localStorage — cap the length and drop control characters. */
+const LABEL_MAX = 80;
+function sanitizeLabel(s: string): string | undefined {
+  const clean = s.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, LABEL_MAX);
+  return clean || undefined;
+}
+
 export function encodeState(s: UrlState): string {
   const p = new URLSearchParams();
   if (s.lat != null && s.lon != null && validLat(s.lat) && validLon(s.lon)) {
@@ -36,6 +45,6 @@ export function decodeState(query: string): UrlState {
   const lat = p.has("lat") ? Number.parseFloat(p.get("lat")!) : NaN;
   const lon = p.has("lon") ? Number.parseFloat(p.get("lon")!) : NaN;
   if (!validLat(lat) || !validLon(lon)) return { lat: null, lon: null };
-  const label = p.get("label") || undefined;
-  return { lat: roundCoord(lat), lon: roundCoord(lon), label };
+  const raw = p.get("label");
+  return { lat: roundCoord(lat), lon: roundCoord(lon), label: raw ? sanitizeLabel(raw) : undefined };
 }

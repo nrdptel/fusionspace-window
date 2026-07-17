@@ -68,7 +68,8 @@ export default function AllSitesConditions({
         </p>
         <ul className="max-h-96 divide-y divide-zinc-100 overflow-auto dark:divide-zinc-800/70">
           {sites.map((s) => (
-            <SiteRow key={s.name} site={s} onPick={onPick} />
+            // Key on the unique slug, not the display name — two curated fields could share a name.
+            <SiteRow key={s.slug} site={s} onPick={onPick} />
           ))}
         </ul>
       </div>

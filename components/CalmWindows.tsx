@@ -57,7 +57,7 @@ export default function CalmWindows({
     <div className="mb-4">
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
         <span className="font-medium text-zinc-700 dark:text-zinc-300">Calm windows</span> —
-        upcoming stretches with sustained wind {lineLabel}. Tap one to read its winds aloft.
+        upcoming stretches with sustained wind {lineLabel}. Tap one to set the fly-time.
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {windows.slice(0, MAX_SHOWN).map((w) => (

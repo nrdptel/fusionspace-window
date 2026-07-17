@@ -114,6 +114,13 @@ export default function Page() {
               absent.
             </li>
             <li>
+              <strong className="font-medium text-zinc-800 dark:text-zinc-200">The next several days</strong>{" "}
+              distills each day into its calmest flyable window and how that day&apos;s wind sits
+              against the <strong>seasonal normal</strong> for the field — so you can pick a day
+              before you drill into the hour. (It&apos;s the multi-day companion to the hourly{" "}
+              <em>next 3 days</em> above.)
+            </li>
+            <li>
               <strong className="font-medium text-zinc-800 dark:text-zinc-200">Units &amp; sharing</strong>{" "}
               — toggle Imperial/Metric (and knots) any time; it never refetches. The field is in
               the URL, so a link is shareable and reload-proof, and a bare visit comes back to
@@ -181,7 +188,7 @@ export default function Page() {
           <Method title="Density altitude">
             The altitude in the standard atmosphere where the air has the same density as the
             air at the field right now — the honest way to say how thin the air is. It&apos;s
-            computed from the field&apos;s actual (station) pressure, temperature, and humidity:
+            computed from the field&apos;s surface (station-level) pressure, temperature, and humidity:
             the moist-air density (dry and water-vapor partial pressures over the gas
             constants) inverted through the ISA density profile. Field elevation is shown only
             for context — it isn&apos;t an input, a common misconception. It matters because

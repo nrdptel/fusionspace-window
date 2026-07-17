@@ -152,8 +152,9 @@ export default function WeatherBoard() {
     const fresh = cached && !isStale(cached.fetchedAt, Date.now());
 
     if (offline) {
-      if (cached) setStale(true);
-      else setError("offline");
+      // A fresh cache stays fresh offline — line above already set the right stale flag from its
+      // age; don't force the "showing last-known data" banner on data that's seconds old.
+      if (!cached) setError("offline");
       return;
     }
     if (fresh) return; // cache is within the freshness window — no refetch
@@ -303,7 +304,10 @@ export default function WeatherBoard() {
         </Notice>
       )}
 
-      {loading && !data && (
+      {/* Show the skeleton the moment a field is picked, not only once `loading` flips true inside
+          the post-mount effect — otherwise there's a blank frame between the two. Hides as soon as
+          data lands or an error is surfaced. */}
+      {field?.lat != null && !data && !error && (
         <div className="mt-8 space-y-3">
           <div className="h-40 animate-pulse rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40" />
           <div className="h-32 animate-pulse rounded-xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40" />

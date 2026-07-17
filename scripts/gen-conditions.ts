@@ -77,4 +77,9 @@ async function main() {
   console.log(`gen-conditions: wrote ${feed.sites.length} per-site detail files`);
 }
 
-main();
+main().catch((err) => {
+  // The conditions API is best-effort (the site deploys fine without it). The fetch path already
+  // degrades to an empty feed; this guards the write phase too, so an unexpected error here can't
+  // fail the whole build via an unhandled rejection.
+  console.warn("gen-conditions: skipped —", err instanceof Error ? err.message : err);
+});

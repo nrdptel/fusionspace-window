@@ -35,3 +35,13 @@ test("Open-Meteo down with no cache: a clear, non-error message — not a blank 
   await expect(page.getByText(/Open-Meteo couldn't be reached/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Right now" })).toHaveCount(0);
 });
+
+test("Open-Meteo 200 with no usable body: the honest error card, not a NaN dashboard", async ({ page }) => {
+  // A 200 with an empty/`{error:true}` body must fail like a network error — otherwise the whole
+  // board renders as all-"—" and looks valid. The board must show the error card, not "Right now".
+  await installStubs(page, { forecast: "empty200" });
+  await page.goto(FIELD_URL, { waitUntil: "networkidle" });
+
+  await expect(page.getByText(/Open-Meteo couldn't be reached/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Right now" })).toHaveCount(0);
+});

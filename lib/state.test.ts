@@ -24,4 +24,12 @@ describe("URL state", () => {
   it("accepts a leading question mark", () => {
     expect(decodeState("?lat=40&lon=-105").lat).toBe(40);
   });
+
+  it("clamps an over-long label from the URL and drops control characters", () => {
+    const long = "x".repeat(500);
+    expect(decodeState(`?lat=40&lon=-105&label=${long}`).label).toHaveLength(80);
+    expect(decodeState("?lat=40&lon=-105&label=%09%00clean%1F").label).toBe("clean");
+    // A label that's empty after sanitizing becomes undefined, not "".
+    expect(decodeState("?lat=40&lon=-105&label=%00%01").label).toBeUndefined();
+  });
 });

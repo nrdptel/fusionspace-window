@@ -169,10 +169,10 @@ test("splits the landing drift between drogue and main in dual-deploy mode", asy
   await expect(page.getByText(/Landing drift \(dual\):/)).toBeVisible();
 });
 
-test("brand eyebrow links to the Fusion Space hub", async ({ page }) => {
+test("brand eyebrow links to the FusionSpace hub", async ({ page }) => {
   await installStubs(page);
   await page.goto(FIELD_URL);
-  const eyebrow = page.getByRole("link", { name: "Fusion Space" }).first();
+  const eyebrow = page.getByRole("link", { name: "FusionSpace" }).first();
   await expect(eyebrow).toHaveAttribute("href", "https://fusionspace.co");
 });
 

@@ -14,8 +14,8 @@ export default function NotFound() {
         src="/brand/fusion-space-mark.svg"
         alt=""
         aria-hidden
-        width={880}
-        height={815}
+        width={199}
+        height={200}
         className="h-10 w-auto opacity-80"
       />
       <p className="mt-6 font-mono text-sm text-indigo-600 dark:text-indigo-400">404</p>

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/gen-og.mjs && node scripts/gen-favicon.mjs && tsx scripts/gen-conditions.ts",
+    "prebuild": "tsx scripts/gen-conditions.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -33,7 +33,6 @@
     "eslint": "^9.18.0",
     "eslint-config-next": "^16.0.0",
     "serve": "^14.2.6",
-    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "tsx": "^4.22.5",
     "typescript": "^5",

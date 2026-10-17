@@ -18,9 +18,8 @@ const DESCRIPTION =
 
 const TITLE = "Window — HPR launch weather";
 
-// Pre-generated at build by scripts/gen-og.mjs (a static export can't render the dynamic
-// next/og route at request time). Resolved absolutely against metadataBase. Uses the HPR
-// Motor Finder's exact card template so the family reads as one.
+// The FusionSpace Rev C link-preview card, committed as a static file (from the brand kit's
+// projects/window/og-image-dark.png, 1200×630). Resolved absolutely against metadataBase.
 const OG_IMAGE = "/og/default.png";
 
 export const metadata: Metadata = {

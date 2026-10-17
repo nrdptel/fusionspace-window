@@ -161,7 +161,9 @@ export default function LocationBar({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search a place — town, field, landmark"
+              // Short enough to show whole beside the icon and the Search button down to a
+              // 320 px phone (e2e/responsive.spec.ts checks it); the aria-label says the rest.
+              placeholder="Town or field"
               aria-label="Search for a launch field by place name"
               className="w-full bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
             />
@@ -195,7 +197,8 @@ export default function LocationBar({
           )}
         </div>
 
-        <div className="flex gap-2">
+        {/* Wraps on the narrowest phones (320 px) rather than pushing Coordinates past the card. */}
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={useMyLocation}

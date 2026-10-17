@@ -1,3 +1,9 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/brand/readme-banner-dark@2x.png">
+  <source media="(prefers-color-scheme: light)" srcset=".github/brand/readme-banner-light@2x.png">
+  <img alt="Window · FS · SW · TOOL 003" src=".github/brand/readme-banner-dark@2x.png" width="100%">
+</picture>
+
 # Window
 
 Launch weather for high-power and model rocketry. You give it a launch field; it shows the

@@ -260,17 +260,19 @@ export default function ConditionsTimeline({
           aria-label="Hourly conditions table"
           className="mt-2 max-h-72 overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800"
         >
+          {/* Tighter cell padding on phones so all five columns fit a 320 px screen at rest,
+              instead of the Precip column sitting cut off at the scroller's edge. */}
           <table className="w-full text-left text-xs tabular-nums">
             <caption className="sr-only">
               Wind, gusts, storm potential, and chance of rain by hour for the next 3 days
             </caption>
             <thead className="sticky top-0 bg-zinc-50 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
               <tr>
-                <th scope="col" className="px-3 py-1.5 font-medium">Hour</th>
-                <th scope="col" className="px-3 py-1.5 font-medium">Wind</th>
-                <th scope="col" className="px-3 py-1.5 font-medium">Gusts</th>
-                <th scope="col" className="px-3 py-1.5 font-medium">Storms</th>
-                <th scope="col" className="px-3 py-1.5 font-medium">Precip</th>
+                <th scope="col" className="px-2 py-1.5 font-medium sm:px-3">Hour</th>
+                <th scope="col" className="px-2 py-1.5 font-medium sm:px-3">Wind</th>
+                <th scope="col" className="px-2 py-1.5 font-medium sm:px-3">Gusts</th>
+                <th scope="col" className="px-2 py-1.5 font-medium sm:px-3">Storms</th>
+                <th scope="col" className="px-2 py-1.5 font-medium sm:px-3">Precip</th>
               </tr>
             </thead>
             <tbody>
@@ -278,11 +280,11 @@ export default function ConditionsTimeline({
                 const c = conds[i];
                 return (
                   <tr key={i} className={i === selLocal ? "bg-indigo-500/5 font-medium" : "odd:bg-zinc-50/60 dark:odd:bg-zinc-900/30"}>
-                    <td className="px-3 py-1">{dayLabel(h.time, todayIso).slice(0, 3)} {clockShort(h.time)}</td>
-                    <td className={"px-3 py-1 " + windToneTextClass(c.wind.tone)}>{fmtWind(h.windMph, u.wind)}</td>
-                    <td className={"px-3 py-1 " + windToneTextClass(c.gusts.tone)}>{c.gusts.label}</td>
-                    <td className={"px-3 py-1 " + windToneTextClass(c.storms.tone)}>{c.storms.label}</td>
-                    <td className={"px-3 py-1 " + windToneTextClass(c.precip.tone)}>{c.precip.label}</td>
+                    <td className="px-2 py-1 sm:px-3">{dayLabel(h.time, todayIso).slice(0, 3)} {clockShort(h.time)}</td>
+                    <td className={"px-2 py-1 sm:px-3 " + windToneTextClass(c.wind.tone)}>{fmtWind(h.windMph, u.wind)}</td>
+                    <td className={"px-2 py-1 sm:px-3 " + windToneTextClass(c.gusts.tone)}>{c.gusts.label}</td>
+                    <td className={"px-2 py-1 sm:px-3 " + windToneTextClass(c.storms.tone)}>{c.storms.label}</td>
+                    <td className={"px-2 py-1 sm:px-3 " + windToneTextClass(c.precip.tone)}>{c.precip.label}</td>
                   </tr>
                 );
               })}

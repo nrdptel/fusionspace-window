@@ -1,10 +1,10 @@
 # Window — design notes
 
-This is my working read of how Fusion Space looks, reads, and is built, plus the plan for
+This is my working read of how FusionSpace looks, reads, and is built, plus the plan for
 Window. It's written down so it can be corrected early rather than late. It is not
 user-facing.
 
-## 1. What Fusion Space is, as a design
+## 1. What FusionSpace is, as a design
 
 There are a handful of tools now — the hub (`fusionspace.co`), the HPR Motor Finder
 (`motor.fusionspace.co`), Charge, and Debrief — and they're unmistakably the same hand. I
@@ -44,7 +44,7 @@ read the throughline as three habits:
   in `localStorage` under a per-tool key. A tiny inline script runs before paint to set
   `dark`/`light` on `<html>` so nothing flashes. `theme-color` `#ffffff` / `#09090b`.
 - **Footer:** thin top border, `text-xs text-zinc-500`. A row of links separated by `·`, a
-  "Built by [Fusion Space wordmark]" lockup, and a plain non-affiliation + best-effort
+  "Built by [FusionSpace wordmark]" lockup, and a plain non-affiliation + best-effort
   disclaimer. Plus the monthly observance flourish (`lib/observances.ts`).
 - **Transparency sections** are `<details>` disclosures: a `font-medium` summary, a
   `space-y-4 text-zinc-600` body, often a `<dl>` per term.
@@ -938,7 +938,7 @@ for the field you choose. Geolocation, if you use it, only sets coordinates loca
   (names/origin adapted only). Static-exports to `out/`, no runtime server.
 - **One page.** `/` is the board; `/privacy` is the only other route. The explainer lives
   inline in disclosures.
-- **Shared chrome verbatim** (strings adapted): header/footer, the Fusion Space badge, the
+- **Shared chrome verbatim** (strings adapted): header/footer, the FusionSpace badge, the
   Ko-fi tip _link_, the three-state theme toggle + pre-paint script, `globals.css` tokens,
   the brand vectors, the OG template + `gen-og.mjs` + `og-mark`, `lib/observances.ts` + the
   monthly rebuild, PWA manifest + service worker, robots/sitemap, issue templates,

@@ -16,7 +16,7 @@ verdict. It surfaces the data and the relevant reference lines — the 20 mph NF
 surface-wind limit, winds aloft, the ceiling — and leaves the call to you and your field's
 rules. Every figure carries its source and valid time.
 
-Part of [Fusion Space](https://fusionspace.co) — free, careful tools for the hobby. Live at
+Part of [FusionSpace](https://fusionspace.co) — free, careful tools for the hobby. Live at
 **[window.fusionspace.co](https://window.fusionspace.co)**.
 
 ## What it shows
@@ -113,7 +113,7 @@ installability; it never caches a forecast, so freshness is always real.
 ## Stack
 
 Next.js (App Router) statically exported (`output: "export"`), Tailwind v4, Geist, TypeScript,
-Node 20 — the same stack as the rest of Fusion Space. It builds to plain static files in
+Node 20 — the same stack as the rest of FusionSpace. It builds to plain static files in
 `out/` with no server runtime, and deploys to Cloudflare Pages via Wrangler in GitHub Actions.
 
 The data layer is split the family's way: a thin, impure network layer (`lib/weather/net.ts`)

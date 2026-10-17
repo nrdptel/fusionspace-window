@@ -26,7 +26,7 @@ export default function Footer() {
             <GitHubIcon className="h-4 w-4 fill-current" />
             GitHub
           </a>
-          {/* The other live Fusion Space tools, inline the way the siblings cross-link. */}
+          {/* The other live FusionSpace tools, inline the way the siblings cross-link. */}
           {SIBLING_TOOLS.map((tool) => (
             <span key={tool.href} className="inline-flex items-center gap-x-4">
               <Dot />
@@ -68,17 +68,27 @@ export default function Footer() {
           href={HUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          title="Fusion Space — free, polished tools for high-power rocketry"
+          title="FusionSpace — free, polished tools for high-power rocketry"
           className="group inline-flex items-center gap-1.5 transition hover:opacity-80"
         >
           <span>A</span>
+          {/* Rev C horizontal lockup at the brand's 24 px minimum: Void on light (under
+              32 px the gradient goes faint on light), gradient on dark. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/fusion-space-horizontal-void.svg"
+            alt="FusionSpace"
+            width={142}
+            height={24}
+            className="h-6 w-auto dark:hidden"
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/fusion-space-wordmark.svg"
-            alt="Fusion Space"
-            width={1598}
-            height={281}
-            className="h-5 w-auto"
+            alt="FusionSpace"
+            width={142}
+            height={24}
+            className="hidden h-6 w-auto dark:block"
           />
           <span>
             project{" "}

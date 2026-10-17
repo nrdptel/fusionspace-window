@@ -11,7 +11,7 @@ export const KOFI_URL = "https://ko-fi.com/nrdptel";
 export const API_DOCS_PATH = "/api";
 export const API_BASE_URL = `${SITE_URL}/api/v1`;
 
-// Sibling Fusion Space tools, linked inline in the footer the way the live siblings do
+// Sibling FusionSpace tools, linked inline in the footer the way the live siblings do
 // (Charge's footer carries a Motor Finder link, no "more tools" heading). The LIVE tools only
 // — Debrief is still in development, so it isn't linked from a launch-ready tool. Window is
 // omitted (you're already here).

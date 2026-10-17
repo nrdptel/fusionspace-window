@@ -79,7 +79,7 @@ const JSON_LD = {
     {
       "@type": "Organization",
       "@id": `${HUB_URL}/#org`,
-      name: "Fusion Space",
+      name: "FusionSpace",
       url: HUB_URL,
       sameAs: ["https://github.com/nrdptel"],
     },
